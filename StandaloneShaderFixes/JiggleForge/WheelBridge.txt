@@ -1,0 +1,16 @@
+# Only translate the wheel while Zenless Zone Zero is in the foreground.
+process_names = ZenlessZoneZero
+
+# Duration of each synthetic F13/F14 pulse.
+pulse_ms = 60
+
+# Prevent the game UI from receiving the wheel during a drag.
+block_wheel_while_dragging = true
+
+# Only translate wheel input while any configured global drag key is held.
+require_drag_button = true
+
+# Keep this synchronized with the drag keys selected in JiggleForge.
+# The singular field keeps older WheelBridge builds usable with the first key.
+drag_key = VK_LBUTTON
+drag_keys = VK_LBUTTON

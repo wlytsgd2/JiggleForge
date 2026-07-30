@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/app/">
+    <Project Path="app/JiggleForge/JiggleForge.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/JiggleForge.Core/JiggleForge.Core.csproj" />
+    <Project Path="src/JiggleForge.WheelBridge/JiggleForge.WheelBridge.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/JiggleForge.Core.Tests/JiggleForge.Core.Tests.csproj" />
+    <Project Path="tests/JiggleForge.GpuParity/JiggleForge.GpuParity.csproj" />
+  </Folder>
+</Solution>

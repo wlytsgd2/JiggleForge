@@ -1,0 +1,264 @@
+// JiggleForge receiver-only replacement for street transparent geometry VS 699981e2a62dd9b4.
+struct t0_t {
+  float val[32];
+};
+StructuredBuffer<t0_t> t0 : register(t0);
+
+cbuffer cb2 : register(b2)
+{
+  float4 cb2[25];
+}
+
+cbuffer cb1 : register(b1)
+{
+  float4 cb1[10];
+}
+
+cbuffer cb0 : register(b0)
+{
+  float4 cb0[200];
+}
+
+
+
+
+// 3Dmigoto declarations
+#define cmp -
+
+Buffer<uint> JiggleForgeDirectStateIndex : register(t72);
+Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
+Buffer<float4> JF_MotionState : register(t75);
+Buffer<float4> JF_GroupParams : register(t76);
+
+#include "JiggleForgeRuntime/draw_state_consumer.hlsl"
+
+float SampleJiggleForgeDirectMask(float2 uv)
+{
+  uint width;
+  uint height;
+  JiggleForgeDirectMaskTexture.GetDimensions(width, height);
+  if (width == 0u || height == 0u)
+    return 1.0;
+
+  float2 texelPosition = saturate(uv) * float2(width - 1u, height - 1u);
+  uint2 texel0 = (uint2)floor(texelPosition);
+  uint2 texel1 = min(texel0 + 1u, uint2(width - 1u, height - 1u));
+  float2 blend = frac(texelPosition);
+  float mask00 = JiggleForgeDirectMaskTexture.Load(int3(texel0, 0)).r;
+  float mask10 = JiggleForgeDirectMaskTexture.Load(int3(texel1.x, texel0.y, 0)).r;
+  float mask01 = JiggleForgeDirectMaskTexture.Load(int3(texel0.x, texel1.y, 0)).r;
+  float mask11 = JiggleForgeDirectMaskTexture.Load(int3(texel1, 0)).r;
+  float mask0 = lerp(mask00, mask10, blend.x);
+  float mask1 = lerp(mask01, mask11, blend.x);
+  return saturate(lerp(mask0, mask1, blend.y));
+}
+
+void main(
+  float3 v0 : POSITION0,
+  float3 v1 : NORMAL0,
+  float4 v2 : TANGENT0,
+  float4 v3 : COLOR0,
+  float4 v4 : TEXCOORD0,
+  float4 v5 : TEXCOORD1,
+  float4 v6 : TEXCOORD2,
+  float4 v7 : TEXCOORD3,
+  float3 v8 : TEXCOORD4,
+  out float4 o0 : TEXCOORD0,
+  out float4 o1 : TEXCOORD1,
+  out float4 o2 : TEXCOORD2,
+  out float4 o3 : TEXCOORD3,
+  out float4 o4 : TEXCOORD4,
+  out float o5 : TEXCOORD5,
+  out float3 p5 : TEXCOORD8,
+  out float4 o6 : TEXCOORD7,
+  out float4 o7 : SV_POSITION0)
+{
+  float4 r0,r1,r2,r3,r4,r5,r6;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xyz = cb1[1].xyz * v0.yyy;
+  r0.xyz = cb1[0].xyz * v0.xxx + r0.xyz;
+  r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
+  r0.xyz = cb1[3].xyz + r0.xyz;
+  float3 jiggleForgeBasePosition = r0.xyz;
+  float3 jiggleForgeAppliedDisplacement = float3(0.0, 0.0, 0.0);
+  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+
+  bool jfUnusedMovingInfluence;
+  float jfUnusedRadius;
+  jiggleForgeAppliedDisplacement = JF_EvaluateBoundStates(
+    jiggleForgeBasePosition,
+    jiggleForgeVertexMask,
+    jfUnusedMovingInfluence,
+    jfUnusedRadius);
+
+  r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;
+  r1.xyzw = cb0[126].xyzw * r0.yyyy;
+  r1.xyzw = cb0[125].xyzw * r0.xxxx + r1.xyzw;
+  r1.xyzw = cb0[127].xyzw * r0.zzzz + r1.xyzw;
+  o7.xyzw = cb0[128].xyzw + r1.xyzw;
+  r0.w = cb1[9].w * v2.w;
+  r1.x = dot(v1.xyz, cb1[4].xyz);
+  r1.y = dot(v1.xyz, cb1[5].xyz);
+  r1.z = dot(v1.xyz, cb1[6].xyz);
+  r1.w = dot(r1.xyz, r1.xyz);
+  r1.w = max(1.17549435e-38, r1.w);
+  r1.w = rsqrt(r1.w);
+  r1.xyz = r1.xyz * r1.www;
+  r2.xyz = cb1[1].xyz * v2.yyy;
+  r2.xyz = cb1[0].xyz * v2.xxx + r2.xyz;
+  r2.xyz = cb1[2].xyz * v2.zzz + r2.xyz;
+  r1.w = dot(r2.xyz, r2.xyz);
+  r1.w = max(1.17549435e-38, r1.w);
+  r1.w = rsqrt(r1.w);
+  r2.xyz = r2.xyz * r1.www;
+  r3.xyz = r2.yzx * r1.zxy;
+  r3.xyz = r1.yzx * r2.zxy + -r3.xyz;
+  o4.xyz = r3.xyz * r0.www;
+  r0.w = v3.z * 255 + 0.5;
+  r0.w = (int)r0.w;
+  r0.w = (uint)r0.w >> 5;
+  r0.w = (int)r0.w & 1;
+  r0.w = (int)r0.w;
+  r0.w = cmp(0 != r0.w);
+  o6.y = r0.w ? 0 : v3.w;
+  o6.z = r0.w ? 1.000000 : 0;
+  r0.w = cmp(0 < asint(cb0[196].x));
+  if (r0.w != 0) {
+    r0.w = (int)cb2[2].z;
+    r1.w = asint(cb0[196].x) + -1;
+    r0.w = min((int)r1.w, (int)r0.w);
+    r0.w = max(0, (int)r0.w);
+    r0.w = t0[r0.w].val[52/4];
+  } else {
+    r0.w = 0;
+  }
+  o6.x = r0.w * -v3.w + 1;
+  r0.w = min(4, cb2[2].x);
+  r0.w = (int)r0.w;
+  r1.w = cmp(0 < (int)r0.w);
+  if (r1.w != 0) {
+    r3.xyz = cb2[9].xyz + -r0.xyz;
+    r1.w = dot(r3.xyz, r3.xyz);
+    r1.w = max(1.17549435e-38, r1.w);
+    r2.w = rsqrt(r1.w);
+    r3.xyz = r3.xyz * r2.www;
+    r4.y = cb2[11].x * r1.w;
+    r2.w = cmp(-0.5 < cb2[11].y);
+    r5.x = 1 / r1.w;
+    r5.y = r4.y * r4.y;
+    r4.x = 1;
+    r4.xy = r2.ww ? r5.xy : r4.xy;
+    r1.w = cmp(cb2[11].y < -1.5);
+    r2.w = cmp(r4.y >= 1);
+    r2.w = r2.w ? 1.000000 : 0;
+    r1.w = r1.w ? r2.w : r4.y;
+    r1.w = saturate(1 + -r1.w);
+    r1.w = r1.w * r1.w;
+    r1.w = r4.x * r1.w;
+    r2.w = dot(cb2[10].xyz, r3.xyz);
+    r2.w = saturate(r2.w * cb2[11].z + cb2[11].w);
+    r2.w = r2.w * r2.w;
+    r1.w = r2.w * r1.w;
+    r1.w = cb0[199].y * r1.w;
+    r3.xyz = cb2[12].xyz * r1.www;
+    r1.w = cmp(1 < (int)r0.w);
+    if (r1.w != 0) {
+      r4.xyz = cb2[13].xyz + -r0.xyz;
+      r1.w = dot(r4.xyz, r4.xyz);
+      r1.w = max(1.17549435e-38, r1.w);
+      r2.w = rsqrt(r1.w);
+      r4.xyz = r4.xyz * r2.www;
+      r5.y = cb2[15].x * r1.w;
+      r2.w = cmp(-0.5 < cb2[15].y);
+      r6.x = 1 / r1.w;
+      r6.y = r5.y * r5.y;
+      r5.x = 1;
+      r5.xy = r2.ww ? r6.xy : r5.xy;
+      r1.w = cmp(cb2[15].y < -1.5);
+      r2.w = cmp(r5.y >= 1);
+      r2.w = r2.w ? 1.000000 : 0;
+      r1.w = r1.w ? r2.w : r5.y;
+      r1.w = saturate(1 + -r1.w);
+      r1.w = r1.w * r1.w;
+      r1.w = r5.x * r1.w;
+      r2.w = dot(cb2[14].xyz, r4.xyz);
+      r2.w = saturate(r2.w * cb2[15].z + cb2[15].w);
+      r2.w = r2.w * r2.w;
+      r1.w = r2.w * r1.w;
+      r1.w = cb0[199].y * r1.w;
+      r3.xyz = cb2[16].xyz * r1.www + r3.xyz;
+      r1.w = cmp(2 < (int)r0.w);
+      if (r1.w != 0) {
+        r4.xyz = cb2[17].xyz + -r0.xyz;
+        r1.w = dot(r4.xyz, r4.xyz);
+        r1.w = max(1.17549435e-38, r1.w);
+        r2.w = rsqrt(r1.w);
+        r4.xyz = r4.xyz * r2.www;
+        r5.y = cb2[19].x * r1.w;
+        r2.w = cmp(-0.5 < cb2[19].y);
+        r6.x = 1 / r1.w;
+        r6.y = r5.y * r5.y;
+        r5.x = 1;
+        r5.xy = r2.ww ? r6.xy : r5.xy;
+        r1.w = cmp(cb2[19].y < -1.5);
+        r2.w = cmp(r5.y >= 1);
+        r2.w = r2.w ? 1.000000 : 0;
+        r1.w = r1.w ? r2.w : r5.y;
+        r1.w = saturate(1 + -r1.w);
+        r1.w = r1.w * r1.w;
+        r1.w = r5.x * r1.w;
+        r2.w = dot(cb2[18].xyz, r4.xyz);
+        r2.w = saturate(r2.w * cb2[19].z + cb2[19].w);
+        r2.w = r2.w * r2.w;
+        r1.w = r2.w * r1.w;
+        r1.w = cb0[199].y * r1.w;
+        r3.xyz = cb2[20].xyz * r1.www + r3.xyz;
+        r0.w = cmp(3 < (int)r0.w);
+        if (r0.w != 0) {
+          r4.xyz = cb2[21].xyz + -r0.xyz;
+          r0.w = dot(r4.xyz, r4.xyz);
+          r0.w = max(1.17549435e-38, r0.w);
+          r1.w = rsqrt(r0.w);
+          r4.xyz = r4.xyz * r1.www;
+          r5.y = cb2[23].x * r0.w;
+          r1.w = cmp(-0.5 < cb2[23].y);
+          r6.x = 1 / r0.w;
+          r6.y = r5.y * r5.y;
+          r5.x = 1;
+          r5.xy = r1.ww ? r6.xy : r5.xy;
+          r0.w = cmp(cb2[23].y < -1.5);
+          r1.w = cmp(r5.y >= 1);
+          r1.w = r1.w ? 1.000000 : 0;
+          r0.w = r0.w ? r1.w : r5.y;
+          r0.w = saturate(1 + -r0.w);
+          r0.w = r0.w * r0.w;
+          r0.w = r5.x * r0.w;
+          r1.w = dot(cb2[22].xyz, r4.xyz);
+          r1.w = saturate(r1.w * cb2[23].z + cb2[23].w);
+          r1.w = r1.w * r1.w;
+          r0.w = r1.w * r0.w;
+          r0.w = cb0[199].y * r0.w;
+          r3.xyz = cb2[24].xyz * r0.www + r3.xyz;
+        }
+      }
+    }
+  } else {
+    r3.xyz = float3(0,0,0);
+  }
+  o0.xy = v4.xy;
+  o0.zw = v7.xy;
+  o1.xy = v6.xy;
+  o1.zw = float2(0,0);
+  o2.w = r0.x;
+  o2.xyz = r1.xyz;
+  o3.w = r0.y;
+  o3.xyz = r2.xyz;
+  o4.w = r0.z;
+  r3.w = 0;
+  o5 = r3.w;
+  p5 = r3.xyz;
+  o6.w = 0;
+  return;
+}

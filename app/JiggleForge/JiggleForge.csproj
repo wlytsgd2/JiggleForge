@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <RootNamespace>JiggleForge</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\branding\JiggleForge.ico</ApplicationIcon>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260710003" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.8249" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\JiggleForge.Core\JiggleForge.Core.csproj" />
+    <ProjectReference Include="..\..\src\JiggleForge.WheelBridge\JiggleForge.WheelBridge.csproj"
+                      ReferenceOutputAssembly="false"
+                      SkipGetTargetFrameworkProperties="true"
+                      GlobalPropertiesToRemove="RuntimeIdentifier;RuntimeIdentifiers;Platform;PlatformTarget" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\assets\branding\JiggleForge-256.png"
+             Link="Assets\JiggleForge.png"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\branding\JiggleForge.ico"
+             Link="Assets\JiggleForge-Silver.ico"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="..\..\StandaloneShaderFixes\JiggleForge.ini"
+             Link="RuntimePayload\JiggleForge.ini"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\StandaloneShaderFixes\JiggleForge\**\*"
+             Exclude="..\..\StandaloneShaderFixes\JiggleForge\WheelBridge.exe"
+             Link="RuntimePayload\JiggleForge\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\StandaloneShaderFixes\ShaderFixes\*-vs_replace.txt"
+             Link="RuntimePayload\ShaderFixes\%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\StandaloneShaderFixes\ShaderFixes\JiggleForgeRuntime\**\*"
+             Link="RuntimePayload\ShaderFixes\JiggleForgeRuntime\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="CopyWheelBridgeToBuildOutput"
+          AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <WheelBridgeOutputPath>$(MSBuildThisFileDirectory)..\..\src\JiggleForge.WheelBridge\bin\$(Configuration)\net40\WheelBridge.exe</WheelBridgeOutputPath>
+      <WheelBridgeBuildDestination>$(OutDir)RuntimePayload\JiggleForge\WheelBridge.exe</WheelBridgeBuildDestination>
+    </PropertyGroup>
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(WheelBridgeBuildDestination)'))" />
+    <Copy SourceFiles="$(WheelBridgeOutputPath)"
+          DestinationFiles="$(WheelBridgeBuildDestination)" />
+  </Target>
+  <Target Name="CopyWheelBridgeToPublishOutput"
+          AfterTargets="Publish"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <WheelBridgeOutputPath>$(MSBuildThisFileDirectory)..\..\src\JiggleForge.WheelBridge\bin\$(Configuration)\net40\WheelBridge.exe</WheelBridgeOutputPath>
+      <WheelBridgePublishDestination>$(PublishDir)RuntimePayload\JiggleForge\WheelBridge.exe</WheelBridgePublishDestination>
+    </PropertyGroup>
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(WheelBridgePublishDestination)'))" />
+    <Copy SourceFiles="$(WheelBridgeOutputPath)"
+          DestinationFiles="$(WheelBridgePublishDestination)" />
+  </Target>
+  <Target Name="CopyWinUIResourcesToPublishOutput"
+          AfterTargets="Publish"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <WinUIPublishResource Include="$(OutDir)*.xbf;$(OutDir)*.pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WinUIPublishResource)"
+          DestinationFolder="$(PublishDir)" />
+  </Target>
+</Project>

@@ -1,0 +1,16 @@
+* text=auto
+
+*.cs text eol=crlf
+*.csproj text eol=crlf
+*.slnx text eol=crlf
+*.xaml text eol=crlf
+*.hlsl text eol=crlf
+*.ini text eol=crlf
+*.ps1 text eol=crlf
+*.md text eol=lf
+*.txt text eol=crlf
+
+*.png binary
+*.ico binary
+*.dds binary
+*.exe binary

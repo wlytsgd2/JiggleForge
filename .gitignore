@@ -1,0 +1,53 @@
+# Build output
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+publish/
+
+# IDE and editor state
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Local diagnostics and temporary files
+.tmp/
+tmp/
+*.log
+*.tmp
+*.bak
+*.dmp
+*.cache
+
+# Local game analysis and test content
+FrameAnalysis-*/
+ShaderCache/
+Mods/
+TestMods/
+*.buf
+
+# Generated application/runtime files
+StandaloneShaderFixes/JiggleForge/WheelBridge.exe
+JiggleForge.lnk
+
+# Local packages and archives
+*.zip
+*.7z
+*.rar
+*.nupkg
+
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Secrets and local environment overrides
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Development.json

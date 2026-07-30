@@ -1,0 +1,864 @@
+<Window
+    x:Class="JiggleForge.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:JiggleForge"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="JiggleForge">
+
+    <Grid Background="Transparent"
+          AllowDrop="True"
+          Loaded="Root_Loaded"
+          DragOver="Root_DragOver"
+          Drop="Root_Drop">
+        <Grid.Resources>
+        <Style x:Key="PageTitleTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="PageSubtitleTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="PageCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorAltBrush}" />
+        </Style>
+
+        <Style x:Key="PageScrollViewerStyle" TargetType="ScrollViewer">
+            <Setter Property="HorizontalScrollMode" Value="Disabled" />
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="VerticalScrollMode" Value="Auto" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="PageFooterStyle" TargetType="Border">
+            <Setter Property="Padding" Value="0,14,0,0" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+            <Setter Property="BorderBrush" Value="{ThemeResource DividerStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style x:Key="DrawTableCardStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorAltBrush}" />
+        </Style>
+
+        <Style x:Key="DrawFooterCardStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,14,0,0" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="Background" Value="{ThemeResource LayerFillColorAltBrush}" />
+        </Style>
+
+        <DataTemplate x:Key="DrawGroupNodeTemplate">
+            <Border Margin="0,5,0,3"
+                    CornerRadius="9"
+                    Padding="12,8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                <Grid Tag="{Binding Content}"
+                      ColumnSpacing="10"
+                      AllowDrop="True"
+                      DragOver="DrawGroup_DragOver"
+                      Drop="DrawGroup_Drop"
+                      RightTapped="DrawGroup_RightTapped">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE8B7;"
+                              FontSize="16"
+                              Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                              VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Content.DisplayName}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <Border Grid.Column="2"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Padding="8,2"
+                            CornerRadius="9"
+                            Background="{ThemeResource ControlFillColorSecondaryBrush}">
+                        <TextBlock Text="{Binding Content.CountText}"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Border>
+                    <ToggleSwitch Grid.Column="3"
+                                  IsOn="{Binding Content.OriginalPartsEnabled, Mode=TwoWay}"
+                                  Visibility="{Binding Content.OriginalToggleVisibility}"
+                                  OnContent="允许原版部件变形"
+                                  OffContent="禁止原版部件变形"
+                                  ToolTipService.ToolTip="控制所有未被当前 Mod 替换的原版部件。" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DrawLeafNodeTemplate">
+            <Border Margin="0,2"
+                    CornerRadius="8"
+                    Padding="10,7"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid Tag="{Binding Content.Row}"
+                      MinHeight="38"
+                      ColumnSpacing="12"
+                      CanDrag="True"
+                      DragStarting="DrawLeaf_DragStarting"
+                      RightTapped="DrawLeaf_RightTapped">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Content.Row.Id}"
+                               VerticalAlignment="Center"
+                               FontWeight="SemiBold" />
+                    <ToggleSwitch Grid.Column="1"
+                                  IsOn="{Binding Content.Row.DeformationEnabled, Mode=TwoWay}"
+                                  OnContent=""
+                                  OffContent=""
+                                  VerticalAlignment="Center" />
+                    <TextBox Grid.Column="2"
+                             Text="{Binding Content.Row.Alias, Mode=TwoWay}"
+                             PlaceholderText="例如 Body" />
+                    <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Content.Row.Source}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Content.Row.Branch}"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <local:DrawTreeTemplateSelector x:Key="DrawTreeTemplateSelector"
+                                        GroupTemplate="{StaticResource DrawGroupNodeTemplate}"
+                                        DrawTemplate="{StaticResource DrawLeafNodeTemplate}" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Padding="16,0,160,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <Image Source="Assets/JiggleForge.png"
+                       Width="20"
+                       Height="20"
+                       Stretch="Uniform" />
+                <TextBlock Text="JiggleForge" FontSize="14" FontWeight="SemiBold" />
+            </StackPanel>
+        </Grid>
+
+        <NavigationView Grid.Row="1"
+                        x:Name="Navigation"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        PaneDisplayMode="LeftCompact"
+                        IsPaneOpen="False"
+                        Background="Transparent"
+                        HorizontalContentAlignment="Stretch"
+                        SelectionChanged="Navigation_SelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="OverviewNavItem" Content="概览" Icon="Home" Tag="overview" IsSelected="True" />
+                <NavigationViewItem x:Name="DrawNavItem" Content="Draw" Icon="List" Tag="draws" IsEnabled="False" />
+                <NavigationViewItem x:Name="GraphNavItem" Content="依赖关系" Icon="Share" Tag="graph" IsEnabled="False" />
+                <NavigationViewItem x:Name="MaskNavItem" Content="Mask" Icon="Pictures" Tag="mask" IsEnabled="False" />
+                <NavigationViewItem x:Name="PhysicsNavItem" Content="物理参数" Icon="Repair" Tag="physics" IsEnabled="False" />
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="RuntimeNavItem" Content="运行环境" Icon="Setting" Tag="runtime" />
+            </NavigationView.FooterMenuItems>
+
+            <Grid HorizontalAlignment="Stretch" Background="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <InfoBar x:Name="StatusBar"
+                         Margin="28,12,28,0"
+                         IsOpen="False"
+                         IsClosable="True" />
+
+                <Grid Grid.Row="1">
+                    <ScrollViewer x:Name="OverviewView"
+                                  Style="{StaticResource PageScrollViewerStyle}">
+                        <Grid HorizontalAlignment="Stretch" Padding="28,22,28,36">
+                            <StackPanel HorizontalAlignment="Stretch" Spacing="18">
+                                <StackPanel Spacing="5">
+                                    <TextBlock Text="打开变形项目" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock Text="拖入原 Mod 或已经适配的 Mod 文件夹。应用会自动判断导入状态。"
+                                               Style="{StaticResource PageSubtitleTextStyle}" />
+                                </StackPanel>
+                                <Border x:Name="DropCard"
+                                        MinHeight="188"
+                                        Style="{StaticResource PageCardStyle}"
+                                        Padding="28">
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+                                        <FontIcon Glyph="&#xE8B7;" FontSize="38" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                        <TextBlock Text="将 Mod 文件夹拖到这里" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock Text="也可以手动选择文件夹" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <Button Content="选择文件夹" Click="ChooseFolder_Click" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border x:Name="ProjectCard"
+                                        Visibility="Collapsed"
+                                        Style="{StaticResource PageCardStyle}"
+                                        Padding="22">
+                                    <StackPanel Spacing="14">
+                                        <Grid ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="4">
+                                                <TextBlock x:Name="ProjectNameText" FontSize="20" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="ProjectPathText" TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" CornerRadius="10" Padding="10,5" Background="{ThemeResource AccentFillColorSecondaryBrush}">
+                                                <TextBlock x:Name="StateText" FontWeight="SemiBold" />
+                                            </Border>
+                                        </Grid>
+
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border CornerRadius="10" Padding="14" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                <StackPanel>
+                                                    <TextBlock Text="识别到的 Draw" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock x:Name="DrawCountText" FontSize="24" FontWeight="SemiBold" />
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Grid.Column="1" CornerRadius="10" Padding="14" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                                <StackPanel>
+                                                    <TextBlock Text="配置版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock x:Name="SchemaText" FontSize="24" FontWeight="SemiBold" />
+                                                </StackPanel>
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock x:Name="DetailsText" TextWrapping="Wrap" />
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <Button x:Name="CreateConfigButton"
+                                                    Content="首次适配"
+                                                    Style="{StaticResource AccentButtonStyle}"
+                                                    Visibility="Collapsed"
+                                                    Click="CreateConfig_Click" />
+                                            <Button x:Name="RepairRuntimeButton"
+                                                    Content="修复运行文件"
+                                                    Style="{StaticResource AccentButtonStyle}"
+                                                    Visibility="Collapsed"
+                                                    Click="RepairRuntime_Click" />
+                                            <Button Content="在资源管理器中打开" Click="OpenExplorer_Click" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+
+                    <Grid x:Name="DrawView" Visibility="Collapsed" Padding="28,22,28,28">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+                            <StackPanel Spacing="18">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="Draw 配置" Style="{StaticResource PageTitleTextStyle}" />
+                                        <TextBlock Text="拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。"
+                                                   Style="{StaticResource PageSubtitleTextStyle}" />
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Content="新建组"
+                                            Click="CreateDrawGroup_Click"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            VerticalAlignment="Bottom" />
+                                </Grid>
+                                <Border Style="{StaticResource DrawTableCardStyle}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Border Padding="44,12,22,12"
+                                                CornerRadius="14,14,0,0"
+                                                BorderThickness="0,0,0,1"
+                                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                                            <Grid ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100" />
+                                                    <ColumnDefinition Width="80" />
+                                                    <ColumnDefinition Width="1.2*" />
+                                                    <ColumnDefinition Width="2*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="Draw" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="1" Text="变形" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="2" Text="名称" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="3" Text="来源" FontWeight="SemiBold" />
+                                            </Grid>
+                                        </Border>
+                                        <TreeView x:Name="DrawGroupTree"
+                                                  Grid.Row="1"
+                                                  Margin="10,7,10,12"
+                                                  Background="Transparent"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  CanDragItems="False"
+                                                  CanReorderItems="False"
+                                                  SelectionMode="None"
+                                                  ItemTemplateSelector="{StaticResource DrawTreeTemplateSelector}" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Border Grid.Row="1" Style="{StaticResource DrawFooterCardStyle}">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ToggleButton x:Name="InspectorToggleButton"
+                                              Content="Draw 检测器：已关闭"
+                                              HorizontalAlignment="Left"
+                                              Click="InspectorToggle_Click" />
+                                <Button Grid.Column="1"
+                                        Content="应用配置"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        Click="ApplyConfiguration_Click"
+                                        HorizontalAlignment="Right" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="GraphView"
+                          Visibility="Collapsed"
+                          Padding="28,22,28,28"
+                          Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+                            <StackPanel Spacing="16">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="有向依赖关系" Style="{StaticResource PageTitleTextStyle}" />
+                                        <TextBlock Text="依赖会沿有向边继续传递：A → B → C 时，拖动 A 会同时影响 B 和 C。环形依赖会安全合并，不会重复计算；OriginalParts 固定组只能作为起点，不能作为终点。"
+                                                   Style="{StaticResource PageSubtitleTextStyle}" />
+                                    </StackPanel>
+                                    <ComboBox x:Name="GraphModeComboBox"
+                                              Grid.Column="1"
+                                              Header="显示方式"
+                                              SelectedIndex="0"
+                                              SelectionChanged="GraphMode_SelectionChanged">
+                                        <ComboBoxItem Content="边列表" />
+                                        <ComboBoxItem Content="互动图" />
+                                    </ComboBox>
+                                </Grid>
+
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="当前组" FontWeight="SemiBold" />
+                                        <TextBlock x:Name="GroupSummaryText"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid x:Name="EdgeListPanel">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <ListView x:Name="EdgeEditorList"
+                                              Background="Transparent"
+                                              SelectionMode="None"
+                                              HorizontalContentAlignment="Stretch">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Padding="0,4" ColumnSpacing="10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox ItemsSource="{Binding FromOptions}"
+                                                              SelectedItem="{Binding From, Mode=TwoWay}"
+                                                              HorizontalAlignment="Stretch"
+                                                              PlaceholderText="触发组" />
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="→"
+                                                               FontSize="20"
+                                                               VerticalAlignment="Center" />
+                                                    <ComboBox Grid.Column="2"
+                                                              ItemsSource="{Binding ToOptions}"
+                                                              SelectedItem="{Binding To, Mode=TwoWay}"
+                                                              HorizontalAlignment="Stretch"
+                                                              PlaceholderText="受影响组" />
+                                                    <Button Grid.Column="3"
+                                                            Content="删除"
+                                                            Tag="{Binding}"
+                                                            Click="DeleteEdge_Click" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                    <Button Grid.Row="1"
+                                            Content="添加边"
+                                            Click="AddEdge_Click"
+                                            HorizontalAlignment="Left"
+                                            Margin="0,10,0,0" />
+                                </Grid>
+
+                                <Grid x:Name="InteractiveGraphPanel" Visibility="Collapsed">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock Text="在节点上按住左键可调整位置；按住右键拖到另一个节点即可连边。把鼠标放到边上会显示删除按钮。"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Border Style="{StaticResource PageCardStyle}" Padding="0">
+                                            <Canvas x:Name="GraphCanvas"
+                                                    Height="520"
+                                                    MinWidth="560"
+                                                    Background="Transparent"
+                                                    HorizontalAlignment="Stretch"
+                                                    PointerMoved="GraphCanvas_PointerMoved"
+                                                    PointerReleased="GraphCanvas_PointerReleased"
+                                                    PointerCanceled="GraphCanvas_PointerCanceled"
+                                                    SizeChanged="GraphCanvas_SizeChanged" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
+                            <Button Content="应用依赖关系"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Click="ApplyConfiguration_Click"
+                                    HorizontalAlignment="Right" />
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="MaskView" Visibility="Collapsed" Padding="28,22,28,28">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+                            <StackPanel>
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="纹理 Mask" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock Text="填写 Mod 文件夹内的 DDS 相对路径。空白表示全白 1.0。多个 Draw 可以使用同一个文件。"
+                                               Style="{StaticResource PageSubtitleTextStyle}" />
+                                </StackPanel>
+                                <ListView x:Name="MaskEditorList"
+                                          Margin="0,16,0,14"
+                                          Background="Transparent"
+                                          SelectionMode="None"
+                                          HorizontalContentAlignment="Stretch">
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Padding="4" ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="220" />
+                                                    <ColumnDefinition Width="1*" />
+                                                    <ColumnDefinition Width="2*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DisplayName}"
+                                                           VerticalAlignment="Center"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Group}" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                <TextBox Grid.Column="2" Text="{Binding Mask, Mode=TwoWay}" PlaceholderText="Masks\Body.dds" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
+                            <Button Content="应用 Mask"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Click="ApplyConfiguration_Click"
+                                    HorizontalAlignment="Right" />
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="PhysicsView"
+                          Visibility="Collapsed"
+                          Padding="28,22,28,28"
+                          Background="Transparent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+                            <StackPanel Spacing="16">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="物理参数" Style="{StaticResource PageTitleTextStyle}" />
+                                <TextBlock Text="每个组使用独立参数；未分组 Draw 使用 Mod 默认参数。依赖关系中的每个状态仍保留其所属组的参数。"
+                                           Style="{StaticResource PageSubtitleTextStyle}" />
+                            </StackPanel>
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="PhysicsScopeComboBox"
+                                          Header="正在编辑"
+                                          DisplayMemberPath="DisplayName"
+                                          HorizontalAlignment="Stretch"
+                                          SelectionChanged="PhysicsScopeComboBox_SelectionChanged" />
+                                <Button Grid.Column="1"
+                                        Content="复制 Mod 默认参数"
+                                        VerticalAlignment="Bottom"
+                                        Click="CopyDefaultPhysicsToGroup_Click" />
+                            </Grid>
+                            <Border Style="{StaticResource PageCardStyle}">
+                                <Grid x:Name="PhysicsFieldsGrid" ColumnSpacing="18" RowSpacing="14">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup>
+                                            <VisualState x:Name="NarrowPhysicsLayout">
+                                                <VisualState.StateTriggers>
+                                                    <AdaptiveTrigger MinWindowWidth="0" />
+                                                </VisualState.StateTriggers>
+                                                <VisualState.Setters>
+                                                    <Setter Target="PhysicsSecondaryColumn.Width" Value="0" />
+                                                    <Setter Target="StrengthNumber.(Grid.Row)" Value="1" />
+                                                    <Setter Target="StrengthNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="FalloffNumber.(Grid.Row)" Value="2" />
+                                                    <Setter Target="DragScaleNumber.(Grid.Row)" Value="3" />
+                                                    <Setter Target="DragScaleNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="GrabDampingNumber.(Grid.Row)" Value="4" />
+                                                    <Setter Target="GrabSpringNumber.(Grid.Row)" Value="5" />
+                                                    <Setter Target="GrabSpringNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="ReleaseDampingNumber.(Grid.Row)" Value="6" />
+                                                    <Setter Target="ReleaseSpringNumber.(Grid.Row)" Value="7" />
+                                                    <Setter Target="ReleaseSpringNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="ReleaseKickNumber.(Grid.Row)" Value="8" />
+                                                    <Setter Target="TargetFollowNumber.(Grid.Row)" Value="9" />
+                                                    <Setter Target="TargetFollowNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="MaxOffsetNumber.(Grid.Row)" Value="10" />
+                                                    <Setter Target="WheelStepNumber.(Grid.Row)" Value="11" />
+                                                    <Setter Target="WheelStepNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="WheelMinDepthNumber.(Grid.Row)" Value="12" />
+                                                    <Setter Target="WheelMinDepthNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="WheelMaxDepthNumber.(Grid.Row)" Value="13" />
+                                                    <Setter Target="WheelMaxDepthNumber.(Grid.Column)" Value="0" />
+                                                    <Setter Target="VolumeResponseNumber.(Grid.Row)" Value="14" />
+                                                    <Setter Target="VolumeResponseNumber.(Grid.Column)" Value="0" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="WidePhysicsLayout">
+                                                <VisualState.StateTriggers>
+                                                    <AdaptiveTrigger MinWindowWidth="760" />
+                                                </VisualState.StateTriggers>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition x:Name="PhysicsSecondaryColumn" Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <NumberBox x:Name="RadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="StrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="FalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="DragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="GrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="GrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseKickNumber" Grid.Row="4" Header="释放冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="TargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="MaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="VolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                </Grid>
+                            </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
+                            <Button Content="保存参数"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Click="ApplyConfiguration_Click"
+                                    HorizontalAlignment="Right" />
+                        </Border>
+                    </Grid>
+
+                    <ScrollViewer x:Name="RuntimeView"
+                                  Visibility="Collapsed"
+                                  Style="{StaticResource PageScrollViewerStyle}">
+                        <Grid HorizontalAlignment="Stretch" Padding="28,22,28,36">
+                            <StackPanel Spacing="16">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="游戏运行环境" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock Text="管理全局变形运行时、6 个 ShaderFix 和滚轮深度输入。安装或修改后回到游戏按 F10 生效。"
+                                               Style="{StaticResource PageSubtitleTextStyle}" />
+                                </StackPanel>
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="RuntimePathTextBox"
+                                                 Header="ZZMI 根目录"
+                                                 PlaceholderText="%APPDATA%\XXMI Launcher\ZZMI" />
+                                        <Button Grid.Column="1"
+                                                Content="选择文件夹"
+                                                VerticalAlignment="Bottom"
+                                                Click="ChooseRuntimeFolder_Click" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <StackPanel Spacing="14">
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="全局默认物理参数" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock Text="首次生成 Mod 与没有适配 Mod 的原版角色共用这套默认值。已经生成的 Mod 保留自己的独立参数。"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                        <Grid ColumnSpacing="18" RowSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <NumberBox x:Name="DefaultRadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultStrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultFalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultDragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultGrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultGrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseKickNumber" Grid.Row="4" Header="释放冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultTargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultMaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultVolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                        </Grid>
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="DefaultPhysicsSaveStatusText"
+                                                       VerticalAlignment="Center"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                       Visibility="Collapsed" />
+                                            <Button x:Name="SaveDefaultPhysicsButton"
+                                                    Grid.Column="1"
+                                                    Content="保存全局默认参数"
+                                                    Style="{StaticResource AccentButtonStyle}"
+                                                    HorizontalAlignment="Right"
+                                                    Click="SaveDefaultPhysics_Click" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <Grid ColumnSpacing="12" RowSpacing="6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <StackPanel Spacing="6">
+                                            <TextBlock Text="全局拖动键（可多选）" FontWeight="SemiBold" />
+                                            <ItemsControl x:Name="DragKeyOptionsList">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox Content="{Binding DisplayName}"
+                                                                  IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                  MinWidth="130"
+                                                                  Margin="0,0,8,2" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                        <Button x:Name="ApplyDragKeyButton"
+                                                Grid.Column="1"
+                                                Content="应用拖动键"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                VerticalAlignment="Bottom"
+                                                Click="ApplyDragKey_Click" />
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.ColumnSpan="2"
+                                                   Text="这是所有角色和 Mod 共用的键位。按下任意一个已勾选按键都能拖动；修改后回到游戏按 F10 生效。"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <Grid ColumnSpacing="18">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <ProgressRing x:Name="RuntimeBusyRing"
+                                                      Width="32"
+                                                      Height="32"
+                                                      IsActive="False"
+                                                      VerticalAlignment="Top" />
+                                        <StackPanel Grid.Column="1" Spacing="12">
+                                            <StackPanel Spacing="3">
+                                                <TextBlock x:Name="RuntimeOverallStatusText" FontSize="18" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="RuntimeDetailText"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                            <Grid ColumnSpacing="12" RowSpacing="10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="全局运行时" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="RuntimeComponentStatusText"
+                                                           Grid.Column="1"
+                                                           TextWrapping="Wrap"
+                                                           HorizontalAlignment="Right" />
+                                                <TextBlock Grid.Row="1" Text="ShaderFix" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="ShaderFixStatusText"
+                                                           Grid.Row="1"
+                                                           Grid.Column="1"
+                                                           TextWrapping="Wrap"
+                                                           HorizontalAlignment="Right" />
+                                                <TextBlock Grid.Row="2" Text="WheelBridge" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="WheelBridgeStatusText"
+                                                           Grid.Row="2"
+                                                           Grid.Column="1"
+                                                           HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <Grid ColumnSpacing="10" RowSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Button x:Name="InstallRuntimeButton"
+                                            Content="安装或更新运行环境"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            Click="InstallRuntime_Click" />
+                                    <Button x:Name="UninstallRuntimeButton"
+                                            Grid.Column="1"
+                                            Content="卸载运行环境"
+                                            HorizontalAlignment="Stretch"
+                                            Click="UninstallRuntime_Click" />
+                                    <Button x:Name="StartWheelButton"
+                                            Grid.Row="1"
+                                            Content="启动滚轮输入"
+                                            HorizontalAlignment="Stretch"
+                                            Click="StartWheel_Click" />
+                                    <Button x:Name="StopWheelButton"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Content="停止滚轮输入"
+                                            HorizontalAlignment="Stretch"
+                                            Click="StopWheel_Click" />
+                                    <Button x:Name="RefreshRuntimeButton"
+                                            Grid.Row="2"
+                                            Grid.ColumnSpan="2"
+                                            Content="刷新状态"
+                                            HorizontalAlignment="Stretch"
+                                            Click="RefreshRuntime_Click" />
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>
