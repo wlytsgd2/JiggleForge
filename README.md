@@ -14,6 +14,8 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 - 支持 DDS Mask：白色区域完全变形，黑色区域不变形；没有 Mask 时默认权重为 `1.0`。
 - 提供可选的游戏内 Draw 检测器，用于识别较小或重叠的部位。
 - 首次适配前自动创建 `JiggleForge.original.zip`，可以从概览页恢复原始 Mod。
+- 启动时检查 GitHub 最新稳定版；可以立即一键更新，也可以暂不更新并在标题栏保留提醒。
+- 在“设置”中可以随时检查更新、重新安装最新版本并校验当前安装文件。
 
 ## 运行要求
 
@@ -27,11 +29,19 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 
 1. 从 [Releases](https://github.com/wlytsgd2/JiggleForge/releases) 下载并解压最新自包含版本。
 2. 启动 `JiggleForge.exe`，按首次使用向导完成设置。
-3. 打开“运行环境”，选择包含 `Mods` 和 `ShaderFixes` 的 ZZMI 根目录，然后安装或更新运行时。
+3. 打开“设置”，选择包含 `Mods` 和 `ShaderFixes` 的 ZZMI 根目录，然后安装或更新运行时。
 4. 将一个替换 Mod 文件夹拖入应用，或使用文件夹选择器打开。
 5. 检查 Draw、分组、Mask、依赖关系和物理参数，然后点击“应用配置”。
 6. 回到游戏按 `F10`。
-7. 按住配置好的拖动键在模型上拖动；需要滚轮控制深度时，在“运行环境”页面启动 WheelBridge。
+7. 按住配置好的拖动键在模型上拖动；需要滚轮控制深度时，在“设置”页面启动 WheelBridge。
+
+## 应用更新
+
+应用启动后会检查 GitHub 最新稳定版。发现新版本时可以立即更新或暂不更新；暂不更新后，窗口左上角会持续显示新版本提醒。
+
+一键更新会先下载 ZIP 和对应的 SHA-256 文件，校验通过后才会关闭应用并替换程序文件。更新失败时，独立更新器会尽可能恢复更新前的文件。也可以在“设置”的“应用更新与校验”中手动检查更新或校验当前安装。
+
+`v0.1.1` 及更早版本不包含更新器，需要手动安装一次 `v0.1.2` 或更高版本；之后即可使用一键更新。
 
 应用会直接修改选中的 Mod 文件夹。首次适配时会在该文件夹中生成 `JiggleForge.txt`、运行时文件和原始备份压缩包。
 
@@ -64,6 +74,7 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 - `app/JiggleForge` — WinUI 3 桌面应用。
 - `src/JiggleForge.Core` — 扫描、配置、补丁和运行时生成。
 - `src/JiggleForge.WheelBridge` — 滚轮输入桥接程序。
+- `src/JiggleForge.Updater` — 独立应用更新器。
 - `StandaloneShaderFixes` — 全局运行时和支持的 VS 替换源文件。
 - `tests` — 自动化测试。
 - `docs` — 用户和开发文档。

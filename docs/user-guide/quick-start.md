@@ -5,7 +5,7 @@ JiggleForge starts an interactive interface tour on first launch. It moves throu
 ## 1. Install the global runtime
 
 1. Extract the self-contained JiggleForge release.
-2. Open **Runtime**.
+2. Open **Settings**.
 3. Select the ZZMI root, usually the folder that contains `Mods` and `ShaderFixes`.
 4. Click **Install or update runtime**.
 5. Return to the game and press `F10`.
@@ -29,7 +29,7 @@ The original Mod draw commands remain in the source INI. JiggleForge adds the ge
 1. Return to the game and press `F10`.
 2. Hold a configured drag key over a visible opaque body part.
 3. Move the mouse to deform in the frozen screen plane.
-4. Start WheelBridge from **Runtime** if you want the mouse wheel to move along the frozen screen normal.
+4. Start WheelBridge from **Settings** if you want the mouse wheel to move along the frozen screen normal.
 5. Enable the Draw inspector only while identifying a Draw. Disable it for normal play.
 
 When the camera rotates during one drag, the drag basis remains frozen. Release the key and start another drag to use the new view direction.

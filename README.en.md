@@ -14,6 +14,8 @@ JiggleForge is a Windows desktop application for 《Zenless Zone Zero》 XXMI/ZZ
 - Supports DDS masks: white deforms fully, black does not deform, and missing masks default to weight `1.0`.
 - Includes an optional in-game Draw inspector for identifying small or overlapping parts.
 - Creates `JiggleForge.original.zip` before first adaptation and restores the original Mod from the Overview page.
+- Checks the latest stable GitHub Release at startup, with one-click update or a persistent title-bar reminder when postponed.
+- Checks for updates, reinstalls the latest version, and verifies installed files from **Settings**.
 
 ## Requirements
 
@@ -27,11 +29,19 @@ Game updates can change shader hashes. If a pass is no longer recognized, update
 
 1. Download and extract the latest self-contained package from [Releases](https://github.com/wlytsgd2/JiggleForge/releases).
 2. Start `JiggleForge.exe` and follow the first-run guide.
-3. Open **Runtime**, select the ZZMI root folder containing `Mods` and `ShaderFixes`, and install or update the runtime.
+3. Open **Settings**, select the ZZMI root folder containing `Mods` and `ShaderFixes`, and install or update the runtime.
 4. Drag one replacement Mod folder into the app, or select it with the folder picker.
 5. Review Draws, groups, masks, dependencies, and physics, then click **Apply configuration**.
 6. Return to the game and press `F10`.
-7. Hold a configured drag key over the model. Start WheelBridge from **Runtime** if wheel depth is needed.
+7. Hold a configured drag key over the model. Start WheelBridge from **Settings** if wheel depth is needed.
+
+## Application updates
+
+The app checks the latest stable GitHub Release at startup. A new version can be installed immediately or postponed; postponing leaves a highlighted reminder beside the app name.
+
+One-click update downloads both the ZIP and its SHA-256 file. JiggleForge closes and replaces its files only after verification succeeds. The separate updater attempts to roll back if replacement fails. **Settings → Application update and integrity** can check again, reinstall the latest version, or verify the current installation at any time.
+
+`v0.1.1` and earlier do not contain the updater. Install `v0.1.2` or later manually once; subsequent releases can use one-click update.
 
 The app edits the selected Mod folder directly. The first adaptation creates `JiggleForge.txt`, generated runtime files, and an original backup archive in that folder.
 
@@ -64,6 +74,7 @@ Mods adapted by an older build without this archive cannot be restored byte-for-
 - `app/JiggleForge` — WinUI 3 desktop application.
 - `src/JiggleForge.Core` — scanning, configuration, patching, and runtime generation.
 - `src/JiggleForge.WheelBridge` — wheel input bridge.
+- `src/JiggleForge.Updater` — separate application updater.
 - `StandaloneShaderFixes` — global runtime and supported VS replacement sources.
 - `tests` — automated tests.
 - `docs` — user and developer documentation.

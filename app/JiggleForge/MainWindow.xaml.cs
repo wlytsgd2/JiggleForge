@@ -96,6 +96,7 @@ public sealed partial class MainWindow : Window
         RuntimePathTextBox.Text = RuntimeEnvironmentService.DefaultZzmiRoot;
         SelectDragKeys(LoadDragKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
+        InitializeApplicationUpdateView();
     }
 
     private async void Root_Loaded(object sender, RoutedEventArgs e)
@@ -107,6 +108,7 @@ public sealed partial class MainWindow : Window
 
         runtimeStatusInitialized = true;
         await RefreshRuntimeStatusAsync();
+        await CheckApplicationUpdatesAsync(promptIfAvailable: true, showResult: false);
         if (ShouldShowOnboarding())
         {
             await ShowOnboardingAsync(automatic: true);

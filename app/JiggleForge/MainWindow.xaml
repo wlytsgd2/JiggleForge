@@ -169,6 +169,15 @@
                        Height="20"
                        Stretch="Uniform" />
                 <TextBlock Text="JiggleForge" FontSize="14" FontWeight="SemiBold" />
+                <Button x:Name="UpdateTitleButton"
+                        Content="发现新版本"
+                        Padding="9,3"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Visibility="Collapsed"
+                        Click="UpdateTitleButton_Click"
+                        ToolTipService.ToolTip="打开设置并更新 JiggleForge" />
             </StackPanel>
         </Grid>
 
@@ -195,7 +204,7 @@
                                     Icon="Help"
                                     Tag="guide"
                                     SelectsOnInvoked="False" />
-                <NavigationViewItem x:Name="RuntimeNavItem" Content="运行环境" Icon="Setting" Tag="runtime" />
+                <NavigationViewItem x:Name="RuntimeNavItem" Content="设置" Icon="Setting" Tag="runtime" />
             </NavigationView.FooterMenuItems>
 
             <Grid HorizontalAlignment="Stretch" Background="Transparent">
@@ -661,10 +670,66 @@
                         <Grid HorizontalAlignment="Stretch" Padding="28,22,28,36">
                             <StackPanel Spacing="16">
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="游戏运行环境" Style="{StaticResource PageTitleTextStyle}" />
-                                    <TextBlock Text="管理全局变形运行时、6 个 ShaderFix 和滚轮深度输入。安装或修改后回到游戏按 F10 生效。"
+                                    <TextBlock Text="设置与运行环境" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock Text="更新和校验 JiggleForge，并管理全局变形运行时、ShaderFix 与滚轮深度输入。"
                                                Style="{StaticResource PageSubtitleTextStyle}" />
                                 </StackPanel>
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <StackPanel Spacing="13">
+                                        <Grid ColumnSpacing="14">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="应用更新与校验" FontSize="18" FontWeight="SemiBold" />
+                                                <TextBlock x:Name="ApplicationVersionText"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                            <ProgressRing x:Name="ApplicationUpdateBusyRing"
+                                                          Grid.Column="1"
+                                                          Width="28"
+                                                          Height="28"
+                                                          IsActive="False"
+                                                          VerticalAlignment="Center" />
+                                        </Grid>
+                                        <TextBlock x:Name="ApplicationUpdateStatusText"
+                                                   Text="尚未检查更新。"
+                                                   TextWrapping="Wrap" />
+                                        <ProgressBar x:Name="ApplicationUpdateProgressBar"
+                                                     Minimum="0"
+                                                     Maximum="100"
+                                                     Value="0"
+                                                     Visibility="Collapsed" />
+                                        <TextBlock x:Name="ApplicationIntegrityStatusText"
+                                                   Text="可校验当前程序和运行时文件是否完整。"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button x:Name="CheckApplicationUpdateButton"
+                                                    Content="检查更新"
+                                                    HorizontalAlignment="Stretch"
+                                                    Click="CheckApplicationUpdate_Click" />
+                                            <Button x:Name="UpdateApplicationButton"
+                                                    Grid.Column="1"
+                                                    Content="更新到最新版本"
+                                                    Style="{StaticResource AccentButtonStyle}"
+                                                    HorizontalAlignment="Stretch"
+                                                    IsEnabled="False"
+                                                    Click="UpdateApplication_Click" />
+                                            <Button x:Name="VerifyApplicationButton"
+                                                    Grid.Column="2"
+                                                    Content="校验当前安装"
+                                                    HorizontalAlignment="Stretch"
+                                                    Click="VerifyApplication_Click" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>

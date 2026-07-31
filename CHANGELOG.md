@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — 2026-07-31
+
+- Added startup checks for the latest stable GitHub Release.
+- Added an optional one-click update flow with a persistent title-bar reminder when an update is postponed.
+- Added release-package SHA-256 verification, per-file installation verification, and a separate rollback-capable updater.
+- Added application update and integrity controls to the Settings page.
+
 ## 0.1.1 — 2026-07-31
 
 - Added per-Mod `JiggleForge.original.zip` backups before first adaptation.

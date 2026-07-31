@@ -21,9 +21,16 @@ The application is a self-contained Windows desktop project. Build output is wri
 
 ## Packaging
 
-Package the published application together with the contents of `StandaloneShaderFixes`. Do not include local FrameAnalysis dumps, generated Mod folders, test captures, or personal configuration files. The application creates per-Mod generated resources when a user imports a Mod.
+Create the self-contained package from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build\CreateReleasePackage.ps1
+```
+
+The script publishes the app, includes the updater and user documentation, generates `JiggleForge.manifest.sha256`, and creates both the ZIP and its `.sha256` sidecar under `artifacts`.
+
+Upload both files to a GitHub Release whose tag is `v<Version>`. The asset names must remain `JiggleForge-win-x64-v<Version>.zip` and `JiggleForge-win-x64-v<Version>.zip.sha256`; the in-app updater locates those names. Do not include local FrameAnalysis dumps, generated Mod folders, test captures, or personal configuration files.
 
 ## Runtime validation
 
 The shader validation script checks HLSL compilation and compares the CPU reference model with the GPU-compatible runtime path. Warnings emitted for decompiled game shaders can be expected; compilation errors and parity failures are blocking issues.
-
