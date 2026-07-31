@@ -8,7 +8,8 @@
     mc:Ignorable="d"
     Title="JiggleForge">
 
-    <Grid Background="Transparent"
+    <Grid x:Name="RootGrid"
+          Background="Transparent"
           AllowDrop="True"
           Loaded="Root_Loaded"
           DragOver="Root_DragOver"
@@ -179,6 +180,7 @@
                         IsPaneOpen="False"
                         Background="Transparent"
                         HorizontalContentAlignment="Stretch"
+                        ItemInvoked="Navigation_ItemInvoked"
                         SelectionChanged="Navigation_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Name="OverviewNavItem" Content="概览" Icon="Home" Tag="overview" IsSelected="True" />
@@ -188,6 +190,11 @@
                 <NavigationViewItem x:Name="PhysicsNavItem" Content="物理参数" Icon="Repair" Tag="physics" IsEnabled="False" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="GuideNavItem"
+                                    Content="使用向导"
+                                    Icon="Help"
+                                    Tag="guide"
+                                    SelectsOnInvoked="False" />
                 <NavigationViewItem x:Name="RuntimeNavItem" Content="运行环境" Icon="Setting" Tag="runtime" />
             </NavigationView.FooterMenuItems>
 
@@ -263,6 +270,10 @@
                                         </Grid>
 
                                         <TextBlock x:Name="DetailsText" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="BackupStatusText"
+                                                   TextWrapping="Wrap"
+                                                   FontSize="12"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <StackPanel Orientation="Horizontal" Spacing="10">
                                             <Button x:Name="CreateConfigButton"
                                                     Content="首次适配"
@@ -274,6 +285,10 @@
                                                     Style="{StaticResource AccentButtonStyle}"
                                                     Visibility="Collapsed"
                                                     Click="RepairRuntime_Click" />
+                                            <Button x:Name="RestoreOriginalButton"
+                                                    Content="恢复原始 Mod"
+                                                    Visibility="Collapsed"
+                                                    Click="RestoreOriginal_Click" />
                                             <Button Content="在资源管理器中打开" Click="OpenExplorer_Click" />
                                         </StackPanel>
                                     </StackPanel>
@@ -860,5 +875,52 @@
                 </Grid>
             </Grid>
         </NavigationView>
+
+        <Canvas x:Name="OnboardingHighlightLayer"
+                Grid.RowSpan="2"
+                Visibility="Collapsed"
+                IsHitTestVisible="False">
+            <Border x:Name="OnboardingHighlightBorder"
+                    BorderThickness="3"
+                    BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                    Background="{ThemeResource AccentFillColorTertiaryBrush}"
+                    CornerRadius="10" />
+        </Canvas>
+
+        <TeachingTip x:Name="OnboardingTip"
+                     Grid.RowSpan="2"
+                     IsOpen="False"
+                     IsLightDismissEnabled="False"
+                     ShouldConstrainToRootBounds="True"
+                     TailVisibility="Auto"
+                     Closed="OnboardingTip_Closed">
+            <TeachingTip.Content>
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="OnboardingProgressText"
+                               VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <Button x:Name="OnboardingPreviousButton"
+                            Grid.Column="1"
+                            Content="上一步"
+                            Visibility="Collapsed"
+                            Click="OnboardingPreviousButton_Click" />
+                    <Button x:Name="OnboardingExitButton"
+                            Grid.Column="2"
+                            Content="退出向导"
+                            Click="OnboardingExitButton_Click" />
+                    <Button x:Name="OnboardingNextButton"
+                            Grid.Column="3"
+                            Content="下一步"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="OnboardingNextButton_Click" />
+                </Grid>
+            </TeachingTip.Content>
+        </TeachingTip>
     </Grid>
 </Window>

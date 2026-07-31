@@ -22,6 +22,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly ModProjectService projectService = new();
     private readonly ModRuntimeCompiler runtimeCompiler = new();
+    private readonly ModBackupService backupService = new();
     private readonly RuntimeEnvironmentService runtimeEnvironmentService = new(
         Path.Combine(AppContext.BaseDirectory, "RuntimePayload"));
     private readonly ObservableCollection<DrawEditorRow> drawRows = [];
@@ -106,6 +107,10 @@ public sealed partial class MainWindow : Window
 
         runtimeStatusInitialized = true;
         await RefreshRuntimeStatusAsync();
+        if (ShouldShowOnboarding())
+        {
+            await ShowOnboardingAsync(automatic: true);
+        }
     }
 
     private void Navigation_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

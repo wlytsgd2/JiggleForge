@@ -62,6 +62,13 @@ public sealed partial class MainWindow : Window
 
     private void OpenProject(string path)
     {
+        // Opening a project changes the navigation targets used by the tour.
+        // End an active tour first so it cannot retain stale controls.
+        if (onboardingTourActive)
+        {
+            EndOnboardingTour();
+        }
+
         currentInspection = projectService.Inspect(path);
         currentConfiguration = currentInspection.Configuration;
         ProjectCard.Visibility = Visibility.Visible;
@@ -72,10 +79,15 @@ public sealed partial class MainWindow : Window
         DrawCountText.Text = drawCount.ToString(System.Globalization.CultureInfo.InvariantCulture);
         SchemaText.Text = currentConfiguration?.SchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "—";
         DetailsText.Text = string.Join(Environment.NewLine, currentInspection.Messages);
+        UpdateBackupStatus();
         CreateConfigButton.Visibility = currentInspection.State == ModImportState.FirstImport
             ? Visibility.Visible
             : Visibility.Collapsed;
         RepairRuntimeButton.Visibility = currentInspection.State == ModImportState.RuntimeRepairRequired
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        ModBackupInspection backup = backupService.Inspect(currentInspection.ModPath);
+        RestoreOriginalButton.Visibility = backup.IsValid && currentInspection.State != ModImportState.FirstImport
             ? Visibility.Visible
             : Visibility.Collapsed;
 
@@ -176,6 +188,9 @@ public sealed partial class MainWindow : Window
             JiggleProjectConfig config = projectService.CreateInitialConfiguration(
                 currentInspection,
                 defaultPhysics);
+            _ = backupService.EnsureOriginalBackup(
+                currentInspection.ModPath,
+                config);
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, config);
             OpenProject(currentInspection.ModPath);
             ShowMessage($"已原地适配 {result.DrawCount} 个 Draw。配置界面已经打开；修改后按 F10 查看效果。", InfoBarSeverity.Success);
@@ -183,6 +198,69 @@ public sealed partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
             ShowMessage(exception.Message, InfoBarSeverity.Error);
+        }
+    }
+
+    private async void RestoreOriginal_Click(object sender, RoutedEventArgs e)
+    {
+        if (currentInspection is null)
+        {
+            return;
+        }
+
+        ContentDialog dialog = new()
+        {
+            Title = "恢复原始 Mod？",
+            Content = "这会还原首次适配前的原始文件，并删除当前 JiggleForge 配置和运行时文件。备份压缩包会保留，可以再次恢复。",
+            PrimaryButtonText = "恢复原始 Mod",
+            CloseButtonText = "取消",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = RootGrid.XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+        {
+            return;
+        }
+
+        try
+        {
+            string path = currentInspection.ModPath;
+            backupService.Restore(path);
+            OpenProject(path);
+            ShowMessage("已恢复原始 Mod。原始备份仍保留在 Mod 文件夹中。", InfoBarSeverity.Success);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            ShowMessage($"恢复失败：{exception.Message}", InfoBarSeverity.Error);
+        }
+    }
+
+    private void UpdateBackupStatus()
+    {
+        if (currentInspection is null)
+        {
+            BackupStatusText.Text = string.Empty;
+            return;
+        }
+
+        ModBackupInspection backup = backupService.Inspect(currentInspection.ModPath);
+        if (backup.IsValid)
+        {
+            BackupStatusText.Text = $"原始备份：已保存 {backup.Files.Count} 个文件（{ModBackupService.BackupFileName}）";
+            BackupStatusText.Foreground = new SolidColorBrush(Colors.DarkGreen);
+        }
+        else if (backup.Exists)
+        {
+            BackupStatusText.Text = $"原始备份：文件存在但不可用。{backup.Error}";
+            BackupStatusText.Foreground = new SolidColorBrush(Colors.DarkRed);
+        }
+        else
+        {
+            BackupStatusText.Text = currentInspection.State == ModImportState.FirstImport
+                ? "原始备份：首次适配时自动创建。"
+                : "原始备份：未找到（旧版本适配的 Mod 可能无法精确恢复）。";
+            BackupStatusText.Foreground = new SolidColorBrush(Colors.Gray);
         }
     }
 
