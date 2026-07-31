@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 — 2026-07-31
+
+- Added per-Mod `JiggleForge.original.zip` backups before first adaptation.
+- Added Overview-page restore to return a Mod to its pre-adaptation files.
+- Added backup validation, checksums, rollback handling, and Core tests.
+- Added the interactive first-run guide and made the Chinese README the public entry page.
+- Clarified English/Chinese user documentation, installation, compatibility, and backup behavior.
+
 ## Unreleased
 
 - Prepared a public-facing repository layout.
