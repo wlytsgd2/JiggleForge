@@ -160,6 +160,55 @@ public sealed class MotionModelTests
     }
 
     [TestMethod]
+    public void ShortStationaryClickAppliesOneInwardSurfaceNormalImpulse()
+    {
+        CpuCaptureState capture = new();
+        CpuMotionState state = new();
+        CpuParameters parameters = new()
+        {
+            Strength = 1.0f,
+            MaxOffset = 0.15f,
+            ReleaseImpulse = 0.5f,
+            ReleaseFrequencyHz = 0.0f,
+            ReleaseDampingRatio = 0.0f,
+        };
+        CpuPick pick = Pick(7) with { SurfaceNormal = Vector3.UnitY };
+
+        Step(state, capture, parameters, 7, true, new Vector2(500.0f), pick);
+        Step(state, capture, parameters, 7, false, new Vector2(504.0f), pick);
+
+        Assert.AreEqual(1, state.TapImpulseApplications);
+        Assert.IsTrue(state.Velocity.Y < 0.0f);
+        Assert.AreEqual(0.0f, state.Velocity.X, 1.0e-6f);
+        Assert.AreEqual(0.0f, state.Velocity.Z, 1.0e-6f);
+
+        Step(state, capture, parameters, 7, false, new Vector2(504.0f), pick);
+        Assert.AreEqual(1, state.TapImpulseApplications);
+    }
+
+    [TestMethod]
+    public void DragAndLongHoldDoNotTriggerTapImpulse()
+    {
+        CpuParameters parameters = new() { ReleaseImpulse = 0.5f };
+
+        CpuCaptureState draggedCapture = new();
+        CpuMotionState draggedState = new();
+        CpuPick pick = Pick(7) with { SurfaceNormal = Vector3.UnitZ };
+        Step(draggedState, draggedCapture, parameters, 7, true, Vector2.Zero, pick);
+        Step(draggedState, draggedCapture, parameters, 7, false, new Vector2(20.0f), pick);
+        Assert.AreEqual(0, draggedState.TapImpulseApplications);
+
+        CpuCaptureState heldCapture = new();
+        CpuMotionState heldState = new();
+        for (int frame = 0; frame < 13; frame++)
+        {
+            Step(heldState, heldCapture, parameters, 7, true, Vector2.Zero, pick);
+        }
+        Step(heldState, heldCapture, parameters, 7, false, Vector2.Zero, pick);
+        Assert.AreEqual(0, heldState.TapImpulseApplications);
+    }
+
+    [TestMethod]
     public void ReleasedStateReturnsToRestAndSleeps()
     {
         CpuCaptureState capture = new();

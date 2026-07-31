@@ -52,7 +52,8 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         CapturedPickRecords[2u],
         CapturedPickRecords[3u],
         CapturedPickRecords[4u],
-        CapturedPickRecords[5u]);
+        CapturedPickRecords[5u],
+        CapturedPickRecords[6u]);
     JF_MotionState state = JF_DecodeMotionState(
         MotionStateRecords[motionBase + 0u],
         MotionStateRecords[motionBase + 1u],

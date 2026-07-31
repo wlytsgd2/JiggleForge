@@ -33,7 +33,7 @@
 | 资源 | 记录数 | 用途 |
 | --- | ---: | --- |
 | `ResourceInputController` | 2 | 当前拖动输入和控制器边沿 |
-| `ResourceCapturedPick` | 6 | 冻结的抓取目标 |
+| `ResourceCapturedPick` | 7 | 冻结的抓取目标、三角形法线和按住时间 |
 | `ResourceGroupParameters` | 65536 × 5 | 每个状态的物理参数 |
 | `ResourceMotionStates` | 65536 × 7 | 每个状态的运动状态 |
 | `ResourceDefaultParameters` | 5 | 未适配原版部件的默认参数 |
@@ -62,7 +62,8 @@
 - 鼠标 XY 沿抓取开始时冻结的屏幕右/上世界方向；
 - 滚轮沿冻结屏幕平面的法向量修改深度；
 - `target_follow_seconds` 控制目标低通跟随；
-- `release_impulse` 控制松手时继承目标速度的比例；
+- `release_impulse` 控制松手时继承目标速度的比例，同时作为短按拍打的冲量系数；
+- 短按不超过 `0.20` 秒且移动不超过 `10` 像素时，沿捕获三角形法线反方向施加一次冲量；
 - `max_offset` 限制世界位移；
 - 静止若干帧后状态休眠并归零。
 

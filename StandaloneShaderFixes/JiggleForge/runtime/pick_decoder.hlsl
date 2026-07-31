@@ -22,6 +22,7 @@ JF_PickRecord JF_DecodeSourceFramePick(
     result.WorldPosition = 0.0f;
     result.ScreenRight = float3(1.0f, 0.0f, 0.0f);
     result.ScreenUp = float3(0.0f, 1.0f, 0.0f);
+    result.SurfaceNormal = float3(0.0f, 0.0f, 1.0f);
     result.Depth = 0.0f;
     result.Priority = 0.0f;
     result.PipelineToken = 0.0f;
@@ -55,6 +56,9 @@ JF_PickRecord JF_DecodeSourceFramePick(
             max(round(JF_FiniteOr(s3.y, 0.0f)), 0.0f),
             max(round(JF_FiniteOr(s3.z, 0.0f)), 0.0f));
         result.Barycentric = JF_FiniteOr3(s4.xyz, 0.0f);
+        result.SurfaceNormal = JF_SafeNormalize(
+            JF_FiniteOr3(s5.xyz, float3(0.0f, 0.0f, 1.0f)),
+            float3(0.0f, 0.0f, 1.0f));
         float3 right = float3(1.0f, 0.0f, 0.0f);
         float3 up = float3(0.0f, 1.0f, 0.0f);
         JF_BuildOrthonormalBasis(

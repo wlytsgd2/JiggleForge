@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — 2026-08-01
+
+- Added short-click tap deformation along the picked triangle normal.
+- Added tap detection based on hold time and cursor travel, while preserving normal drag and release behavior.
+- Reused the existing release impulse, spring, damping, strength, and maximum-offset parameters for configurable tap response.
+- Extended captured-pick diagnostics and CPU/GPU parity coverage for the new interaction path.
+
 ## 0.1.2 — 2026-07-31
 
 - Added startup checks for the latest stable GitHub Release.

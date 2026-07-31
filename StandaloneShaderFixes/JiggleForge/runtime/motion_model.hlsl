@@ -9,6 +9,8 @@ static const float JF_VECTOR_EPSILON = 1.0e-8f;
 static const float JF_SLEEP_POSITION_SQUARED = 1.0e-8f;
 static const float JF_SLEEP_VELOCITY_SQUARED = 1.0e-8f;
 static const uint JF_SLEEP_FRAME_THRESHOLD = 12u;
+static const float JF_TAP_MAXIMUM_HOLD_SECONDS = 0.20f;
+static const float JF_TAP_MAXIMUM_CURSOR_DISTANCE = 10.0f;
 
 struct JF_GroupParameters
 {
@@ -54,6 +56,8 @@ struct JF_CapturedPick
     float3 WorldPosition;
     float3 ScreenRight;
     float3 ScreenUp;
+    float3 SurfaceNormal;
+    float HoldSeconds;
     float Depth;
     float Priority;
     uint TriangleOrdinal;
@@ -437,6 +441,57 @@ void JF_ApplyReleaseImpulse(
     state.Velocity += targetVelocity * impulse;
 }
 
+bool JF_IsTapGesture(
+    JF_InputFrame input,
+    JF_CapturedPick capture)
+{
+    float holdSeconds = clamp(
+        JF_FiniteOr(capture.HoldSeconds, JF_TAP_MAXIMUM_HOLD_SECONDS + 1.0f),
+        0.0f,
+        10.0f);
+    float2 cursorDelta = JF_FiniteOr2(
+        input.CursorPixels - capture.PressCursorPixels,
+        JF_TAP_MAXIMUM_CURSOR_DISTANCE + 1.0f);
+    float distanceSquared = dot(cursorDelta, cursorDelta);
+    return holdSeconds <= JF_TAP_MAXIMUM_HOLD_SECONDS
+        && JF_IsFinite(distanceSquared)
+        && distanceSquared
+            <= JF_TAP_MAXIMUM_CURSOR_DISTANCE
+                * JF_TAP_MAXIMUM_CURSOR_DISTANCE;
+}
+
+void JF_ApplyTapImpulse(
+    inout JF_MotionState state,
+    JF_CapturedPick capture,
+    JF_GroupParameters parameters,
+    float deltaSeconds)
+{
+    float3 screenNormal = JF_SafeNormalize(
+        cross(state.ScreenRight, state.ScreenUp),
+        float3(0.0f, 0.0f, 1.0f));
+    float3 surfaceNormal = JF_SafeNormalize(
+        JF_FiniteOr3(capture.SurfaceNormal, screenNormal),
+        screenNormal);
+    float impulse = clamp(
+        JF_FiniteOr(parameters.ReleaseImpulse, 0.0f),
+        0.0f,
+        10.0f);
+    float strength = clamp(
+        JF_FiniteOr(parameters.Strength, 0.0f),
+        0.0f,
+        10.0f);
+    float tapSpeed = JF_SafeMaximumOffset(parameters.MaxOffset)
+        * impulse
+        * strength
+        / deltaSeconds;
+
+    // A physical tap first presses into the selected surface. The release
+    // spring then supplies the visible outward rebound.
+    state.Velocity -= surfaceNormal * tapSpeed;
+    state.Active = 1u;
+    state.SleepFrames = 0u;
+}
+
 void JF_IntegrateImplicitSpring(
     inout JF_MotionState state,
     float3 target,
@@ -563,6 +618,14 @@ void JF_StepMotion(
     if (releaseEdge)
     {
         JF_ApplyReleaseImpulse(state, parameters, deltaSeconds);
+        if (JF_IsTapGesture(input, capture))
+        {
+            JF_ApplyTapImpulse(
+                state,
+                capture,
+                parameters,
+                deltaSeconds);
+        }
     }
 
     float3 target = heldByState

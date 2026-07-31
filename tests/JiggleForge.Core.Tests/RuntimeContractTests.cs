@@ -17,7 +17,7 @@ public sealed class RuntimeContractTests
         string ini = File.ReadAllText(RuntimeIniPath);
 
         AssertSectionArray(ini, "ResourceInputController", 2);
-        AssertSectionArray(ini, "ResourceCapturedPick", 6);
+        AssertSectionArray(ini, "ResourceCapturedPick", 7);
         AssertSectionArray(ini, "ResourceGroupParameters", 327680);
         AssertSectionArray(ini, "ResourceMotionStates", 458752);
         AssertSectionArray(ini, "ResourceDefaultParameters", 5);

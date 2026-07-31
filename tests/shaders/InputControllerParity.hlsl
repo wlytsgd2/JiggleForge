@@ -34,6 +34,7 @@ JF_PickRecord JF_InputParityPick(
     pick.WorldPosition = float3(1.0f, 2.0f, 3.0f);
     pick.ScreenRight = float3(2.0f, 0.0f, 0.0f);
     pick.ScreenUp = float3(2.0f, 3.0f, 0.0f);
+    pick.SurfaceNormal = float3(0.0f, 0.6f, 0.8f);
     pick.Depth = 0.42f;
     pick.Priority = 3.0f;
     pick.PipelineToken = 91.0f;
@@ -57,7 +58,8 @@ void JF_StoreInputParity(
     float4 q3;
     float4 q4;
     float4 q5;
-    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5);
+    float4 q6;
+    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5, q6);
 
     uint baseRecord = scenario * JF_INPUT_PARITY_RECORD_COUNT;
     OutputRecords[baseRecord + 0u] = c0;
@@ -68,6 +70,7 @@ void JF_StoreInputParity(
     OutputRecords[baseRecord + 5u] = q3;
     OutputRecords[baseRecord + 6u] = q4;
     OutputRecords[baseRecord + 7u] = q5;
+    OutputRecords[baseRecord + 8u] = q6;
 }
 
 void JF_RunIdleInputScenario(

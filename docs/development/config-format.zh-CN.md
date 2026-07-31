@@ -82,7 +82,7 @@ Schema 2 直接保存正式运行时解算器的物理量：
 - `hold_frequency_hz` 和 `release_frequency_hz` 是按住与松手阶段的弹簧固有频率；数值越大，响应越快、越硬。
 - `hold_damping_ratio` 和 `release_damping_ratio` 是阻尼比；`1` 接近临界阻尼，较小的值产生更多回弹。
 - `target_follow_seconds` 是拖动目标的指数跟随时间常数；越小越跟手，`0` 表示不滤波。
-- `release_impulse` 是松手瞬间继承目标速度的比例；`0` 完全关闭甩动惯性。
+- `release_impulse` 是松手瞬间继承目标速度的比例，同时控制短按拍打力度；`0` 会同时关闭甩动惯性和拍打冲量。
 
 应用读取 Schema 1 配置时会先在同目录生成 `JiggleForge.txt.schema1.bak`，再将旧的抓取弹性、松手弹性、目标跟随速度和松手惯性转换成上述 Schema 2 参数并写回。若同名备份已经存在，会使用递增后缀，绝不覆盖旧备份。
 

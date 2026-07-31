@@ -34,9 +34,10 @@ The most important parameters are:
 - strength and drag scale — response to mouse movement;
 - max offset — world-space displacement limit;
 - hold/release frequency and damping — spring feel;
-- release impulse — motion inherited when the key is released;
+- release impulse — inherited drag-release motion and short-click tap strength;
 - wheel depth step and min/max depth — third-axis wheel control;
 - volume response — the amount of surrounding volume preservation.
 
 The group value overrides the Mod default for Draws in that group. Save the page before pressing `F10`.
 
+A valid press released within `0.20` seconds and within `10` pixels of its starting point is treated as a tap. The surface is first pushed opposite the picked triangle normal, then rebounds through the selected group's release spring and damping.

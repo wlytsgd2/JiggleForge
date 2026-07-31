@@ -6,10 +6,10 @@ namespace JiggleForge.Core.Tests;
 
 internal static class Program
 {
-    private const int MotionScenarioCount = 5;
+    private const int MotionScenarioCount = 6;
     private const int MotionRecordsPerScenario = 7;
     private const int InputScenarioCount = 5;
-    private const int InputRecordsPerScenario = 8;
+    private const int InputRecordsPerScenario = 9;
     private const int ComponentsPerRecord = 4;
     private static readonly Vector2 Viewport = new(1000.0f, 1000.0f);
 
@@ -75,7 +75,7 @@ internal static class Program
             }
 
             Console.WriteLine(
-                "Runtime CPU/GPU parity passed for 10 scenarios and 75 float4 records.");
+                "Runtime CPU/GPU parity passed for 11 scenarios and 87 float4 records.");
             return 0;
         }
         catch (Exception exception)
@@ -141,6 +141,7 @@ internal static class Program
             RunWheelScenario(),
             RunReleaseScenario(),
             RunClampScenario(),
+            RunTapScenario(),
         ];
         List<float> values = new(
             MotionScenarioCount
@@ -326,6 +327,20 @@ internal static class Program
         return state;
     }
 
+    private static CpuMotionState RunTapScenario()
+    {
+        CpuCaptureState capture = new();
+        CpuMotionState state = new();
+        CpuParameters parameters = DefaultParameters();
+        CpuPick pick = Pick() with
+        {
+            SurfaceNormal = new Vector3(0.0f, 0.6f, 0.8f),
+        };
+        Step(state, capture, parameters, true, new Vector2(500.0f), pick);
+        Step(state, capture, parameters, false, new Vector2(504.0f, 500.0f), pick);
+        return state;
+    }
+
     private static void Step(
         CpuMotionState state,
         CpuCaptureState capture,
@@ -409,6 +424,7 @@ internal static class Program
             TriangleOrdinal = 7,
             TriangleIndices = new Vector3(10.0f, 20.0f, 30.0f),
             Barycentric = new Vector3(0.2f, 0.3f, 0.5f),
+            SurfaceNormal = new Vector3(0.0f, 0.6f, 0.8f),
         };
 
     private static Vector4[] Encode(CpuMotionState state)
@@ -458,6 +474,9 @@ internal static class Program
             new Vector4(
                 pick.Barycentric,
                 state.PressCursorPixels.Y),
+            new Vector4(
+                pick.SurfaceNormal,
+                state.HoldSeconds),
         ];
     }
 

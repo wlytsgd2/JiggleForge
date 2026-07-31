@@ -4,7 +4,7 @@
 #include "motion_model.hlsl"
 
 static const uint JF_CONTROLLER_RECORD_COUNT = 2u;
-static const uint JF_CAPTURED_PICK_RECORD_COUNT = 6u;
+static const uint JF_CAPTURED_PICK_RECORD_COUNT = 7u;
 static const uint JF_MAXIMUM_EXACT_GENERATION = 0x007fffffu;
 
 struct JF_PickRecord
@@ -15,6 +15,7 @@ struct JF_PickRecord
     float3 WorldPosition;
     float3 ScreenRight;
     float3 ScreenUp;
+    float3 SurfaceNormal;
     float Depth;
     float Priority;
     float PipelineToken;
@@ -74,7 +75,8 @@ JF_CapturedPick JF_DecodeCapturedPick(
     float4 q2,
     float4 q3,
     float4 q4,
-    float4 q5)
+    float4 q5,
+    float4 q6)
 {
     JF_CapturedPick result;
     result.Valid = 0u;
@@ -85,6 +87,8 @@ JF_CapturedPick JF_DecodeCapturedPick(
     result.WorldPosition = 0.0f;
     result.ScreenRight = 0.0f;
     result.ScreenUp = 0.0f;
+    result.SurfaceNormal = 0.0f;
+    result.HoldSeconds = 0.0f;
     result.Depth = 0.0f;
     result.Priority = 0.0f;
     result.TriangleOrdinal = 0u;
@@ -120,6 +124,10 @@ JF_CapturedPick JF_DecodeCapturedPick(
     result.PressCursorPixels.x = JF_FiniteOr(q4.w, 0.0f);
     result.Barycentric = JF_FiniteOr3(q5.xyz, 0.0f);
     result.PressCursorPixels.y = JF_FiniteOr(q5.w, 0.0f);
+    result.SurfaceNormal = JF_FiniteOr3(
+        q6.xyz,
+        float3(0.0f, 0.0f, 1.0f));
+    result.HoldSeconds = clamp(JF_FiniteOr(q6.w, 0.0f), 0.0f, 10.0f);
     return result;
 }
 
@@ -130,7 +138,8 @@ void JF_EncodeCapturedPick(
     out float4 q2,
     out float4 q3,
     out float4 q4,
-    out float4 q5)
+    out float4 q5,
+    out float4 q6)
 {
     q0 = float4(
         capture.WorldPosition,
@@ -146,6 +155,7 @@ void JF_EncodeCapturedPick(
         (float3)capture.TriangleIndices,
         capture.PressCursorPixels.x);
     q5 = float4(capture.Barycentric, capture.PressCursorPixels.y);
+    q6 = float4(capture.SurfaceNormal, capture.HoldSeconds);
 }
 
 uint JF_NextCaptureGeneration(uint currentGeneration)
@@ -169,6 +179,8 @@ JF_CapturedPick JF_FreezePick(
     result.WorldPosition = 0.0f;
     result.ScreenRight = 0.0f;
     result.ScreenUp = 0.0f;
+    result.SurfaceNormal = 0.0f;
+    result.HoldSeconds = 0.0f;
     result.Depth = 0.0f;
     result.Priority = 0.0f;
     result.TriangleOrdinal = 0u;
@@ -191,6 +203,12 @@ JF_CapturedPick JF_FreezePick(
             up);
         result.ScreenRight = right;
         result.ScreenUp = up;
+        float3 screenNormal = JF_SafeNormalize(
+            cross(right, up),
+            float3(0.0f, 0.0f, 1.0f));
+        result.SurfaceNormal = JF_SafeNormalize(
+            JF_FiniteOr3(currentPick.SurfaceNormal, screenNormal),
+            screenNormal);
         result.Depth = JF_FiniteOr(currentPick.Depth, 0.0f);
         result.Priority = JF_FiniteOr(currentPick.Priority, 0.0f);
         result.TriangleOrdinal = currentPick.TriangleOrdinal;
@@ -220,6 +238,17 @@ void JF_UpdateInputController(
             currentPick,
             currentCursor,
             controller.CaptureGeneration);
+    }
+
+    if (held && capturedPick.Valid != 0u)
+    {
+        float deltaSeconds = clamp(
+            JF_FiniteOr(input.DeltaSeconds, 1.0f / 60.0f),
+            JF_MINIMUM_DELTA_SECONDS,
+            JF_MAXIMUM_DELTA_SECONDS);
+        capturedPick.HoldSeconds = min(
+            capturedPick.HoldSeconds + deltaSeconds,
+            10.0f);
     }
 
     controller.CurrentCursorPixels = currentCursor;

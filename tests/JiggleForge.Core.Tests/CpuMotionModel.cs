@@ -49,6 +49,8 @@ internal readonly record struct CpuPick(
     Vector3 ScreenUp,
     int SourceDraw)
 {
+    public Vector3 SurfaceNormal { get; init; } = Vector3.UnitZ;
+
     public float Depth { get; init; }
 
     public float Priority { get; init; }
@@ -80,6 +82,8 @@ internal sealed class CpuCaptureState
 
     public uint Generation { get; private set; }
 
+    public float HoldSeconds { get; private set; }
+
     public void Step(in CpuInput input, in CpuPick currentPick)
     {
         Vector2 currentCursor = IsFinite(input.CursorPixels)
@@ -94,6 +98,19 @@ internal sealed class CpuCaptureState
             PressCursorPixels = currentCursor;
             Valid = currentPick.Valid;
             Pick = currentPick.Valid ? Freeze(currentPick) : default;
+            HoldSeconds = 0.0f;
+        }
+
+        if (input.DragHeld && Valid)
+        {
+            HoldSeconds = MathF.Min(
+                HoldSeconds + Math.Clamp(
+                    float.IsFinite(input.DeltaSeconds)
+                        ? input.DeltaSeconds
+                        : 1.0f / 60.0f,
+                    1.0f / 240.0f,
+                    0.05f),
+                10.0f);
         }
 
         CurrentCursorPixels = currentCursor;
@@ -116,6 +133,11 @@ internal sealed class CpuCaptureState
                 : Vector3.Zero,
             ScreenRight = right,
             ScreenUp = up,
+            SurfaceNormal = SafeNormalize(
+                IsFinite(source.SurfaceNormal)
+                    ? source.SurfaceNormal
+                    : Vector3.Cross(right, up),
+                SafeNormalize(Vector3.Cross(right, up), Vector3.UnitZ)),
             Depth = float.IsFinite(source.Depth) ? source.Depth : 0.0f,
             Priority = float.IsFinite(source.Priority) ? source.Priority : 0.0f,
             Barycentric = IsFinite(source.Barycentric)
@@ -199,6 +221,8 @@ internal sealed class CpuMotionState
     public int SleepFrames { get; set; }
 
     public int ReleaseImpulseApplications { get; set; }
+
+    public int TapImpulseApplications { get; set; }
 }
 
 internal static class CpuMotionSolver
@@ -209,6 +233,8 @@ internal static class CpuMotionSolver
     private const float SleepPositionSquared = 1.0e-8f;
     private const float SleepVelocitySquared = 1.0e-8f;
     private const int SleepFrameThreshold = 12;
+    private const float TapMaximumHoldSeconds = 0.20f;
+    private const float TapMaximumCursorDistance = 10.0f;
 
     public static void Step(
         CpuMotionState state,
@@ -236,6 +262,10 @@ internal static class CpuMotionSolver
         if (releaseEdge)
         {
             ApplyReleaseImpulse(state, parameters, deltaSeconds);
+            if (IsTapGesture(input, capture))
+            {
+                ApplyTapImpulse(state, capture, parameters, deltaSeconds);
+            }
         }
 
         Vector3 target = heldByState
@@ -384,6 +414,55 @@ internal static class CpuMotionSolver
             10.0f);
         state.Velocity += targetVelocity * releaseImpulse;
         state.ReleaseImpulseApplications++;
+    }
+
+    private static bool IsTapGesture(
+        in CpuInput input,
+        CpuCaptureState capture)
+    {
+        float holdSeconds = Math.Clamp(
+            FiniteOr(capture.HoldSeconds, TapMaximumHoldSeconds + 1.0f),
+            0.0f,
+            10.0f);
+        Vector2 cursorDelta = FiniteOr(
+            input.CursorPixels - capture.PressCursorPixels,
+            new Vector2(TapMaximumCursorDistance + 1.0f));
+        float distanceSquared = cursorDelta.LengthSquared();
+        return holdSeconds <= TapMaximumHoldSeconds
+            && float.IsFinite(distanceSquared)
+            && distanceSquared
+                <= TapMaximumCursorDistance * TapMaximumCursorDistance;
+    }
+
+    private static void ApplyTapImpulse(
+        CpuMotionState state,
+        CpuCaptureState capture,
+        CpuParameters parameters,
+        float deltaSeconds)
+    {
+        Vector3 screenNormal = SafeNormalize(
+            Vector3.Cross(state.ScreenRight, state.ScreenUp),
+            Vector3.UnitZ);
+        Vector3 surfaceNormal = SafeNormalize(
+            FiniteOr(capture.Pick.SurfaceNormal, screenNormal),
+            screenNormal);
+        float impulse = Math.Clamp(
+            FiniteOr(parameters.ReleaseImpulse, 0.0f),
+            0.0f,
+            10.0f);
+        float strength = Math.Clamp(
+            FiniteOr(parameters.Strength, 0.0f),
+            0.0f,
+            10.0f);
+        float tapSpeed = SafeMaximumOffset(parameters.MaxOffset)
+            * impulse
+            * strength
+            / deltaSeconds;
+
+        state.Velocity -= surfaceNormal * tapSpeed;
+        state.Active = true;
+        state.SleepFrames = 0;
+        state.TapImpulseApplications++;
     }
 
     private static void IntegrateImplicitSpring(

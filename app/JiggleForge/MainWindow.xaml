@@ -645,7 +645,7 @@
                                     <NumberBox x:Name="GrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
                                     <NumberBox x:Name="ReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
                                     <NumberBox x:Name="ReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="ReleaseKickNumber" Grid.Row="4" Header="释放冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
                                     <NumberBox x:Name="TargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
                                     <NumberBox x:Name="MaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
                                     <NumberBox x:Name="WheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
@@ -777,7 +777,7 @@
                                             <NumberBox x:Name="DefaultGrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
                                             <NumberBox x:Name="DefaultReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
                                             <NumberBox x:Name="DefaultReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultReleaseKickNumber" Grid.Row="4" Header="释放冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
                                             <NumberBox x:Name="DefaultTargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
                                             <NumberBox x:Name="DefaultMaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
                                             <NumberBox x:Name="DefaultWheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />

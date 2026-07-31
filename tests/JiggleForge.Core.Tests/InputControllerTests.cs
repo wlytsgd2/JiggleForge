@@ -17,6 +17,7 @@ public sealed class InputControllerTests
             TriangleOrdinal = 7,
             TriangleIndices = new Vector3(10.0f, 20.0f, 30.0f),
             Barycentric = new Vector3(0.2f, 0.3f, 0.5f),
+            SurfaceNormal = new Vector3(0.0f, 0.6f, 0.8f),
         };
 
         controller.Step(Input(true, new Vector2(100.0f, 200.0f)), pick);
@@ -29,6 +30,8 @@ public sealed class InputControllerTests
         Assert.AreEqual(0.42f, controller.Pick.Depth);
         Assert.AreEqual(7, controller.Pick.TriangleOrdinal);
         Assert.AreEqual(new Vector3(10.0f, 20.0f, 30.0f), controller.Pick.TriangleIndices);
+        Assert.AreEqual(new Vector3(0.0f, 0.6f, 0.8f), controller.Pick.SurfaceNormal);
+        Assert.AreEqual(1.0f / 60.0f, controller.HoldSeconds, 1.0e-6f);
     }
 
     [TestMethod]
@@ -49,6 +52,7 @@ public sealed class InputControllerTests
         Assert.AreEqual(new Vector2(300.0f, 400.0f), controller.CurrentCursorPixels);
         Assert.AreEqual(5, controller.WheelSequenceCode);
         Assert.AreEqual(1u, controller.Generation);
+        Assert.AreEqual(2.0f / 60.0f, controller.HoldSeconds, 1.0e-6f);
     }
 
     [TestMethod]

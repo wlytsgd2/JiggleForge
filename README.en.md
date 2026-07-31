@@ -10,7 +10,7 @@ JiggleForge is a Windows desktop application for 《Zenless Zone Zero》 XXMI/ZZ
 - Scans a Mod's DrawIndexed commands and adapts the Mod in place.
 - Assigns each Draw a stable identity, with editable aliases and deformation switches.
 - Groups Draws and edits directed dependencies, so related parts can deform together.
-- Supports per-group physics, global defaults, multiple drag keys, and wheel-controlled depth.
+- Supports per-group physics, global defaults, multiple drag keys, short-click taps, and wheel-controlled depth.
 - Supports DDS masks: white deforms fully, black does not deform, and missing masks default to weight `1.0`.
 - Includes an optional in-game Draw inspector for identifying small or overlapping parts.
 - Creates `JiggleForge.original.zip` before first adaptation and restores the original Mod from the Overview page.
@@ -33,7 +33,7 @@ Game updates can change shader hashes. If a pass is no longer recognized, update
 4. Drag one replacement Mod folder into the app, or select it with the folder picker.
 5. Review Draws, groups, masks, dependencies, and physics, then click **Apply configuration**.
 6. Return to the game and press `F10`.
-7. Hold a configured drag key over the model. Start WheelBridge from **Settings** if wheel depth is needed.
+7. Hold a configured drag key to drag the model, or briefly click to tap along the picked triangle normal. Start WheelBridge from **Settings** if wheel depth is needed.
 
 ## Application updates
 

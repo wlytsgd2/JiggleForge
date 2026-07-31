@@ -48,7 +48,8 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         CapturedPickRecords[2u],
         CapturedPickRecords[3u],
         CapturedPickRecords[4u],
-        CapturedPickRecords[5u]);
+        CapturedPickRecords[5u],
+        CapturedPickRecords[6u]);
 
     JF_InputFrame input;
     input.CursorPixels = JF_CURSOR_VIEWPORT.xy;
@@ -80,11 +81,13 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     float4 q3;
     float4 q4;
     float4 q5;
-    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5);
+    float4 q6;
+    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5, q6);
     CapturedPickRecords[0u] = q0;
     CapturedPickRecords[1u] = q1;
     CapturedPickRecords[2u] = q2;
     CapturedPickRecords[3u] = q3;
     CapturedPickRecords[4u] = q4;
     CapturedPickRecords[5u] = q5;
+    CapturedPickRecords[6u] = q6;
 }

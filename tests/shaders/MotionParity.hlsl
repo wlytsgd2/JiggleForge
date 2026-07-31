@@ -2,7 +2,7 @@
 
 RWStructuredBuffer<float4> OutputRecords : register(u0);
 
-static const uint JF_PARITY_SCENARIO_COUNT = 5u;
+static const uint JF_PARITY_SCENARIO_COUNT = 6u;
 
 JF_GroupParameters JF_ParityDefaultParameters()
 {
@@ -41,6 +41,8 @@ JF_CapturedPick JF_ParityPick(uint valid)
     capture.WorldPosition = float3(1.0f, 2.0f, 3.0f);
     capture.ScreenRight = float3(1.0f, 0.0f, 0.0f);
     capture.ScreenUp = float3(0.0f, 1.0f, 0.0f);
+    capture.SurfaceNormal = float3(0.0f, 0.6f, 0.8f);
+    capture.HoldSeconds = 1.0f / 60.0f;
     return capture;
 }
 
@@ -170,6 +172,27 @@ JF_MotionState JF_RunClampScenario()
     return state;
 }
 
+JF_MotionState JF_RunTapScenario()
+{
+    JF_MotionState state = (JF_MotionState)0;
+    JF_GroupParameters parameters = JF_ParityDefaultParameters();
+    JF_CapturedPick capture = JF_ParityPick(1u);
+    JF_InputFrame input = JF_ParityInput(
+        float2(500.0f, 500.0f),
+        1u,
+        0u,
+        0u);
+    JF_StepMotion(state, 17u, input, capture, parameters);
+    capture.HoldSeconds = 2.0f / 60.0f;
+    input = JF_ParityInput(
+        float2(504.0f, 500.0f),
+        0u,
+        0u,
+        0u);
+    JF_StepMotion(state, 17u, input, capture, parameters);
+    return state;
+}
+
 [numthreads(1, 1, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
@@ -183,4 +206,5 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     JF_StoreParityState(2u, JF_RunWheelScenario());
     JF_StoreParityState(3u, JF_RunReleaseScenario());
     JF_StoreParityState(4u, JF_RunClampScenario());
+    JF_StoreParityState(5u, JF_RunTapScenario());
 }
