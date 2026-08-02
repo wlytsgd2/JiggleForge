@@ -731,6 +731,22 @@
                                     </StackPanel>
                                 </Border>
                                 <Border Style="{StaticResource PageCardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="项目链接" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock Text="查看项目源码、提交问题，或观看 JiggleForge 的视频介绍。"
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                        <StackPanel Spacing="4" HorizontalAlignment="Left">
+                                            <HyperlinkButton Content="打开 GitHub 仓库"
+                                                             NavigateUri="https://github.com/wlytsgd2/JiggleForge" />
+                                            <HyperlinkButton Content="观看 B站介绍视频"
+                                                             NavigateUri="https://www.bilibili.com/video/BV1Bt3d6DEYN/" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource PageCardStyle}">
                                     <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />

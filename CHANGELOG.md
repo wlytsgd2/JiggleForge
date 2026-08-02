@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 — 2026-08-03
+
+- Added GitHub repository and Bilibili introduction links to the Settings page.
+- Opened both links with the system default browser from the new project links card.
+
 ## 0.1.3 — 2026-08-01
 
 - Added short-click tap deformation along the picked triangle normal.
