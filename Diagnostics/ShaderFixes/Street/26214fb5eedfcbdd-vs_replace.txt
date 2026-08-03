@@ -29,7 +29,49 @@ Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
 Buffer<float4> JF_MotionState : register(t75);
 Buffer<float4> JF_GroupParams : register(t76);
 
-#include "JiggleForgeRuntime/draw_state_consumer.hlsl"
+float3 JF_EvaluateBoundStates(
+  float3 worldPosition,
+  float vertexMask,
+  out bool hasMovingInfluence,
+  out float minimumActiveRadius)
+{
+  hasMovingInfluence = false;
+  minimumActiveRadius = 0.0;
+  return float3(0.0, 0.0, 0.0);
+}
+
+void JF_PrepareSurfaceSamples(
+  float radius,
+  float3 originalNormal,
+  float3 originalTangent,
+  float3 originalBitangent,
+  out float derivativeStep,
+  out float3 tangentDirection,
+  out float3 bitangentDirection)
+{
+  derivativeStep = 0.001;
+  tangentDirection = originalTangent;
+  bitangentDirection = originalBitangent;
+}
+
+void JF_ReconstructSurfaceFrameFromSamples(
+  float3 originalNormal,
+  float3 originalTangent,
+  float3 originalBitangent,
+  float derivativeStep,
+  float3 tangentDirection,
+  float3 bitangentDirection,
+  float3 centerDisplacement,
+  float3 tangentDisplacement,
+  float3 bitangentDisplacement,
+  out float3 deformedNormal,
+  out float3 deformedTangent,
+  out float3 deformedBitangent)
+{
+  deformedNormal = originalNormal;
+  deformedTangent = originalTangent;
+  deformedBitangent = originalBitangent;
+}
 
 float SampleJiggleForgeDirectMask(float2 uv)
 {

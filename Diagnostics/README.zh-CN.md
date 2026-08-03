@@ -23,4 +23,4 @@
 - 主体没有变化：可能选择了错误的 ZZMI 根目录、游戏使用了不同的 VS Hash、替换 Shader 编译失败，或该场景没有经过这个 pass。
 - 只在一个场景偏移：ShaderFixes 路径正常，但另一个场景的 Hash 或 Shader 编译存在问题。
 
-诊断文件依赖正常安装的 `ShaderFixes/JiggleForgeRuntime` include 文件夹。复制后如果 `d3d11_log.txt` 报编译错误，应先重新安装 JiggleForge 全局运行时。
+诊断文件已经内置最小的空变形函数，不依赖 `ShaderFixes/JiggleForgeRuntime`。如果复制后 `d3d11_log.txt` 仍报编译错误，应根据日志中的具体文件与行号继续检查。
