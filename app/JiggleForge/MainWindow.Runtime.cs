@@ -43,6 +43,7 @@ public sealed partial class MainWindow : Window
         }
 
         RuntimePathTextBox.Text = folder.Path;
+        SaveZzmiRootPreference(folder.Path);
         await RefreshRuntimeStatusAsync();
     }
 
@@ -54,6 +55,7 @@ public sealed partial class MainWindow : Window
     private async void InstallRuntime_Click(object sender, RoutedEventArgs e)
     {
         string runtimePath = RuntimePathTextBox.Text;
+        SaveZzmiRootPreference(runtimePath);
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
         SaveDragKeyPreference(dragKeys);
         if (RuntimeEnvironmentService.IsWheelBridgeRunning() &&
@@ -72,6 +74,7 @@ public sealed partial class MainWindow : Window
     private async void ApplyDragKey_Click(object sender, RoutedEventArgs e)
     {
         string runtimePath = RuntimePathTextBox.Text;
+        SaveZzmiRootPreference(runtimePath);
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
         SaveDragKeyPreference(dragKeys);
         await RunRuntimeOperationAsync(
@@ -97,6 +100,7 @@ public sealed partial class MainWindow : Window
             SaveDefaultPhysicsPreference(settings);
             defaultPhysics = settings;
             string runtimePath = RuntimePathTextBox.Text;
+            SaveZzmiRootPreference(runtimePath);
             RuntimeEnvironmentStatus liveStatus = await Task.Run(
                 () => runtimeEnvironmentService.Inspect(runtimePath));
             if (liveStatus.RuntimeInstalled)
@@ -131,6 +135,7 @@ public sealed partial class MainWindow : Window
     private async void UninstallRuntime_Click(object sender, RoutedEventArgs e)
     {
         string runtimePath = RuntimePathTextBox.Text;
+        SaveZzmiRootPreference(runtimePath);
         RuntimeOverallStatusText.Text = "正在卸载运行环境";
         RuntimeDetailText.Text = "正在移除全局运行时和 6 个 JiggleForge ShaderFix；安装前备份会自动恢复。";
         ShowMessage("正在卸载运行环境…", InfoBarSeverity.Informational);
@@ -151,6 +156,7 @@ public sealed partial class MainWindow : Window
 
     private async void StartWheel_Click(object sender, RoutedEventArgs e)
     {
+        SaveZzmiRootPreference(RuntimePathTextBox.Text);
         RuntimeOverallStatusText.Text = "等待管理员授权";
         RuntimeDetailText.Text = "WheelBridge 需要管理员权限来读取并拦截鼠标滚轮。请在 Windows 用户账户控制窗口中选择“是”。";
         ShowMessage("正在等待 WheelBridge 的管理员授权…", InfoBarSeverity.Informational);
@@ -391,6 +397,47 @@ public sealed partial class MainWindow : Window
         {
             Directory.CreateDirectory(Path.GetDirectoryName(DragKeyPreferencePath)!);
             File.WriteAllText(DragKeyPreferencePath, string.Join(",", dragKeys));
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private static string LoadZzmiRootPreference()
+    {
+        try
+        {
+            if (File.Exists(ZzmiRootPreferencePath))
+            {
+                string saved = File.ReadAllText(ZzmiRootPreferencePath).Trim().Trim('"');
+                if (!string.IsNullOrWhiteSpace(saved))
+                {
+                    return saved;
+                }
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+
+        return RuntimeEnvironmentService.DefaultZzmiRoot;
+    }
+
+    private static void SaveZzmiRootPreference(string path)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(ZzmiRootPreferencePath)!);
+            File.WriteAllText(
+                ZzmiRootPreferencePath,
+                path.Trim().Trim('"'),
+                new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
         }
         catch (IOException)
         {

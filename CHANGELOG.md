@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6 — 2026-08-03
+
+- Persisted the selected ZZMI root between application launches.
+- Reused the saved root for runtime installation, updates, WheelBridge, and default-physics writes.
+- Kept an invalid saved path visible so users can repair it instead of silently reverting to the default.
+
 ## 0.1.5 — 2026-08-03
 
 - Bundled the Windows App SDK 1.8 runtime in the self-contained Windows release.

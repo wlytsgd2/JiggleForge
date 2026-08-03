@@ -56,6 +56,10 @@ public sealed partial class MainWindow : Window
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "JiggleForge",
         "DragKey.txt");
+    private static readonly string ZzmiRootPreferencePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "JiggleForge",
+        "ZzmiRoot.txt");
     private static readonly string PhysicsDefaultsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "JiggleForge",
@@ -93,7 +97,7 @@ public sealed partial class MainWindow : Window
         EdgeEditorList.ItemsSource = edgeRows;
         PhysicsScopeComboBox.ItemsSource = physicsScopeOptions;
         DragKeyOptionsList.ItemsSource = dragKeyOptions;
-        RuntimePathTextBox.Text = RuntimeEnvironmentService.DefaultZzmiRoot;
+        RuntimePathTextBox.Text = LoadZzmiRootPreference();
         SelectDragKeys(LoadDragKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
         InitializeApplicationUpdateView();
