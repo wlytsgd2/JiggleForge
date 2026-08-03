@@ -1,9 +1,0 @@
-; TEMPORARY DIAGNOSTIC ONLY.
-; Copy this file into the active ZZMI ShaderFixes folder, enter a street scene,
-; and confirm that the matching opaque body draw disappears.
-; Remove this file before normal gameplay.
-
-[ShaderOverrideJiggleForgeDiagnosticStreet2621]
-hash = 26214fb5eedfcbdd
-allow_duplicate_hash = true
-handling = skip

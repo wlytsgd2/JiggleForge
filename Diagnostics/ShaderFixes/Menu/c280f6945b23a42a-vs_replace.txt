@@ -1,0 +1,674 @@
+// ---- Created with 3Dmigoto v1.3.16 on Sat Jul 18 15:19:37 2026
+struct t0_t {
+  float val[32];
+};
+StructuredBuffer<t0_t> t0 : register(t0);
+
+cbuffer cb2 : register(b2)
+{
+  float4 cb2[25];
+}
+
+cbuffer cb1 : register(b1)
+{
+  float4 cb1[29];
+}
+
+cbuffer cb0 : register(b0)
+{
+  float4 cb0[200];
+}
+
+
+
+
+// 3Dmigoto declarations
+#define cmp -
+Buffer<uint> JiggleForgeDirectStateIndex : register(t72);
+Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
+Buffer<float4> JF_MotionState : register(t75);
+Buffer<float4> JF_GroupParams : register(t76);
+
+#include "JiggleForgeRuntime/draw_state_consumer.hlsl"
+
+float SampleJiggleForgeDirectMask(float2 uv)
+{
+  uint width;
+  uint height;
+  JiggleForgeDirectMaskTexture.GetDimensions(width, height);
+  if (width == 0u || height == 0u)
+    return 1.0;
+
+  float2 texelPosition = saturate(uv) * float2(width - 1u, height - 1u);
+  uint2 texel0 = (uint2)floor(texelPosition);
+  uint2 texel1 = min(texel0 + 1u, uint2(width - 1u, height - 1u));
+  float2 blend = frac(texelPosition);
+  float mask00 = JiggleForgeDirectMaskTexture.Load(int3(texel0, 0)).r;
+  float mask10 = JiggleForgeDirectMaskTexture.Load(int3(texel1.x, texel0.y, 0)).r;
+  float mask01 = JiggleForgeDirectMaskTexture.Load(int3(texel0.x, texel1.y, 0)).r;
+  float mask11 = JiggleForgeDirectMaskTexture.Load(int3(texel1, 0)).r;
+  float mask0 = lerp(mask00, mask10, blend.x);
+  float mask1 = lerp(mask01, mask11, blend.x);
+  return saturate(lerp(mask0, mask1, blend.y));
+}
+
+float4 ProjectJiggleForgePosition(float3 position)
+{
+  float4 clipPosition = cb0[128].xyzw * position.yyyy;
+  clipPosition = cb0[127].xyzw * position.xxxx + clipPosition;
+  clipPosition = cb0[129].xyzw * position.zzzz + clipPosition;
+  clipPosition = cb0[130].xyzw + clipPosition;
+  clipPosition.xy = cb0[21].xy * clipPosition.ww + clipPosition.xy;
+  return clipPosition;
+}
+
+float3 SafeJiggleForgeNormalize(float3 value, float3 fallback)
+{
+  float lengthSquared = dot(value, value);
+  if (lengthSquared <= 1e-12)
+    return fallback;
+  return value * rsqrt(lengthSquared);
+}
+
+void ComputeJiggleForgeScreenBasis(float4 clipPosition, out float3 screenRight, out float3 screenUp)
+{
+  float3 clipWGradient = float3(cb0[127].w, cb0[128].w, cb0[129].w);
+  float3 clipXGradient = float3(cb0[127].x, cb0[128].x, cb0[129].x)
+    + cb0[21].x * clipWGradient;
+  float3 clipYGradient = float3(cb0[127].y, cb0[128].y, cb0[129].y)
+    + cb0[21].y * clipWGradient;
+
+  float safeW = abs(clipPosition.w) > 1e-6
+    ? clipPosition.w
+    : (clipPosition.w < 0.0 ? -1e-6 : 1e-6);
+  float invW2 = 1.0 / (safeW * safeW);
+  float3 ndcXGradient = (clipXGradient * safeW - clipPosition.x * clipWGradient) * invW2;
+  float3 ndcYGradient = (clipYGradient * safeW - clipPosition.y * clipWGradient) * invW2;
+
+  float3 rightCandidate = cross(ndcYGradient, clipWGradient);
+  float3 upCandidate = cross(clipWGradient, ndcXGradient);
+  float rightLengthSquared = dot(rightCandidate, rightCandidate);
+  float upLengthSquared = dot(upCandidate, upCandidate);
+
+  if (rightLengthSquared <= 1e-14 || upLengthSquared <= 1e-14)
+  {
+    float aa = dot(ndcXGradient, ndcXGradient);
+    float ab = dot(ndcXGradient, ndcYGradient);
+    float bb = dot(ndcYGradient, ndcYGradient);
+    float determinant = aa * bb - ab * ab;
+    if (determinant <= 1e-14)
+    {
+      screenRight = float3(1.0, 0.0, 0.0);
+      screenUp = float3(0.0, 1.0, 0.0);
+      return;
+    }
+
+    rightCandidate = (bb * ndcXGradient - ab * ndcYGradient) / determinant;
+    upCandidate = (aa * ndcYGradient - ab * ndcXGradient) / determinant;
+  }
+
+  if (dot(rightCandidate, ndcXGradient) < 0.0)
+    rightCandidate = -rightCandidate;
+  if (dot(upCandidate, ndcYGradient) < 0.0)
+    upCandidate = -upCandidate;
+  screenRight = SafeJiggleForgeNormalize(rightCandidate, float3(1.0, 0.0, 0.0));
+  screenUp = SafeJiggleForgeNormalize(upCandidate, float3(0.0, 1.0, 0.0));
+}
+
+void main(
+  float3 v0 : POSITION0,
+  float3 v1 : NORMAL0,
+  float4 v2 : TANGENT0,
+  float4 v3 : COLOR0,
+  float4 v4 : TEXCOORD0,
+  float4 v5 : TEXCOORD1,
+  float4 v6 : TEXCOORD2,
+  float4 v7 : TEXCOORD3,
+  float3 v8 : TEXCOORD4,
+  out float4 o0 : TEXCOORD0,
+  out float4 o1 : TEXCOORD1,
+  out float4 o2 : TEXCOORD2,
+  out float4 o3 : TEXCOORD3,
+  out float4 o4 : TEXCOORD4,
+  out float4 o5 : TEXCOORD5,
+  out float4 o6 : TEXCOORD6,
+  out float4 o7 : TEXCOORD7,
+  out float3 o8 : TEXCOORD8,
+  out float3 o10 : TEXCOORD9,
+  out float3 o11 : TEXCOORD10,
+  out float3 o12 : TEXCOORD11,
+  out float4 o9 : SV_POSITION0)
+{
+  float4 r0,r1,r2,r3,r4,r5,r6,r7,r8;
+  uint4 bitmask, uiDest;
+  float4 fDest;
+
+  r0.xyz = cb1[1].xyz * v0.yyy;
+  r0.xyz = cb1[0].xyz * v0.xxx + r0.xyz;
+  r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
+  r0.xyz = cb1[3].xyz + r0.xyz;
+  float3 jiggleForgeBasePosition = r0.xyz;
+  float4 jiggleForgeUndeformedClip = ProjectJiggleForgePosition(jiggleForgeBasePosition);
+  float3 jiggleForgeScreenRight;
+  float3 jiggleForgeScreenUp;
+  ComputeJiggleForgeScreenBasis(jiggleForgeUndeformedClip, jiggleForgeScreenRight, jiggleForgeScreenUp);
+  float3 jiggleForgeAppliedDisplacement = float3(0.0, 0.0, 0.0);
+  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+  float3 jfActiveBaseDisplacement = float3(0.0, 0.0, 0.0);
+  float jfMinimumActiveRadius = 0.0;
+  bool jfDeformationActive = false;
+
+  jfActiveBaseDisplacement = JF_EvaluateBoundStates(
+    jiggleForgeBasePosition,
+    jiggleForgeVertexMask,
+    jfDeformationActive,
+    jfMinimumActiveRadius);
+  jiggleForgeAppliedDisplacement = jfActiveBaseDisplacement;
+
+  r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;
+  // Picking must always observe the undeformed position. Feeding the already
+  // displaced value back into the next capture would make the anchor drift.
+  o10.xyz = jiggleForgeBasePosition;
+  r1.xyzw = cb0[128].xyzw * r0.yyyy;
+  r1.xyzw = cb0[127].xyzw * r0.xxxx + r1.xyzw;
+  r1.xyzw = cb0[129].xyzw * r0.zzzz + r1.xyzw;
+  r1.xyzw = cb0[130].xyzw + r1.xyzw;
+  o9.xy = cb0[21].xy * r1.ww + r1.xy;
+  // DIAGNOSTIC: move the matching body half a screen width to the right.
+  o9.x += 0.5 * r1.w;
+  o11.xyz = jiggleForgeScreenRight;
+  o12.xyz = jiggleForgeScreenUp;
+  r0.w = cb1[9].w * v2.w;
+  r2.x = dot(v1.xyz, cb1[4].xyz);
+  r2.y = dot(v1.xyz, cb1[5].xyz);
+  r2.z = dot(v1.xyz, cb1[6].xyz);
+  r1.x = dot(r2.xyz, r2.xyz);
+  r1.x = max(1.17549435e-38, r1.x);
+  r1.x = rsqrt(r1.x);
+  r2.xyz = r2.xyz * r1.xxx;
+  r3.xyz = cb1[1].xyz * v2.yyy;
+  r3.xyz = cb1[0].xyz * v2.xxx + r3.xyz;
+  r3.xyz = cb1[2].xyz * v2.zzz + r3.xyz;
+  r1.x = dot(r3.xyz, r3.xyz);
+  r1.x = max(1.17549435e-38, r1.x);
+  r1.x = rsqrt(r1.x);
+  r3.xyz = r3.xyz * r1.xxx;
+  r4.xyz = r3.yzx * r2.zxy;
+  r4.xyz = r2.yzx * r3.zxy + -r4.xyz;
+  float jiggleForgeTangentSign = r0.w < 0.0 ? -1.0 : 1.0;
+  float3 jiggleForgeOriginalBitangent = r4.xyz * jiggleForgeTangentSign;
+  if (jfDeformationActive)
+  {
+    float jfDerivativeStep;
+    float3 jfTangentDirection;
+    float3 jfBitangentDirection;
+    JF_PrepareSurfaceSamples(
+      jfMinimumActiveRadius,
+      r2.xyz,
+      r3.xyz,
+      jiggleForgeOriginalBitangent,
+      jfDerivativeStep,
+      jfTangentDirection,
+      jfBitangentDirection);
+    bool jfUnusedMovingInfluence;
+    float jfUnusedRadius;
+    float3 jfTangentDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition + jfTangentDirection * jfDerivativeStep,
+      jiggleForgeVertexMask,
+      jfUnusedMovingInfluence,
+      jfUnusedRadius);
+    float3 jfBitangentDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition + jfBitangentDirection * jfDerivativeStep,
+      jiggleForgeVertexMask,
+      jfUnusedMovingInfluence,
+      jfUnusedRadius);
+    float3 jfDeformedNormal;
+    float3 jfDeformedTangent;
+    float3 jfDeformedBitangent;
+    JF_ReconstructSurfaceFrameFromSamples(
+      r2.xyz,
+      r3.xyz,
+      jiggleForgeOriginalBitangent,
+      jfDerivativeStep,
+      jfTangentDirection,
+      jfBitangentDirection,
+      jfActiveBaseDisplacement,
+      jfTangentDisplacement,
+      jfBitangentDisplacement,
+      jfDeformedNormal,
+      jfDeformedTangent,
+      jfDeformedBitangent);
+    r2.xyz = jfDeformedNormal;
+    r3.xyz = jfDeformedTangent;
+    o4.xyz = jfDeformedBitangent;
+  }
+  else
+  {
+    o4.xyz = jiggleForgeOriginalBitangent;
+  }
+  r0.w = v3.z * 255 + 0.5;
+  r0.w = (int)r0.w;
+  r0.w = (uint)r0.w >> 5;
+  r0.w = (int)r0.w & 1;
+  r0.w = (int)r0.w;
+  r0.w = cmp(0 != r0.w);
+  o7.y = r0.w ? 0 : v3.w;
+  o7.z = r0.w ? 1.000000 : 0;
+  r4.xyzw = float4(r0.xyz, 1.0);
+  r5.xyzw = cb0[144].xyzw * r4.yyyy;
+  r5.xyzw = cb0[143].xyzw * r4.xxxx + r5.xyzw;
+  r5.xyzw = cb0[145].xyzw * r4.zzzz + r5.xyzw;
+  o5.xyzw = cb0[146].xyzw * r4.wwww + r5.xyzw;
+  r0.w = cmp(0 < cb1[28].x);
+  r4.xyz = r0.www ? v8.xyz : v0.xyz;
+  r5.xyzw = cb1[21].xyzw * r4.yyyy;
+  r5.xyzw = cb1[20].xyzw * r4.xxxx + r5.xyzw;
+  r4.xyzw = cb1[22].xyzw * r4.zzzz + r5.xyzw;
+  r4.xyzw = cb1[23].xyzw + r4.xyzw;
+  r4.xyz += jiggleForgeAppliedDisplacement;
+  r5.xyzw = cb0[136].xyzw * r4.yyyy;
+  r5.xyzw = cb0[135].xyzw * r4.xxxx + r5.xyzw;
+  r5.xyzw = cb0[137].xyzw * r4.zzzz + r5.xyzw;
+  o6.xyzw = cb0[138].xyzw * r4.wwww + r5.xyzw;
+  r0.w = cmp(0 < asint(cb0[196].x));
+  if (r0.w != 0) {
+    r0.w = (int)cb2[2].z;
+    r1.x = asint(cb0[196].x) + -1;
+    r0.w = min((int)r1.x, (int)r0.w);
+    r0.w = max(0, (int)r0.w);
+    r0.w = t0[r0.w].val[52/4];
+  } else {
+    r0.w = 0;
+  }
+  o7.x = r0.w * -v3.w + 1;
+  r0.w = min(4, cb2[2].x);
+  r0.w = (int)r0.w;
+  r1.x = cmp(0 < (int)r0.w);
+  if (r1.x != 0) {
+    r4.xyz = cb2[9].xyz + -r0.xyz;
+    r1.x = dot(r4.xyz, r4.xyz);
+    r1.x = max(1.17549435e-38, r1.x);
+    r1.y = rsqrt(r1.x);
+    r4.xyz = r4.xyz * r1.yyy;
+    r5.y = cb2[11].x * r1.x;
+    r1.y = cmp(-0.5 < cb2[11].y);
+    r6.x = 1 / r1.x;
+    r6.y = r5.y * r5.y;
+    r5.x = 1;
+    r1.xy = r1.yy ? r6.xy : r5.xy;
+    r2.w = cmp(cb2[11].y < -1.5);
+    r3.w = cmp(r1.y >= 1);
+    r3.w = r3.w ? 1.000000 : 0;
+    r1.y = r2.w ? r3.w : r1.y;
+    r1.y = saturate(1 + -r1.y);
+    r1.y = r1.y * r1.y;
+    r1.x = r1.x * r1.y;
+    r1.y = dot(cb2[10].xyz, r4.xyz);
+    r1.y = saturate(r1.y * cb2[11].z + cb2[11].w);
+    r1.y = r1.y * r1.y;
+    r1.x = r1.x * r1.y;
+    r1.x = cb0[199].y * r1.x;
+    r4.xyz = cb2[12].xyz * r1.xxx;
+    r1.x = cmp(1 < (int)r0.w);
+    if (r1.x != 0) {
+      r5.xyz = cb2[13].xyz + -r0.xyz;
+      r1.x = dot(r5.xyz, r5.xyz);
+      r1.x = max(1.17549435e-38, r1.x);
+      r1.y = rsqrt(r1.x);
+      r5.xyz = r5.xyz * r1.yyy;
+      r6.y = cb2[15].x * r1.x;
+      r1.y = cmp(-0.5 < cb2[15].y);
+      r7.x = 1 / r1.x;
+      r7.y = r6.y * r6.y;
+      r6.x = 1;
+      r1.xy = r1.yy ? r7.xy : r6.xy;
+      r2.w = cmp(cb2[15].y < -1.5);
+      r3.w = cmp(r1.y >= 1);
+      r3.w = r3.w ? 1.000000 : 0;
+      r1.y = r2.w ? r3.w : r1.y;
+      r1.y = saturate(1 + -r1.y);
+      r1.y = r1.y * r1.y;
+      r1.x = r1.x * r1.y;
+      r1.y = dot(cb2[14].xyz, r5.xyz);
+      r1.y = saturate(r1.y * cb2[15].z + cb2[15].w);
+      r1.y = r1.y * r1.y;
+      r1.x = r1.x * r1.y;
+      r1.x = cb0[199].y * r1.x;
+      r5.xyz = cb2[16].xyz * r1.xxx + r4.xyz;
+      r1.x = cmp(2 < (int)r0.w);
+      if (r1.x != 0) {
+        r6.xyz = cb2[17].xyz + -r0.xyz;
+        r1.x = dot(r6.xyz, r6.xyz);
+        r1.x = max(1.17549435e-38, r1.x);
+        r1.y = rsqrt(r1.x);
+        r6.xyz = r6.xyz * r1.yyy;
+        r7.y = cb2[19].x * r1.x;
+        r1.y = cmp(-0.5 < cb2[19].y);
+        r8.x = 1 / r1.x;
+        r8.y = r7.y * r7.y;
+        r7.x = 1;
+        r1.xy = r1.yy ? r8.xy : r7.xy;
+        r2.w = cmp(cb2[19].y < -1.5);
+        r3.w = cmp(r1.y >= 1);
+        r3.w = r3.w ? 1.000000 : 0;
+        r1.y = r2.w ? r3.w : r1.y;
+        r1.y = saturate(1 + -r1.y);
+        r1.y = r1.y * r1.y;
+        r1.x = r1.x * r1.y;
+        r1.y = dot(cb2[18].xyz, r6.xyz);
+        r1.y = saturate(r1.y * cb2[19].z + cb2[19].w);
+        r1.y = r1.y * r1.y;
+        r1.x = r1.x * r1.y;
+        r1.x = cb0[199].y * r1.x;
+        r6.xyz = cb2[20].xyz * r1.xxx + r5.xyz;
+        r0.w = cmp(3 < (int)r0.w);
+        if (r0.w != 0) {
+          r7.xyz = cb2[21].xyz + -r0.xyz;
+          r0.w = dot(r7.xyz, r7.xyz);
+          r0.w = max(1.17549435e-38, r0.w);
+          r1.x = rsqrt(r0.w);
+          r7.xyz = r7.xyz * r1.xxx;
+          r1.y = cb2[23].x * r0.w;
+          r2.w = cmp(-0.5 < cb2[23].y);
+          r8.x = 1 / r0.w;
+          r8.y = r1.y * r1.y;
+          r1.x = 1;
+          r1.xy = r2.ww ? r8.xy : r1.xy;
+          r0.w = cmp(cb2[23].y < -1.5);
+          r2.w = cmp(r1.y >= 1);
+          r2.w = r2.w ? 1.000000 : 0;
+          r0.w = r0.w ? r2.w : r1.y;
+          r0.w = saturate(1 + -r0.w);
+          r0.w = r0.w * r0.w;
+          r0.w = r1.x * r0.w;
+          r1.x = dot(cb2[22].xyz, r7.xyz);
+          r1.x = saturate(r1.x * cb2[23].z + cb2[23].w);
+          r1.x = r1.x * r1.x;
+          r0.w = r1.x * r0.w;
+          r0.w = cb0[199].y * r0.w;
+          o8.xyz = cb2[24].xyz * r0.www + r6.xyz;
+        } else {
+          o8.xyz = r6.xyz;
+        }
+      } else {
+        o8.xyz = r5.xyz;
+      }
+    } else {
+      o8.xyz = r4.xyz;
+    }
+  } else {
+    o8.xyz = float3(0,0,0);
+  }
+  o0.xy = v4.xy;
+  o0.zw = v7.xy;
+  o1.xy = v6.xy;
+  o1.zw = float2(0,0);
+  o2.w = r0.x;
+  o2.xyz = r2.xyz;
+  o3.w = r0.y;
+  o3.xyz = r3.xyz;
+  o4.w = r0.z;
+  o7.w = 0;
+  o9.zw = r1.zw;
+  return;
+}
+
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+// Generated by Microsoft (R) D3D Shader Disassembler
+//
+//   using 3Dmigoto v1.3.16 on Sat Jul 18 15:19:37 2026
+//
+//
+// Input signature:
+//
+// Name                 Index   Mask Register SysValue  Format   Used
+// -------------------- ----- ------ -------- -------- ------- ------
+// POSITION                 0   xyz         0     NONE   float   xyz
+// NORMAL                   0   xyz         1     NONE   float   xyz
+// TANGENT                  0   xyzw        2     NONE   float   xyzw
+// COLOR                    0   xyzw        3     NONE   float     zw
+// TEXCOORD                 0   xy          4     NONE   float   xy
+// TEXCOORD                 1   xy          5     NONE   float
+// TEXCOORD                 2   xy          6     NONE   float   xy
+// TEXCOORD                 3   xy          7     NONE   float   xy
+// TEXCOORD                 4   xyz         8     NONE   float   xyz
+//
+//
+// Output signature:
+//
+// Name                 Index   Mask Register SysValue  Format   Used
+// -------------------- ----- ------ -------- -------- ------- ------
+// TEXCOORD                 0   xyzw        0     NONE   float   xyzw
+// TEXCOORD                 1   xyzw        1     NONE   float   xyzw
+// TEXCOORD                 2   xyzw        2     NONE   float   xyzw
+// TEXCOORD                 3   xyzw        3     NONE   float   xyzw
+// TEXCOORD                 4   xyzw        4     NONE   float   xyzw
+// TEXCOORD                 5   xyzw        5     NONE   float   xyzw
+// TEXCOORD                 6   xyzw        6     NONE   float   xyzw
+// TEXCOORD                 7   xyzw        7     NONE   float   xyzw
+// TEXCOORD                 8   xyz         8     NONE   float   xyz
+// SV_POSITION              0   xyzw        9      POS   float   xyzw
+//
+vs_5_0
+dcl_globalFlags refactoringAllowed
+dcl_constantbuffer CB0[200], immediateIndexed
+dcl_constantbuffer CB1[29], immediateIndexed
+dcl_constantbuffer CB2[25], immediateIndexed
+dcl_resource_structured t0, 128
+dcl_input v0.xyz
+dcl_input v1.xyz
+dcl_input v2.xyzw
+dcl_input v3.zw
+dcl_input v4.xy
+dcl_input v6.xy
+dcl_input v7.xy
+dcl_input v8.xyz
+dcl_output o0.xyzw
+dcl_output o1.xyzw
+dcl_output o2.xyzw
+dcl_output o3.xyzw
+dcl_output o4.xyzw
+dcl_output o5.xyzw
+dcl_output o6.xyzw
+dcl_output o7.xyzw
+dcl_output o8.xyz
+dcl_output_siv o9.xyzw, position
+dcl_temps 9
+mul r0.xyz, v0.yyyy, cb1[1].xyzx
+mad r0.xyz, cb1[0].xyzx, v0.xxxx, r0.xyzx
+mad r0.xyz, cb1[2].xyzx, v0.zzzz, r0.xyzx
+add r0.xyz, r0.xyzx, cb1[3].xyzx
+mul r1.xyzw, r0.yyyy, cb0[128].xyzw
+mad r1.xyzw, cb0[127].xyzw, r0.xxxx, r1.xyzw
+mad r1.xyzw, cb0[129].xyzw, r0.zzzz, r1.xyzw
+add r1.xyzw, r1.xyzw, cb0[130].xyzw
+mad o9.xy, cb0[21].xyxx, r1.wwww, r1.xyxx
+mul r0.w, v2.w, cb1[9].w
+dp3 r2.x, v1.xyzx, cb1[4].xyzx
+dp3 r2.y, v1.xyzx, cb1[5].xyzx
+dp3 r2.z, v1.xyzx, cb1[6].xyzx
+dp3 r1.x, r2.xyzx, r2.xyzx
+max r1.x, r1.x, l(1.175494351E-38)
+rsq r1.x, r1.x
+mul r2.xyz, r1.xxxx, r2.xyzx
+mul r3.xyz, v2.yyyy, cb1[1].xyzx
+mad r3.xyz, cb1[0].xyzx, v2.xxxx, r3.xyzx
+mad r3.xyz, cb1[2].xyzx, v2.zzzz, r3.xyzx
+dp3 r1.x, r3.xyzx, r3.xyzx
+max r1.x, r1.x, l(1.175494351E-38)
+rsq r1.x, r1.x
+mul r3.xyz, r1.xxxx, r3.xyzx
+mul r4.xyz, r2.zxyz, r3.yzxy
+mad r4.xyz, r2.yzxy, r3.zxyz, -r4.xyzx
+mul o4.xyz, r0.wwww, r4.xyzx
+mad r0.w, v3.z, l(255.000000), l(0.500000)
+ftoi r0.w, r0.w
+ishr r0.w, r0.w, l(5)
+and r0.w, r0.w, l(1)
+itof r0.w, r0.w
+ne r0.w, l(0.000000, 0.000000, 0.000000, 0.000000), r0.w
+movc o7.y, r0.w, l(0), v3.w
+and o7.z, r0.w, l(0x3f800000)
+mul r4.xyzw, v0.yyyy, cb1[1].xyzw
+mad r4.xyzw, cb1[0].xyzw, v0.xxxx, r4.xyzw
+mad r4.xyzw, cb1[2].xyzw, v0.zzzz, r4.xyzw
+add r4.xyzw, r4.xyzw, cb1[3].xyzw
+mul r5.xyzw, r4.yyyy, cb0[144].xyzw
+mad r5.xyzw, cb0[143].xyzw, r4.xxxx, r5.xyzw
+mad r5.xyzw, cb0[145].xyzw, r4.zzzz, r5.xyzw
+mad o5.xyzw, cb0[146].xyzw, r4.wwww, r5.xyzw
+lt r0.w, l(0.000000), cb1[28].x
+movc r4.xyz, r0.wwww, v8.xyzx, v0.xyzx
+mul r5.xyzw, r4.yyyy, cb1[21].xyzw
+mad r5.xyzw, cb1[20].xyzw, r4.xxxx, r5.xyzw
+mad r4.xyzw, cb1[22].xyzw, r4.zzzz, r5.xyzw
+add r4.xyzw, r4.xyzw, cb1[23].xyzw
+mul r5.xyzw, r4.yyyy, cb0[136].xyzw
+mad r5.xyzw, cb0[135].xyzw, r4.xxxx, r5.xyzw
+mad r5.xyzw, cb0[137].xyzw, r4.zzzz, r5.xyzw
+mad o6.xyzw, cb0[138].xyzw, r4.wwww, r5.xyzw
+ilt r0.w, l(0), cb0[196].x
+if_nz r0.w
+  ftoi r0.w, cb2[2].z
+  iadd r1.x, cb0[196].x, l(-1)
+  imin r0.w, r0.w, r1.x
+  imax r0.w, r0.w, l(0)
+  ld_structured_indexable(structured_buffer, stride=128)(mixed,mixed,mixed,mixed) r0.w, r0.w, l(52), t0.xxxx
+else
+  mov r0.w, l(0)
+endif
+mad o7.x, r0.w, -v3.w, l(1.000000)
+min r0.w, cb2[2].x, l(4.000000)
+ftoi r0.w, r0.w
+ilt r1.x, l(0), r0.w
+if_nz r1.x
+  add r4.xyz, -r0.xyzx, cb2[9].xyzx
+  dp3 r1.x, r4.xyzx, r4.xyzx
+  max r1.x, r1.x, l(1.175494351E-38)
+  rsq r1.y, r1.x
+  mul r4.xyz, r1.yyyy, r4.xyzx
+  mul r5.y, r1.x, cb2[11].x
+  lt r1.y, l(-0.500000), cb2[11].y
+  div r6.x, l(1.000000, 1.000000, 1.000000, 1.000000), r1.x
+  mul r6.y, r5.y, r5.y
+  mov r5.x, l(1.000000)
+  movc r1.xy, r1.yyyy, r6.xyxx, r5.xyxx
+  lt r2.w, cb2[11].y, l(-1.500000)
+  ge r3.w, r1.y, l(1.000000)
+  and r3.w, r3.w, l(0x3f800000)
+  movc r1.y, r2.w, r3.w, r1.y
+  add_sat r1.y, -r1.y, l(1.000000)
+  mul r1.y, r1.y, r1.y
+  mul r1.x, r1.y, r1.x
+  dp3 r1.y, cb2[10].xyzx, r4.xyzx
+  mad_sat r1.y, r1.y, cb2[11].z, cb2[11].w
+  mul r1.y, r1.y, r1.y
+  mul r1.x, r1.y, r1.x
+  mul r1.x, r1.x, cb0[199].y
+  mul r4.xyz, r1.xxxx, cb2[12].xyzx
+  ilt r1.x, l(1), r0.w
+  if_nz r1.x
+    add r5.xyz, -r0.xyzx, cb2[13].xyzx
+    dp3 r1.x, r5.xyzx, r5.xyzx
+    max r1.x, r1.x, l(1.175494351E-38)
+    rsq r1.y, r1.x
+    mul r5.xyz, r1.yyyy, r5.xyzx
+    mul r6.y, r1.x, cb2[15].x
+    lt r1.y, l(-0.500000), cb2[15].y
+    div r7.x, l(1.000000, 1.000000, 1.000000, 1.000000), r1.x
+    mul r7.y, r6.y, r6.y
+    mov r6.x, l(1.000000)
+    movc r1.xy, r1.yyyy, r7.xyxx, r6.xyxx
+    lt r2.w, cb2[15].y, l(-1.500000)
+    ge r3.w, r1.y, l(1.000000)
+    and r3.w, r3.w, l(0x3f800000)
+    movc r1.y, r2.w, r3.w, r1.y
+    add_sat r1.y, -r1.y, l(1.000000)
+    mul r1.y, r1.y, r1.y
+    mul r1.x, r1.y, r1.x
+    dp3 r1.y, cb2[14].xyzx, r5.xyzx
+    mad_sat r1.y, r1.y, cb2[15].z, cb2[15].w
+    mul r1.y, r1.y, r1.y
+    mul r1.x, r1.y, r1.x
+    mul r1.x, r1.x, cb0[199].y
+    mad r5.xyz, cb2[16].xyzx, r1.xxxx, r4.xyzx
+    ilt r1.x, l(2), r0.w
+    if_nz r1.x
+      add r6.xyz, -r0.xyzx, cb2[17].xyzx
+      dp3 r1.x, r6.xyzx, r6.xyzx
+      max r1.x, r1.x, l(1.175494351E-38)
+      rsq r1.y, r1.x
+      mul r6.xyz, r1.yyyy, r6.xyzx
+      mul r7.y, r1.x, cb2[19].x
+      lt r1.y, l(-0.500000), cb2[19].y
+      div r8.x, l(1.000000, 1.000000, 1.000000, 1.000000), r1.x
+      mul r8.y, r7.y, r7.y
+      mov r7.x, l(1.000000)
+      movc r1.xy, r1.yyyy, r8.xyxx, r7.xyxx
+      lt r2.w, cb2[19].y, l(-1.500000)
+      ge r3.w, r1.y, l(1.000000)
+      and r3.w, r3.w, l(0x3f800000)
+      movc r1.y, r2.w, r3.w, r1.y
+      add_sat r1.y, -r1.y, l(1.000000)
+      mul r1.y, r1.y, r1.y
+      mul r1.x, r1.y, r1.x
+      dp3 r1.y, cb2[18].xyzx, r6.xyzx
+      mad_sat r1.y, r1.y, cb2[19].z, cb2[19].w
+      mul r1.y, r1.y, r1.y
+      mul r1.x, r1.y, r1.x
+      mul r1.x, r1.x, cb0[199].y
+      mad r6.xyz, cb2[20].xyzx, r1.xxxx, r5.xyzx
+      ilt r0.w, l(3), r0.w
+      if_nz r0.w
+        add r7.xyz, -r0.xyzx, cb2[21].xyzx
+        dp3 r0.w, r7.xyzx, r7.xyzx
+        max r0.w, r0.w, l(1.175494351E-38)
+        rsq r1.x, r0.w
+        mul r7.xyz, r1.xxxx, r7.xyzx
+        mul r1.y, r0.w, cb2[23].x
+        lt r2.w, l(-0.500000), cb2[23].y
+        div r8.x, l(1.000000, 1.000000, 1.000000, 1.000000), r0.w
+        mul r8.y, r1.y, r1.y
+        mov r1.x, l(1.000000)
+        movc r1.xy, r2.wwww, r8.xyxx, r1.xyxx
+        lt r0.w, cb2[23].y, l(-1.500000)
+        ge r2.w, r1.y, l(1.000000)
+        and r2.w, r2.w, l(0x3f800000)
+        movc r0.w, r0.w, r2.w, r1.y
+        add_sat r0.w, -r0.w, l(1.000000)
+        mul r0.w, r0.w, r0.w
+        mul r0.w, r0.w, r1.x
+        dp3 r1.x, cb2[22].xyzx, r7.xyzx
+        mad_sat r1.x, r1.x, cb2[23].z, cb2[23].w
+        mul r1.x, r1.x, r1.x
+        mul r0.w, r0.w, r1.x
+        mul r0.w, r0.w, cb0[199].y
+        mad o8.xyz, cb2[24].xyzx, r0.wwww, r6.xyzx
+      else
+        mov o8.xyz, r6.xyzx
+      endif
+    else
+      mov o8.xyz, r5.xyzx
+    endif
+  else
+    mov o8.xyz, r4.xyzx
+  endif
+else
+  mov o8.xyz, l(0,0,0,0)
+endif
+mov o0.xy, v4.xyxx
+mov o0.zw, v7.xxxy
+mov o1.xy, v6.xyxx
+mov o1.zw, l(0,0,0,0)
+mov o2.w, r0.x
+mov o2.xyz, r2.xyzx
+mov o3.w, r0.y
+mov o3.xyz, r3.xyzx
+mov o4.w, r0.z
+mov o7.w, l(0)
+mov o9.zw, r1.zzzw
+ret
+// Approximately 0 instruction slots used
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
