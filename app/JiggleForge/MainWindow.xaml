@@ -730,11 +730,12 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-                                <Border Style="{StaticResource PageCardStyle}">
+                                <Border x:Name="CommunityCard"
+                                        Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="10">
                                         <StackPanel Spacing="3">
-                                            <TextBlock Text="项目链接" FontSize="18" FontWeight="SemiBold" />
-                                            <TextBlock Text="查看项目源码、提交问题，或观看 JiggleForge 的视频介绍。"
+                                            <TextBlock Text="项目链接与社区" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock Text="无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！"
                                                        TextWrapping="Wrap"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
@@ -743,6 +744,12 @@
                                                              NavigateUri="https://github.com/wlytsgd2/JiggleForge" />
                                             <HyperlinkButton Content="观看 B站介绍视频"
                                                              NavigateUri="https://www.bilibili.com/video/BV1Bt3d6DEYN/" />
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <TextBlock Text="QQ 交流群：451901293"
+                                                           VerticalAlignment="Center" />
+                                                <Button Content="复制群号"
+                                                        Click="CopyQqGroup_Click" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>

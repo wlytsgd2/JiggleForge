@@ -7,7 +7,7 @@ namespace JiggleForge;
 
 public sealed partial class MainWindow
 {
-    private const int CurrentOnboardingVersion = 2;
+    private const int CurrentOnboardingVersion = 3;
 
     private static readonly string OnboardingStatePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -128,6 +128,11 @@ public sealed partial class MainWindow
             GuideNavItem,
             "随时重新查看向导",
             "完成配置后点击页面底部的“应用配置”，回到游戏按 F10 测试。以后可从这里重新播放完整界面导览。"),
+        new(
+            "runtime",
+            CommunityCard,
+            "加入 QQ 交流群",
+            "QQ群：451901293。无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！"),
     ];
 
     private async Task ShowOnboardingAsync(bool automatic)

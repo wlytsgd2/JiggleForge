@@ -198,6 +198,13 @@ public sealed partial class MainWindow
                 IsTextSelectionEnabled = true,
             },
         });
+        content.Children.Add(new TextBlock
+        {
+            Text = "QQ 交流群：451901293\n无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！",
+            TextWrapping = TextWrapping.Wrap,
+            IsTextSelectionEnabled = true,
+            Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+        });
 
         ContentDialog dialog = new()
         {

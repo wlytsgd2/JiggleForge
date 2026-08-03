@@ -20,6 +20,15 @@ namespace JiggleForge;
 
 public sealed partial class MainWindow : Window
 {
+    private void CopyQqGroup_Click(object sender, RoutedEventArgs e)
+    {
+        DataPackage package = new();
+        package.SetText("451901293");
+        Clipboard.SetContent(package);
+        Clipboard.Flush();
+        ShowMessage("QQ群号 451901293 已复制。", InfoBarSeverity.Success);
+    }
+
     private void OpenExplorer_Click(object sender, RoutedEventArgs e)
     {
         if (currentInspection is null)

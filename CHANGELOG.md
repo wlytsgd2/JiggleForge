@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 — 2026-08-03
+
+- Added the QQ community group to Settings with one-click group-number copying.
+- Added the community invitation to the final onboarding step and new-version dialog.
+- Added and refined standalone ShaderFixes diagnostics for troubleshooting runtime loading.
+
 ## 0.1.6 — 2026-08-03
 
 - Persisted the selected ZZMI root between application launches.
