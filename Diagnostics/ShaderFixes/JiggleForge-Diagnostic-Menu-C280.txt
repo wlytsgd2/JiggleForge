@@ -1,0 +1,9 @@
+; TEMPORARY DIAGNOSTIC ONLY.
+; Copy this file into the active ZZMI ShaderFixes folder, launch the character menu,
+; and confirm that the matching opaque body draw disappears.
+; Remove this file before normal gameplay.
+
+[ShaderOverrideJiggleForgeDiagnosticMenuC280]
+hash = c280f6945b23a42a
+allow_duplicate_hash = true
+handling = skip
