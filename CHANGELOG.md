@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5 — 2026-08-03
+
+- Bundled the Windows App SDK 1.8 runtime in the self-contained Windows release.
+- Removed the requirement for users to install Windows App Runtime separately.
+- Added release-package validation for the required app-local Windows App SDK files.
+
 ## 0.1.4 — 2026-08-03
 
 - Added GitHub repository and Bilibili introduction links to the Settings page.

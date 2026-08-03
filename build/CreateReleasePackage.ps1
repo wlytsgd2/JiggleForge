@@ -36,6 +36,19 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE"
 }
 
+$requiredSelfContainedFiles = @(
+    'hostfxr.dll',
+    'Microsoft.WindowsAppRuntime.dll',
+    'Microsoft.UI.Xaml.dll',
+    'DWriteCore.dll'
+)
+foreach ($requiredFile in $requiredSelfContainedFiles) {
+    $requiredPath = Join-Path $publishDirectory $requiredFile
+    if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+        throw "Self-contained publish is missing required runtime file: $requiredFile"
+    }
+}
+
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'README.md') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'README.en.md') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'CHANGELOG.md') -Destination $publishDirectory
