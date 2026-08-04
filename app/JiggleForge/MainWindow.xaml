@@ -818,12 +818,17 @@
                                                        TextWrapping="Wrap"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                                        Visibility="Collapsed" />
-                                            <Button x:Name="SaveDefaultPhysicsButton"
-                                                    Grid.Column="1"
-                                                    Content="保存全局默认参数"
-                                                    Style="{StaticResource AccentButtonStyle}"
-                                                    HorizontalAlignment="Right"
-                                                    Click="SaveDefaultPhysics_Click" />
+                                            <StackPanel Grid.Column="1"
+                                                        Orientation="Horizontal"
+                                                        Spacing="8"
+                                                        HorizontalAlignment="Right">
+                                                <Button Content="恢复推荐值"
+                                                        Click="ResetDefaultPhysics_Click" />
+                                                <Button x:Name="SaveDefaultPhysicsButton"
+                                                        Content="保存全局默认参数"
+                                                        Style="{StaticResource AccentButtonStyle}"
+                                                        Click="SaveDefaultPhysics_Click" />
+                                            </StackPanel>
                                         </Grid>
                                     </StackPanel>
                                 </Border>

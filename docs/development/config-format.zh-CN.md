@@ -23,20 +23,20 @@ project_id = "62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"
 state_namespace = 37
 
 [Physics]
-radius = 0.25
+radius = 0.12
 strength = 0.7
-falloff = 2.2
-volume_response = 2.5
+falloff = 1
+volume_response = 2
 drag_scale = 0.75
 hold_damping_ratio = 0.84
 hold_frequency_hz = 10
-release_damping_ratio = 0.9
-release_frequency_hz = 2.2
-release_impulse = 0.12
-max_offset = 0.15
+release_damping_ratio = 0
+release_frequency_hz = 5
+release_impulse = 5
+max_offset = 0.1
 target_follow_seconds = 0.02
 wheel_depth_step = 0.02
-wheel_min_depth = -0.15
+wheel_min_depth = 0
 wheel_max_depth = 0.15
 
 [Inspector]
@@ -75,7 +75,7 @@ edge = ["OriginalParts", "Outerwear"]
 
 `wheel_depth_step` 表示每个滚轮刻度改变多少世界深度，`wheel_min_depth` 和 `wheel_max_depth` 定义允许范围。正值沿按下拖动键时冻结的屏幕法向朝向镜头，负值进入屏幕；鼠标 XY 始终使用同一次拖动开始时冻结的屏幕右/上方向。每次新拖动从深度 `0` 开始；若配置范围不包含 `0`，则从范围内离 `0` 最近的端点开始。旧配置中的 `wheel_step` 会直接迁移；角度版配置按旧默认 `8° = 0.02` 换算滚轮灵敏度，并使用默认的有符号深度范围。
 
-`volume_response` 控制 Kelvinlet 的方向性体积响应。`0` 关闭周围顶点的额外收缩、鼓起和剪切，效果接近所有顶点沿拖动方向平行移动；数值越大，软组织的体积联动越明显。默认值为 `2.5`，建议在 `0` 到 `5` 之间调整。
+`volume_response` 控制 Kelvinlet 的方向性体积响应。`0` 关闭周围顶点的额外收缩、鼓起和剪切，效果接近所有顶点沿拖动方向平行移动；数值越大，软组织的体积联动越明显。默认值为 `2`，建议在 `0` 到 `5` 之间调整。
 
 Schema 2 直接保存正式运行时解算器的物理量：
 

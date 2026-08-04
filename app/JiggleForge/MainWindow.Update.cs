@@ -188,6 +188,11 @@ public sealed partial class MainWindow
             Text = $"当前版本：v{applicationUpdateService.CurrentVersionText}\n最新版本：v{release.VersionText}",
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
         });
+        content.Children.Add(new TextBlock
+        {
+            Text = "更新内容",
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+        });
         content.Children.Add(new ScrollViewer
         {
             MaxHeight = 280,

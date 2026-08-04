@@ -211,6 +211,65 @@ public sealed partial class MainWindow : Window
         WheelMaxDepth = DefaultWheelMaxDepthNumber.Value,
     };
 
+    private async Task ApplyRecommendedPhysicsDefaultsMigrationAsync()
+    {
+        if (!physicsDefaultsMigration.IsRequired)
+        {
+            return;
+        }
+
+        PhysicsSettings recommended = new();
+        try
+        {
+            SaveDefaultPhysicsPreference(recommended);
+            defaultPhysics = recommended;
+            LoadDefaultPhysicsEditor(recommended);
+            physicsDefaultsMigration.MarkApplied();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
+                                          InvalidDataException or ArgumentException)
+        {
+            ShowMessage(
+                "无法自动应用 v0.1.8 推荐物理参数：" + exception.Message,
+                InfoBarSeverity.Warning);
+            return;
+        }
+
+        try
+        {
+            string runtimePath = RuntimePathTextBox.Text;
+            RuntimeEnvironmentStatus status = await Task.Run(
+                () => runtimeEnvironmentService.Inspect(runtimePath));
+            if (!status.RuntimeInstalled)
+            {
+                ShowMessage(
+                    "v0.1.8 已一次性应用新的推荐物理参数。安装或更新游戏运行时后会自动使用；现有 Mod 的独立参数没有改变。",
+                    InfoBarSeverity.Success);
+                return;
+            }
+
+            await Task.Run(
+                () => runtimeEnvironmentService.SetDefaultPhysics(runtimePath, recommended));
+            ShowMessage(
+                "v0.1.8 已一次性应用新的推荐物理参数，并同步到游戏运行时。现有 Mod 的独立参数没有改变；回到游戏按 F10 生效。",
+                InfoBarSeverity.Success);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
+                                          InvalidDataException or ArgumentException)
+        {
+            ShowMessage(
+                "v0.1.8 推荐参数已保存到应用，但暂时无法同步游戏运行时：" + exception.Message,
+                InfoBarSeverity.Warning);
+        }
+    }
+
+    private void ResetDefaultPhysics_Click(object sender, RoutedEventArgs e)
+    {
+        LoadDefaultPhysicsEditor(new PhysicsSettings());
+        DefaultPhysicsSaveStatusText.Text = "已填入推荐默认值；点击“保存全局默认参数”后写入应用和游戏运行时。";
+        DefaultPhysicsSaveStatusText.Visibility = Visibility.Visible;
+    }
+
     private static PhysicsSettings LoadDefaultPhysicsPreference()
     {
         try

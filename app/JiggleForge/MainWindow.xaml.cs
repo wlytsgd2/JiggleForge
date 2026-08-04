@@ -64,6 +64,11 @@ public sealed partial class MainWindow : Window
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "JiggleForge",
         "PhysicsDefaults.json");
+    private static readonly string ApplicationSettingsDirectory = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "JiggleForge");
+    private readonly PhysicsDefaultsMigrationState physicsDefaultsMigration = new(
+        ApplicationSettingsDirectory);
     private PhysicsSettings defaultPhysics = LoadDefaultPhysicsPreference();
     private string? draggedGraphNode;
     private Point graphDragPointerStart;
@@ -111,6 +116,7 @@ public sealed partial class MainWindow : Window
         }
 
         runtimeStatusInitialized = true;
+        await ApplyRecommendedPhysicsDefaultsMigrationAsync();
         await RefreshRuntimeStatusAsync();
         await CheckApplicationUpdatesAsync(promptIfAvailable: true, showResult: false);
         if (ShouldShowOnboarding())

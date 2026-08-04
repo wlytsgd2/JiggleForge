@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.8 — 2026-08-04
+
+- Updated the recommended global physics defaults for a smaller deformation radius, quicker target following, freer release motion, and stronger tap response.
+- Applied the new defaults once on first launch of v0.1.8, while preserving every adapted Mod's independently saved group parameters.
+- Added a Settings button for restoring the current recommended defaults at any time.
+- Clarified the update dialog with an explicit release-notes section; future updates do not reset user defaults unless a dedicated migration is intentionally added.
+
 ## 0.1.7 — 2026-08-03
 
 - Added the QQ community group to Settings with one-click group-number copying.

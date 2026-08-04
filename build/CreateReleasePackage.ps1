@@ -36,6 +36,18 @@ if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE"
 }
 
+$sourceRuntimeIni = Join-Path $repositoryRoot 'StandaloneShaderFixes\JiggleForge.ini'
+$publishedRuntimeIni = Join-Path $publishDirectory 'RuntimePayload\JiggleForge.ini'
+if (-not (Test-Path -LiteralPath $publishedRuntimeIni -PathType Leaf)) {
+    throw "Published RuntimePayload is missing: $publishedRuntimeIni"
+}
+
+$sourceRuntimeHash = (Get-FileHash -LiteralPath $sourceRuntimeIni -Algorithm SHA256).Hash
+$publishedRuntimeHash = (Get-FileHash -LiteralPath $publishedRuntimeIni -Algorithm SHA256).Hash
+if ($sourceRuntimeHash -ne $publishedRuntimeHash) {
+    throw 'Published RuntimePayload\JiggleForge.ini does not match the current source runtime.'
+}
+
 $requiredSelfContainedFiles = @(
     'hostfxr.dll',
     'Microsoft.WindowsAppRuntime.dll',

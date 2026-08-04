@@ -417,6 +417,11 @@ public static class JiggleConfigSerializer
                 // Angle-era configurations used 8 degrees for the same input
                 // sensitivity as a 0.02 world-depth notch.
                 physics.WheelDepthStep = Math.Clamp(number / 400.0, 0.00025, 0.075);
+                // Preserve the historical bidirectional depth behavior for
+                // existing angle-era projects even though new projects now
+                // default to outward-only depth.
+                physics.WheelMinDepth = -0.15;
+                physics.WheelMaxDepth = 0.15;
                 return true;
             case "wheel_min_angle":
             case "wheel_max_angle":

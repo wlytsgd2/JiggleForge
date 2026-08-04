@@ -26,13 +26,13 @@ public sealed class JiggleProjectConfig
 
 public sealed class PhysicsSettings
 {
-    public double Radius { get; set; } = 0.25;
+    public double Radius { get; set; } = 0.12;
 
     public double Strength { get; set; } = 0.70;
 
-    public double Falloff { get; set; } = 2.20;
+    public double Falloff { get; set; } = 1.0;
 
-    public double VolumeResponse { get; set; } = 2.50;
+    public double VolumeResponse { get; set; } = 2.0;
 
     public double DragScale { get; set; } = 0.75;
 
@@ -40,19 +40,19 @@ public sealed class PhysicsSettings
 
     public double HoldFrequencyHz { get; set; } = 10.0;
 
-    public double ReleaseDampingRatio { get; set; } = 0.90;
+    public double ReleaseDampingRatio { get; set; } = 0.0;
 
-    public double ReleaseFrequencyHz { get; set; } = 2.20;
+    public double ReleaseFrequencyHz { get; set; } = 5.0;
 
-    public double ReleaseImpulse { get; set; } = 0.12;
+    public double ReleaseImpulse { get; set; } = 5.0;
 
-    public double MaxOffset { get; set; } = 0.15;
+    public double MaxOffset { get; set; } = 0.1;
 
     public double TargetFollowSeconds { get; set; } = 0.02;
 
     public double WheelDepthStep { get; set; } = 0.02;
 
-    public double WheelMinDepth { get; set; } = -0.15;
+    public double WheelMinDepth { get; set; } = 0.0;
 
     public double WheelMaxDepth { get; set; } = 0.15;
 

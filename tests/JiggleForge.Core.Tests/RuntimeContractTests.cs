@@ -25,6 +25,17 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void RuntimeDefaultParameters_MatchRecommendedPhysicsDefaults()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        string defaults = ReadSection(ini, "ResourceDefaultParameters");
+
+        StringAssert.Contains(
+            defaults,
+            "data = 1 2 0.12 0.7 1.0 2.0 0.75 0.1 0.02 10.0 0.84 5.0 0.0 5.0 0.02 0.0 0.15 1.0 -1.0 1.0");
+    }
+
+    [TestMethod]
     public void Runtime_IsAlwaysActiveAndConsumerAccessIsRestrictedToSupportedSlots()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
