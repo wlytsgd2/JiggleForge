@@ -210,7 +210,14 @@ public sealed class RuntimeContractTests
             "ResourceRoleCompositeCandidate = ref ps-t0");
         StringAssert.Contains(
             filteredRoleCapture,
+            "run = CustomShaderCompareRoleComposite");
+        StringAssert.Contains(
+            filteredRoleCapture,
             "run = CustomShaderCaptureFilteredRoleCalibrationMap");
+        Assert.IsFalse(
+            filteredRoleCapture.Contains(
+                "ResourceRoleCompositeVB = copy vb0",
+                StringComparison.Ordinal));
         Assert.IsFalse(
             filteredRoleCapture.Contains(
                 "clear = ResourceAutoCalibrationMap",
@@ -284,10 +291,25 @@ public sealed class RuntimeContractTests
             "ps = ./JiggleForge/modules/capture_filtered_role_composite_uv_ps.hlsl");
         StringAssert.Contains(
             filteredRoleCaptureShader,
-            "ps-t110 = ResourceRoleCompositeCandidate");
+            "ps-t111 = ResourceRoleCompositeMatch");
+        StringAssert.Contains(filteredRoleCaptureShader, "draw = from_caller");
+        Assert.IsFalse(filteredRoleCaptureShader.Contains("vs =", StringComparison.Ordinal));
+
+        string roleComparisonShader = ReadSection(
+            ini,
+            "CustomShaderCompareRoleComposite");
         StringAssert.Contains(
-            filteredRoleCaptureShader,
-            "ps-t111 = ResourceRoleCompositeSource");
+            roleComparisonShader,
+            "cs = ./JiggleForge/modules/compare_role_composite_cs.hlsl");
+        StringAssert.Contains(
+            roleComparisonShader,
+            "cs-t110 = ResourceRoleCompositeCandidate");
+        StringAssert.Contains(
+            roleComparisonShader,
+            "cs-t111 = ResourceRoleCompositeSource");
+        StringAssert.Contains(
+            roleComparisonShader,
+            "cs-u0 = ResourceRoleCompositeMatch");
 
         string filteredRoleShader = File.ReadAllText(Path.Combine(
             RepositoryRoot,
@@ -295,9 +317,18 @@ public sealed class RuntimeContractTests
             "JiggleForge",
             "modules",
             "capture_filtered_role_composite_uv_ps.hlsl"));
-        StringAssert.Contains(filteredRoleShader, "FingerprintMatches()");
+        StringAssert.Contains(filteredRoleShader, "RoleTextureMatch[0]");
         StringAssert.Contains(filteredRoleShader, "discard;");
-        StringAssert.Contains(filteredRoleShader, "GetDimensions");
+
+        string comparisonShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "compare_role_composite_cs.hlsl"));
+        StringAssert.Contains(comparisonShader, "[numthreads(1, 1, 1)]");
+        StringAssert.Contains(comparisonShader, "GetDimensions");
+        StringAssert.Contains(comparisonShader, "RoleTextureMatch[0] = 1u");
 
         string worldCaptureShader = ReadSection(
             ini,

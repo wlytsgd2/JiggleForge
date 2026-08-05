@@ -200,6 +200,20 @@ if ($LASTEXITCODE -ne 0) {
     throw "FXC failed for capture_filtered_role_composite_uv_ps.hlsl with exit code $LASTEXITCODE."
 }
 
+$roleComparisonSource = Join-Path $projectRoot `
+    'StandaloneShaderFixes\JiggleForge\modules\compare_role_composite_cs.hlsl'
+$roleComparisonOutput = Join-Path $temporaryRoot 'compare_role_composite_cs.cso'
+& $fxc `
+    /nologo `
+    /WX `
+    /T cs_5_0 `
+    /E main `
+    /Fo $roleComparisonOutput `
+    $roleComparisonSource
+if ($LASTEXITCODE -ne 0) {
+    throw "FXC failed for compare_role_composite_cs.hlsl with exit code $LASTEXITCODE."
+}
+
 $roleCalibrationVertexSource = Join-Path $projectRoot `
     'StandaloneShaderFixes\JiggleForge\modules\capture_role_composite_raw_vs.hlsl'
 $roleCalibrationVertexOutput = Join-Path $temporaryRoot `
