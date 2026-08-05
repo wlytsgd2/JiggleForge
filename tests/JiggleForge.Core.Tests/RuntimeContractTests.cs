@@ -144,6 +144,10 @@ public sealed class RuntimeContractTests
     public void Present_UpdatesRuntimeBeforeClearingCurrentFramePick()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
+        StringAssert.Contains(
+            ini,
+            "global $runtimeDiagnosticEnabled = 0",
+            "The blue runtime diagnostic overlay must be disabled in distributed builds.");
         string present = ReadSection(ini, "Present");
         int runtimeStepIndex = present.IndexOf(
             "run = CommandListRuntimeStep",
