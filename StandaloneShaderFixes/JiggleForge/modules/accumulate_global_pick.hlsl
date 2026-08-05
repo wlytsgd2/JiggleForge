@@ -38,8 +38,8 @@ void main()
         {
             // Candidates produced by one real game Draw share a pipeline
             // token. Within that Draw, prefer the exact adapted range over
-            // post-Skin and pre-Skin geometry, then use depth for candidates
-            // of equal quality.
+            // pre-Skin fallback geometry, then use depth for candidates of
+            // equal quality.
             if (incoming.z < current.z)
                 return;
             if (incoming.z == current.z && incoming.y > current.y)
