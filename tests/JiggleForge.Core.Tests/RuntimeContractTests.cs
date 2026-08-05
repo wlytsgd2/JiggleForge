@@ -58,6 +58,36 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void GlobalFallback_PicksOnlyBeforeSkin()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+
+        foreach (string sectionName in new[]
+                 {
+                     "ShaderOverrideJiggleForgeGlobalStreet2621",
+                     "ShaderOverrideJiggleForgeGlobalC280"
+                 })
+        {
+            string section = ReadSection(ini, sectionName);
+            int pickIndex = section.IndexOf(
+                "$pickPriority = 1",
+                StringComparison.Ordinal);
+            int skinIndex = section.IndexOf(
+                "run = CommandList\\ZZMIv1\\Skin",
+                StringComparison.Ordinal);
+
+            Assert.IsTrue(pickIndex >= 0, $"{sectionName} is missing its pre-Skin fallback pick.");
+            Assert.IsTrue(skinIndex > pickIndex, $"{sectionName} must pick before Skin.");
+            Assert.IsFalse(
+                section.Contains("$pickPriority = 2", StringComparison.Ordinal),
+                $"{sectionName} must not perform a post-Skin fallback pick.");
+            Assert.IsFalse(
+                section.Contains("preSkin", StringComparison.OrdinalIgnoreCase),
+                $"{sectionName} still contains the retired Skin resource comparison.");
+        }
+    }
+
+    [TestMethod]
     public void RetiredSolverResourcesAndCompatibilityEntriesAreRemoved()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
