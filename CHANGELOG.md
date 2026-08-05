@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.8-beta.2 — test build
+
+- Replaced fixed scene cursor offsets with automatic previous-frame calibration
+  from both role-texture composition and whole-scene composition passes.
+- Added wallpaper-scene calibration through the shared 857 composition shader,
+  filtered against the role texture produced earlier in the frame.
+- Removed the post-Skin fallback pick so restored and otherwise unadapted Mods
+  cannot lose the valid pre-Skin selection to a later incompatible buffer.
+
 ## 0.1.8 — 2026-08-04
 
 - Updated the recommended global physics defaults for a smaller deformation radius, quicker target following, freer release motion, and stronger tap response.

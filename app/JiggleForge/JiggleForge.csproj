@@ -4,7 +4,7 @@
     <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RootNamespace>JiggleForge</RootNamespace>
-    <Version>0.1.8</Version>
+    <Version>0.1.8-beta.2</Version>
     <AssemblyVersion>0.1.8.0</AssemblyVersion>
     <FileVersion>0.1.8.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>

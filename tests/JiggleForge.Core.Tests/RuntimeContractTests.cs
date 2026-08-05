@@ -179,16 +179,42 @@ public sealed class RuntimeContractTests
             "ShaderOverrideJiggleForgeCalibrationRoleCompositeEDF7");
         StringAssert.Contains(edfOverride, "run = CommandListCaptureRoleCalibration");
         Assert.IsFalse(edfOverride.Contains("ps-t0 ===", StringComparison.Ordinal));
-        Assert.IsFalse(
-            ini.Contains(
-                "[ShaderOverrideJiggleForgeCalibrationRoleComposite857C]",
-                StringComparison.Ordinal));
+
+        string producerOverride = ReadSection(
+            ini,
+            "ShaderOverrideJiggleForgeCalibrationRoleProducer");
+        StringAssert.Contains(producerOverride, "ResourceRoleCompositeSource = ref o0");
+        StringAssert.Contains(producerOverride, "clear = ResourceAutoCalibrationMap 0.0");
+        StringAssert.Contains(producerOverride, "$roleCompositeSourceReady = 1");
+
+        string wallpaperOverride = ReadSection(
+            ini,
+            "ShaderOverrideJiggleForgeCalibrationRoleComposite857C");
+        StringAssert.Contains(wallpaperOverride, "hash = 857cd16250c6142e");
+        StringAssert.Contains(wallpaperOverride, "if $roleCompositeSourceReady == 1");
+        StringAssert.Contains(
+            wallpaperOverride,
+            "run = CommandListCaptureFilteredRoleCalibration");
 
         string roleCapture = ReadSection(
             ini,
             "CommandListCaptureRoleCalibration");
         StringAssert.Contains(roleCapture, "run = CustomShaderCaptureRoleCalibrationMap");
         StringAssert.Contains(roleCapture, "$calibrationRouteThisFrame = 30");
+
+        string filteredRoleCapture = ReadSection(
+            ini,
+            "CommandListCaptureFilteredRoleCalibration");
+        StringAssert.Contains(
+            filteredRoleCapture,
+            "ResourceRoleCompositeCandidate = ref ps-t0");
+        StringAssert.Contains(
+            filteredRoleCapture,
+            "run = CustomShaderCaptureFilteredRoleCalibrationMap");
+        Assert.IsFalse(
+            filteredRoleCapture.Contains(
+                "clear = ResourceAutoCalibrationMap",
+                StringComparison.Ordinal));
 
         string worldCapture = ReadSection(
             ini,
@@ -249,6 +275,29 @@ public sealed class RuntimeContractTests
             roleCaptureShader,
             "ps = ./JiggleForge/modules/capture_role_composite_uv_ps.hlsl");
         Assert.IsFalse(roleCaptureShader.Contains("drawindexed = auto", StringComparison.Ordinal));
+
+        string filteredRoleCaptureShader = ReadSection(
+            ini,
+            "CustomShaderCaptureFilteredRoleCalibrationMap");
+        StringAssert.Contains(
+            filteredRoleCaptureShader,
+            "ps = ./JiggleForge/modules/capture_filtered_role_composite_uv_ps.hlsl");
+        StringAssert.Contains(
+            filteredRoleCaptureShader,
+            "ps-t110 = ResourceRoleCompositeCandidate");
+        StringAssert.Contains(
+            filteredRoleCaptureShader,
+            "ps-t111 = ResourceRoleCompositeSource");
+
+        string filteredRoleShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "capture_filtered_role_composite_uv_ps.hlsl"));
+        StringAssert.Contains(filteredRoleShader, "FingerprintMatches()");
+        StringAssert.Contains(filteredRoleShader, "discard;");
+        StringAssert.Contains(filteredRoleShader, "GetDimensions");
 
         string worldCaptureShader = ReadSection(
             ini,
