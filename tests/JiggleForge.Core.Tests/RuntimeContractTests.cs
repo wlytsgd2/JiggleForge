@@ -137,6 +137,114 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void AutomaticCalibration_CapturesBothCompositionRoutesForNextFrame()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+
+        StringAssert.Contains(ini, "hash = 6443f79de027d780");
+        StringAssert.Contains(ini, "hash = edf794e6c2599288");
+        StringAssert.Contains(ini, "hash = 1da80a4543267137");
+        string edfOverride = ReadSection(
+            ini,
+            "ShaderOverrideJiggleForgeCalibrationRoleCompositeEDF7");
+        StringAssert.Contains(edfOverride, "run = CommandListCaptureRoleCalibration");
+        Assert.IsFalse(edfOverride.Contains("ps-t0 ===", StringComparison.Ordinal));
+        Assert.IsFalse(
+            ini.Contains(
+                "[ShaderOverrideJiggleForgeCalibrationRoleComposite857C]",
+                StringComparison.Ordinal));
+
+        string roleCapture = ReadSection(
+            ini,
+            "CommandListCaptureRoleCalibration");
+        StringAssert.Contains(roleCapture, "run = CustomShaderCaptureRoleCalibrationMap");
+        StringAssert.Contains(roleCapture, "$calibrationRouteThisFrame = 30");
+
+        string worldCapture = ReadSection(
+            ini,
+            "CommandListCaptureWorldCalibration");
+        StringAssert.Contains(worldCapture, "run = CustomShaderCaptureWorldCalibrationMap");
+        StringAssert.Contains(worldCapture, "$calibrationRouteThisFrame = 10");
+
+        string present = ReadSection(ini, "Present");
+        int promoteIndex = present.IndexOf(
+            "$calibrationRoutePreviousFrame = $calibrationRouteThisFrame",
+            StringComparison.Ordinal);
+        int clearIndex = present.IndexOf(
+            "$calibrationRouteThisFrame = 0",
+            StringComparison.Ordinal);
+        Assert.IsTrue(promoteIndex >= 0 && clearIndex > promoteIndex);
+
+        string calibrationShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "capture_composite_uv_ps.hlsl"));
+        StringAssert.Contains(calibrationShader, "return float4(sourceUV, 1.0, 1.0);");
+
+        string roleCalibrationShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "capture_role_composite_uv_ps.hlsl"));
+        StringAssert.Contains(roleCalibrationShader, "float4 inputColor : COLOR0");
+        StringAssert.Contains(roleCalibrationShader, "float2 sourceUV : TEXCOORD0");
+
+        string roleCalibrationVertexShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "capture_role_composite_raw_vs.hlsl"));
+        StringAssert.Contains(
+            roleCalibrationVertexShader,
+            "ByteAddressBuffer RoleCompositeVertices : register(t110)");
+        StringAssert.Contains(roleCalibrationVertexShader, "IniParams[94]");
+
+        string calibrationResource = ReadSection(ini, "ResourceAutoCalibrationMap");
+        StringAssert.Contains(calibrationResource, "width = 320");
+        StringAssert.Contains(calibrationResource, "height = 180");
+
+        string roleCaptureShader = ReadSection(
+            ini,
+            "CustomShaderCaptureRoleCalibrationMap");
+        StringAssert.Contains(roleCaptureShader, "draw = 6, 0");
+        StringAssert.Contains(
+            roleCaptureShader,
+            "vs = ./JiggleForge/modules/capture_role_composite_raw_vs.hlsl");
+        StringAssert.Contains(roleCaptureShader, "vs-t110 = ResourceRoleCompositeVB");
+        StringAssert.Contains(
+            roleCaptureShader,
+            "ps = ./JiggleForge/modules/capture_role_composite_uv_ps.hlsl");
+        Assert.IsFalse(roleCaptureShader.Contains("drawindexed = auto", StringComparison.Ordinal));
+
+        string worldCaptureShader = ReadSection(
+            ini,
+            "CustomShaderCaptureWorldCalibrationMap");
+        StringAssert.Contains(worldCaptureShader, "draw = from_caller");
+        Assert.IsFalse(worldCaptureShader.Contains("vs =", StringComparison.Ordinal));
+        Assert.IsFalse(worldCaptureShader.Contains("drawindexed = auto", StringComparison.Ordinal));
+
+        string pickerShader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "modules",
+            "native_world_pick_split.hlsl"));
+        StringAssert.Contains(pickerShader, "SampleCalibrationMap(cursorUV)");
+        StringAssert.Contains(pickerShader, "float2(screenUV.x, 1.0 - screenUV.y)");
+        StringAssert.Contains(pickerShader, "capturedRoute > 0.0");
+        StringAssert.Contains(pickerShader, "cursorUV = float2(-10.0, -10.0)");
+        Assert.IsFalse(pickerShader.Contains("activeProfile", StringComparison.Ordinal));
+        Assert.IsFalse(ini.Contains("$activePickProfile", StringComparison.Ordinal));
+        Assert.IsFalse(ini.Contains("$framePickProfile", StringComparison.Ordinal));
+        Assert.IsFalse(ini.Contains("1.011335", StringComparison.Ordinal));
+        Assert.IsFalse(ini.Contains("384.984375", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
     public void FramePickReset_UsesOneIndependentThreadPerRecord()
     {
         string resetPath = Path.Combine(

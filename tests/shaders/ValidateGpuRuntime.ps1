@@ -156,6 +156,71 @@ foreach ($pickerShader in $pickerShaders) {
     }
 }
 
+$calibrationPixelSource = Join-Path $projectRoot `
+    'StandaloneShaderFixes\JiggleForge\modules\capture_composite_uv_ps.hlsl'
+$calibrationPixelOutput = Join-Path $temporaryRoot 'capture_composite_uv_ps.cso'
+& $fxc `
+    /nologo `
+    /WX `
+    /T ps_5_0 `
+    /E main `
+    /Fo $calibrationPixelOutput `
+    $calibrationPixelSource
+if ($LASTEXITCODE -ne 0) {
+    throw "FXC failed for capture_composite_uv_ps.hlsl with exit code $LASTEXITCODE."
+}
+
+$roleCalibrationPixelSource = Join-Path $projectRoot `
+    'StandaloneShaderFixes\JiggleForge\modules\capture_role_composite_uv_ps.hlsl'
+$roleCalibrationPixelOutput = Join-Path $temporaryRoot `
+    'capture_role_composite_uv_ps.cso'
+& $fxc `
+    /nologo `
+    /WX `
+    /T ps_5_0 `
+    /E main `
+    /Fo $roleCalibrationPixelOutput `
+    $roleCalibrationPixelSource
+if ($LASTEXITCODE -ne 0) {
+    throw "FXC failed for capture_role_composite_uv_ps.hlsl with exit code $LASTEXITCODE."
+}
+
+$roleCalibrationVertexSource = Join-Path $projectRoot `
+    'StandaloneShaderFixes\JiggleForge\modules\capture_role_composite_raw_vs.hlsl'
+$roleCalibrationVertexOutput = Join-Path $temporaryRoot `
+    'capture_role_composite_raw_vs.cso'
+& $fxc `
+    /nologo `
+    /WX `
+    /T vs_5_0 `
+    /E main `
+    /Fo $roleCalibrationVertexOutput `
+    $roleCalibrationVertexSource
+if ($LASTEXITCODE -ne 0) {
+    throw "FXC failed for capture_role_composite_raw_vs.hlsl with exit code $LASTEXITCODE."
+}
+
+$nativePickerSource = Join-Path $projectRoot `
+    'StandaloneShaderFixes\JiggleForge\modules\native_world_pick_split.hlsl'
+foreach ($stage in @(
+    @{ Name = 'gs'; Target = 'gs_5_0'; Define = 'GEOMETRY_SHADER' },
+    @{ Name = 'ps'; Target = 'ps_5_0'; Define = 'PIXEL_SHADER' }
+)) {
+    $nativePickerOutput = Join-Path $temporaryRoot `
+        "native_world_pick_split-$($stage.Name).cso"
+    & $fxc `
+        /nologo `
+        /WX `
+        /D $stage.Define `
+        /T $stage.Target `
+        /E main `
+        /Fo $nativePickerOutput `
+        $nativePickerSource
+    if ($LASTEXITCODE -ne 0) {
+        throw "FXC failed for native_world_pick_split.hlsl $($stage.Name) with exit code $LASTEXITCODE."
+    }
+}
+
 $nativeSource = Join-Path $projectRoot 'tests\native\GpuReadback.cpp'
 $nativeRunner = Join-Path $temporaryRoot 'GpuReadback.exe'
 $nativeObject = Join-Path $temporaryRoot 'GpuReadback.obj'
