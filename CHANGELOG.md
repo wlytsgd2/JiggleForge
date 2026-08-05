@@ -8,6 +8,10 @@
   filtered against the role texture produced earlier in the frame.
 - Removed the post-Skin fallback pick so restored and otherwise unadapted Mods
   cannot lose the valid pre-Skin selection to a later incompatible buffer.
+- Restored the public `activePickProfile` compatibility symbol for Mods adapted
+  by earlier releases, while newly generated patches use `activePickPipeline`.
+- Added runtime ABI contract tests so public variables, resources, and command
+  lists used by already-adapted Mods cannot be removed accidentally.
 
 ## 0.1.8 — 2026-08-04
 

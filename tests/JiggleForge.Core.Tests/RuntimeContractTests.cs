@@ -348,10 +348,58 @@ public sealed class RuntimeContractTests
         StringAssert.Contains(pickerShader, "capturedRoute > 0.0");
         StringAssert.Contains(pickerShader, "cursorUV = float2(-10.0, -10.0)");
         Assert.IsFalse(pickerShader.Contains("activeProfile", StringComparison.Ordinal));
-        Assert.IsFalse(ini.Contains("$activePickProfile", StringComparison.Ordinal));
         Assert.IsFalse(ini.Contains("$framePickProfile", StringComparison.Ordinal));
         Assert.IsFalse(ini.Contains("1.011335", StringComparison.Ordinal));
         Assert.IsFalse(ini.Contains("384.984375", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void RuntimePublicInterface_PreservesCurrentAndLegacyAdaptedModContracts()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+
+        string[] publicGlobals =
+        [
+            "activePickPipeline",
+            "activePickProfile",
+            "mouseDown",
+            "pickObjectID",
+            "pickSourceDraw",
+            "pickRangeAuto",
+            "pickRangeCount",
+            "pickRangeFirst",
+            "pickRangeBase"
+        ];
+        foreach (string name in publicGlobals)
+        {
+            StringAssert.Contains(
+                ini,
+                $"global ${name} =",
+                $"Removing public runtime variable ${name} would break already-adapted Mods.");
+        }
+
+        string[] publicSections =
+        [
+            "ResourceCapturedPick",
+            "ResourceGroupParameters",
+            "ResourceMotionStates",
+            "CommandListPickVisibleRange",
+            "CommandListRegisterGroupParameters",
+            "CommandListEnableAdaptedOnly"
+        ];
+        foreach (string name in publicSections)
+        {
+            StringAssert.Contains(
+                ini,
+                $"[{name}]",
+                $"Removing public runtime section [{name}] would break already-adapted Mods.");
+        }
+
+        string street = ReadSection(ini, "ShaderOverrideJiggleForgeGlobalStreet2621");
+        string selection = ReadSection(ini, "ShaderOverrideJiggleForgeGlobalC280");
+        StringAssert.Contains(street, "$activePickProfile = 1");
+        StringAssert.Contains(selection, "$activePickProfile = 2");
+        StringAssert.Contains(ReadSection(ini, "Present"), "post $activePickProfile = 0");
     }
 
     [TestMethod]

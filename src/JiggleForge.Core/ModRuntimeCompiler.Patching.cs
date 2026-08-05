@@ -135,7 +135,7 @@ public sealed partial class ModRuntimeCompiler
         string maskName,
         bool rebindState)
     {
-        block.Append(indent).Append("if $\\jiggle_forge\\activePickProfile > 0").AppendLine();
+        block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = ").Append(assignment.ObjectId).AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = ").Append(DrawOrdinal(draw.Id)).AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickRangeAuto = ").Append(draw.Kind == JiggleDrawKind.Auto ? 1 : 0).AppendLine();
@@ -165,7 +165,7 @@ public sealed partial class ModRuntimeCompiler
 
     private static void AppendPickObjectReset(StringBuilder block, string indent)
     {
-        block.Append(indent).Append("if $\\jiggle_forge\\activePickProfile > 0").AppendLine();
+        block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = 1").AppendLine();
         block.Append(indent).Append("endif").AppendLine();
     }

@@ -133,6 +133,8 @@ public sealed class ModProjectServiceTests
         StringAssert.Contains(patched, "JIGGLEFORGE_VISIBLE_RANGE BEGIN Draw0001");
         StringAssert.Contains(patched, "JIGGLEFORGE_VISIBLE_RANGE BEGIN Draw0002");
         StringAssert.Contains(patched, "run = CommandList\\jiggle_forge\\RegisterGroupParameters");
+        StringAssert.Contains(patched, "if $\\jiggle_forge\\activePickPipeline > 0");
+        Assert.IsFalse(patched.Contains("$\\jiggle_forge\\activePickProfile", StringComparison.Ordinal));
         StringAssert.Contains(patched, "[ResourceJiggleForgeDrawPhysics001]");
         StringAssert.Contains(patched, "data = 0 2 0.12 0.7 1 2 0.75 0.1 0.02 10 0.84 5 0 5 0.02 0 0.15 1 -1 1");
         Assert.IsFalse(patched.Contains("CommandList\\jiggle_forge\\RegisterParams", StringComparison.Ordinal));
