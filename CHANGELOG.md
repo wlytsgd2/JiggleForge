@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Replaced fixed scene cursor offsets with automatic previous-frame calibration
+  from both role-texture composition and whole-scene composition passes.
+- Restricted role-scene calibration to the unique EDF composition pass so
+  unrelated draws using the shared 857 UI shader cannot clear valid mappings.
+- Replaced fragile one-pixel composition capture with a compact 320x180
+  screen-to-source map and normalized the opposite cursor/texture Y axes.
+- Removed resolution-specific body profiles and fixed cursor offsets; picking
+  now fails closed unless the preceding frame produced a valid calibration map.
+- Updated the default physics preset to the compact, responsive test profile.
+
 ## 0.1.7 — 2026-08-03
 
 - Added the QQ community group to Settings with one-click group-number copying.

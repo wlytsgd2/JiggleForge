@@ -100,7 +100,7 @@ public sealed class ModProjectServiceTests
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
         string serialized = JiggleConfigSerializer.Serialize(config);
         string legacy = serialized.Replace(
-            "wheel_depth_step = 0.02\r\nwheel_min_depth = -0.15\r\nwheel_max_depth = 0.15",
+            "wheel_depth_step = 0.02\r\nwheel_min_depth = 0\r\nwheel_max_depth = 0.15",
             "wheel_angle_step = 8\r\nwheel_min_angle = 0\r\nwheel_max_angle = 60",
             StringComparison.Ordinal);
 
@@ -134,7 +134,7 @@ public sealed class ModProjectServiceTests
         StringAssert.Contains(patched, "JIGGLEFORGE_VISIBLE_RANGE BEGIN Draw0002");
         StringAssert.Contains(patched, "run = CommandList\\jiggle_forge\\RegisterGroupParameters");
         StringAssert.Contains(patched, "[ResourceJiggleForgeDrawPhysics001]");
-        StringAssert.Contains(patched, "data = 0 2 0.25 0.7 2.2 2.5 0.75 0.15 0.02 10 0.84 2.2 0.9 0.12 0.02 -0.15 0.15 1 -1 1");
+        StringAssert.Contains(patched, "data = 0 2 0.12 0.7 1 2 0.75 0.1 0.02 10 0.84 5 0 5 0.02 0 0.15 1 -1 1");
         Assert.IsFalse(patched.Contains("CommandList\\jiggle_forge\\RegisterParams", StringComparison.Ordinal));
         Assert.IsFalse(patched.Contains("cs-t74 =", StringComparison.Ordinal));
         Assert.IsTrue(File.Exists(Path.Combine(root!, JiggleProjectConfig.DefaultFileName)));
@@ -205,7 +205,7 @@ public sealed class ModProjectServiceTests
         Assert.IsFalse(grouped.Contains("x82 =", StringComparison.Ordinal));
         StringAssert.Contains(
             grouped,
-            "data = 0 2 0.123 0.456 2.2 1.8 0.75 0.15 0.02 10 0.84 2.2 0.9 0.12 0.01 -0.12 0.14 1 -1 1");
+            "data = 0 2 0.123 0.456 1 1.8 0.75 0.1 0.02 10 0.84 5 0 5 0.01 -0.12 0.14 1 -1 1");
 
         File.Delete(Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini"));
         ModProjectInspection missingRuntime = service.Inspect(root!);

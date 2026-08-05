@@ -202,7 +202,7 @@ public sealed class RuntimeEnvironmentServiceTests
         StringAssert.Contains(contents, "global $defaultWheelMinDepth = -0.07");
         StringAssert.Contains(
             contents,
-            "data = 1 2 0.42 0.81 2.2 1.9 0.75 0.15 0.02 10 0.84 2.2 0.9 0.12 0.02 -0.07 0.12 1 -1 1");
+            "data = 1 2 0.42 0.81 1 1.9 0.75 0.1 0.02 10 0.84 5 0 5 0.02 -0.07 0.12 1 -1 1");
 
         installedDefaults.Radius = 0.18;
         installedDefaults.WheelDepthStep = 0.01;

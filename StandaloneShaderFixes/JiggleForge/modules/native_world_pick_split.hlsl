@@ -74,10 +74,41 @@ struct PS_OUT
 
 Texture1D<float4> IniParams : register(t120);
 Buffer<uint> gIndexBuffer : register(t1);
+Texture2D<float4> CursorCalibrationMap : register(t2);
 
 #define CURSOR_PARAMS IniParams[24]
 #define DRAW_PARAMS IniParams[26]
 #define INDEX_PARAMS IniParams[27]
+#define CALIBRATION_PARAMS IniParams[28]
+
+float4 SampleCalibrationMap(float2 screenUV)
+{
+    uint width;
+    uint height;
+    CursorCalibrationMap.GetDimensions(width, height);
+    if (width == 0u || height == 0u)
+        return 0.0;
+
+    // Global cursor Y is bottom-up; texture rows are addressed top-down.
+    float2 textureUV = saturate(float2(screenUV.x, 1.0 - screenUV.y));
+    float2 texelPosition = textureUV * float2(width, height) - 0.5;
+    int2 baseTexel = int2(floor(texelPosition));
+    float2 fraction = frac(texelPosition);
+    int2 maximumTexel = int2(width - 1u, height - 1u);
+    int2 p00 = clamp(baseTexel, int2(0, 0), maximumTexel);
+    int2 p10 = clamp(baseTexel + int2(1, 0), int2(0, 0), maximumTexel);
+    int2 p01 = clamp(baseTexel + int2(0, 1), int2(0, 0), maximumTexel);
+    int2 p11 = clamp(baseTexel + int2(1, 1), int2(0, 0), maximumTexel);
+    float4 top = lerp(
+        CursorCalibrationMap.Load(int3(p00, 0)),
+        CursorCalibrationMap.Load(int3(p10, 0)),
+        fraction.x);
+    float4 bottom = lerp(
+        CursorCalibrationMap.Load(int3(p01, 0)),
+        CursorCalibrationMap.Load(int3(p11, 0)),
+        fraction.x);
+    return lerp(top, bottom, fraction.y);
+}
 
 float3 SafeNormalize(float3 value, float3 fallback)
 {
@@ -180,6 +211,22 @@ void main(
 
     float2 screenSize = max(CURSOR_PARAMS.zw, float2(1.0, 1.0));
     float2 cursorUV = saturate(CURSOR_PARAMS.xy / screenSize);
+    float capturedRoute = CALIBRATION_PARAMS.x;
+    if (capturedRoute > 0.0)
+    {
+        float4 calibrated = SampleCalibrationMap(cursorUV);
+        if (calibrated.z > 0.5)
+            cursorUV = calibrated.xy;
+        else
+            cursorUV = float2(-10.0, -10.0);
+    }
+    else
+    {
+        // No fixed scene profile or pixel offset is allowed here. A scene
+        // without a preceding-frame composition map must fail closed so its
+        // missing calibration remains visible during testing.
+        cursorUV = float2(-10.0, -10.0);
+    }
     float2 cursorNDC = float2(cursorUV.x * 2.0 - 1.0, 1.0 - cursorUV.y * 2.0);
     float winding = det < 0.0 ? -1.0 : 1.0;
     float3 barycentrics[3] = {

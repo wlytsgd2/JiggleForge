@@ -420,8 +420,11 @@ public static class JiggleConfigSerializer
                 return true;
             case "wheel_min_angle":
             case "wheel_max_angle":
-                // Angles have no exact independent-depth equivalent. Retain
-                // the signed default range and migrate only wheel sensitivity.
+                // Angles have no exact independent-depth equivalent. Preserve
+                // the signed range used by angle-era projects instead of
+                // inheriting a newer application's defaults.
+                physics.WheelMinDepth = -0.15;
+                physics.WheelMaxDepth = 0.15;
                 return true;
             default:
                 return false;

@@ -4,6 +4,8 @@ Buffer<float4> ControllerRecords : register(t0);
 Buffer<float4> CapturedPickRecords : register(t1);
 Buffer<float4> MotionStateRecords : register(t2);
 Buffer<float4> GroupParameterRecords : register(t3);
+Texture2D<float4> CalibrationMap : register(t4);
+Texture1D<float4> IniParams : register(t120);
 RWBuffer<uint> OutputText : register(u0);
 
 static const uint JF_DIAGNOSTIC_CAPACITY = 256u;
@@ -143,6 +145,88 @@ void JF_AppendWorldLine(
     JF_AppendCharacter(cursor, 10u);
 }
 
+void JF_AppendCalibrationLines(inout uint cursor)
+{
+    float4 route = IniParams[90];
+    float4 cursorData = IniParams[92];
+    uint calibrationWidth;
+    uint calibrationHeight;
+    CalibrationMap.GetDimensions(calibrationWidth, calibrationHeight);
+    float2 screenSize = max(cursorData.zw, float2(1.0f, 1.0f));
+    float2 normalizedCursor = saturate(cursorData.xy / screenSize);
+    float2 calibrationUV = float2(normalizedCursor.x, 1.0f - normalizedCursor.y);
+    uint2 calibrationPixel = min(
+        (uint2)(calibrationUV * float2(calibrationWidth, calibrationHeight)),
+        uint2(calibrationWidth - 1u, calibrationHeight - 1u));
+    float4 calibration = CalibrationMap.Load(int3(calibrationPixel, 0));
+
+    // K = previous and current automatic-calibration routes.
+    JF_AppendCharacter(cursor, 75u);
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendUnsigned(cursor, (uint)max(route.x, 0.0f));
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendUnsigned(cursor, (uint)max(route.y, 0.0f));
+    JF_AppendCharacter(cursor, 10u);
+
+    // U = captured source UV and validity marker.
+    JF_AppendCharacter(cursor, 85u);
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendVector3(cursor, calibration.xyz);
+    JF_AppendCharacter(cursor, 10u);
+
+    // X = normalized cursor passed to the composition capture.
+    JF_AppendCharacter(cursor, 88u);
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendVector3(
+        cursor,
+        float3(normalizedCursor, 1.0f));
+    JF_AppendCharacter(cursor, 10u);
+
+    // B/E = coarse valid-map bounds. A negative B.x means that the capture
+    // target contains no valid pixels anywhere, not merely below the cursor.
+    uint validSamples = 0u;
+    uint2 minimumPixel = uint2(calibrationWidth, calibrationHeight);
+    uint2 maximumPixel = uint2(0u, 0u);
+    static const uint calibrationScanStep = 4u;
+    for (uint y = 0u; y < calibrationHeight; y += calibrationScanStep)
+    {
+        for (uint x = 0u; x < calibrationWidth; x += calibrationScanStep)
+        {
+            if (CalibrationMap.Load(int3(x, y, 0)).z > 0.5f)
+            {
+                validSamples += 1u;
+                minimumPixel = min(minimumPixel, uint2(x, y));
+                maximumPixel = max(maximumPixel, uint2(x, y));
+            }
+        }
+    }
+
+    float2 calibrationDenominator = max(
+        float2(calibrationWidth - 1u, calibrationHeight - 1u),
+        float2(1.0f, 1.0f));
+    float maximumSamples = max(
+        ceil((float)calibrationWidth / calibrationScanStep)
+            * ceil((float)calibrationHeight / calibrationScanStep),
+        1.0f);
+    float3 minimumBounds = validSamples > 0u
+        ? float3(1.0f, float2(minimumPixel) / calibrationDenominator)
+        : float3(-1.0f, -1.0f, -1.0f);
+    float3 maximumBounds = validSamples > 0u
+        ? float3(
+            float2(maximumPixel) / calibrationDenominator,
+            (float)validSamples / maximumSamples)
+        : float3(-1.0f, -1.0f, 0.0f);
+
+    JF_AppendCharacter(cursor, 66u);
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendVector3(cursor, minimumBounds);
+    JF_AppendCharacter(cursor, 10u);
+    JF_AppendCharacter(cursor, 69u);
+    JF_AppendCharacter(cursor, 32u);
+    JF_AppendVector3(cursor, maximumBounds);
+    JF_AppendCharacter(cursor, 10u);
+}
+
 [numthreads(1, 1, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
@@ -228,5 +312,6 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         state.Active);
     JF_AppendWorldLine(cursor, 80u, capture.WorldPosition);
     JF_AppendWorldLine(cursor, 77u, state.Position);
+    JF_AppendCalibrationLines(cursor);
     OutputText[min(cursor, JF_DIAGNOSTIC_CAPACITY - 1u)] = 0u;
 }
