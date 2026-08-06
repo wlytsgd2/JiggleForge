@@ -20,6 +20,8 @@ namespace JiggleForge;
 
 public sealed partial class MainWindow : Window
 {
+    private static string L(string key) => AppLanguageService.Get(key);
+
     private readonly ModProjectService projectService = new();
     private readonly ModLibraryService modLibraryService;
     private readonly ModRuntimeCompiler runtimeCompiler = new();
@@ -36,14 +38,14 @@ public sealed partial class MainWindow : Window
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<DragKeyOption> dragKeyOptions =
     [
-        new("VK_LBUTTON", "鼠标左键"),
-        new("VK_RBUTTON", "鼠标右键"),
-        new("VK_MBUTTON", "鼠标中键"),
-        new("VK_XBUTTON1", "鼠标侧键 1"),
-        new("VK_XBUTTON2", "鼠标侧键 2"),
-        new("X", "键盘 X"),
-        new("C", "键盘 C"),
-        new("V", "键盘 V"),
+        new("VK_LBUTTON", L("DragKeyLeftMouse")),
+        new("VK_RBUTTON", L("DragKeyRightMouse")),
+        new("VK_MBUTTON", L("DragKeyMiddleMouse")),
+        new("VK_XBUTTON1", L("DragKeySideMouse1")),
+        new("VK_XBUTTON2", L("DragKeySideMouse2")),
+        new("X", L("DragKeyKeyboardX")),
+        new("C", L("DragKeyKeyboardC")),
+        new("V", L("DragKeyKeyboardV")),
     ];
     private readonly ObservableCollection<string> graphGroupOptions = [];
     private readonly ObservableCollection<string> graphTargetGroupOptions = [];
@@ -107,6 +109,8 @@ public sealed partial class MainWindow : Window
         PhysicsScopeComboBox.ItemsSource = physicsScopeOptions;
         DragKeyOptionsList.ItemsSource = dragKeyOptions;
         ModLibraryList.ItemsSource = modLibraryRows;
+        LanguageComboBox.SelectedIndex =
+            AppLanguageService.CurrentLanguage == AppLanguageService.English ? 1 : 0;
         RuntimePathTextBox.Text = LoadZzmiRootPreference();
         SelectDragKeys(LoadDragKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
@@ -121,6 +125,12 @@ public sealed partial class MainWindow : Window
         }
 
         runtimeStatusInitialized = true;
+        if (!AppLanguageService.HasSavedLanguage)
+        {
+            await ShowInitialLanguageSelectionAsync();
+            return;
+        }
+
         await ApplyRecommendedPhysicsDefaultsMigrationAsync();
         await RefreshRuntimeStatusAsync();
         await RefreshModLibraryAsync();
@@ -128,6 +138,58 @@ public sealed partial class MainWindow : Window
         if (ShouldShowOnboarding())
         {
             await ShowOnboardingAsync(automatic: true);
+        }
+    }
+
+    private async Task ShowInitialLanguageSelectionAsync()
+    {
+        ContentDialog dialog = new()
+        {
+            XamlRoot = RootGrid.XamlRoot,
+            Title = "选择语言 / Choose your language",
+            Content = "请选择 JiggleForge 的显示语言。\nChoose the display language for JiggleForge.",
+            PrimaryButtonText = "简体中文",
+            SecondaryButtonText = "English",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        ContentDialogResult result = await dialog.ShowAsync();
+        string language = result == ContentDialogResult.Secondary
+            ? AppLanguageService.English
+            : AppLanguageService.Chinese;
+        try
+        {
+            AppLanguageService.SaveLanguage(language);
+            AppLanguageService.RestartApplication();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            ShowMessage(AppLanguageService.Format("LanguageSwitchFailed", exception.Message), InfoBarSeverity.Error);
+        }
+    }
+
+    private void ApplyLanguage_Click(object sender, RoutedEventArgs e)
+    {
+        if (LanguageComboBox.SelectedItem is not ComboBoxItem item ||
+            item.Tag is not string language)
+        {
+            return;
+        }
+
+        if (string.Equals(language, AppLanguageService.CurrentLanguage, StringComparison.OrdinalIgnoreCase))
+        {
+            ShowMessage(AppLanguageService.Get("LanguageAlreadyActive"), InfoBarSeverity.Informational);
+            return;
+        }
+
+        try
+        {
+            AppLanguageService.SaveLanguage(language);
+            AppLanguageService.RestartApplication();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            ShowMessage(AppLanguageService.Format("LanguageSwitchFailed", exception.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -170,12 +232,12 @@ public sealed partial class MainWindow : Window
 
     private static string StateLabel(ModImportState state) => state switch
     {
-        ModImportState.FirstImport => "首次导入",
-        ModImportState.Ready => "配置已就绪",
-        ModImportState.RuntimeRepairRequired => "需要修复运行文件",
-        ModImportState.PatchedConfigurationMissing => "需要恢复配置",
-        ModImportState.LegacyMigrationRequired => "需要迁移旧版本",
-        _ => "无法导入",
+        ModImportState.FirstImport => L("StateFirstImport"),
+        ModImportState.Ready => L("StateReady"),
+        ModImportState.RuntimeRepairRequired => L("StateRuntimeRepair"),
+        ModImportState.PatchedConfigurationMissing => L("StateConfigMissing"),
+        ModImportState.LegacyMigrationRequired => L("StateLegacyMigration"),
+        _ => L("StateCannotImport"),
     };
 
 }
@@ -245,7 +307,7 @@ public sealed class DrawGroupEditorNode : DrawTreeItem, INotifyPropertyChanged
         }
     }
 
-    public string CountText => $"{Children.Count} 个 Draw";
+    public string CountText => AppLanguageService.Format("DrawCount", Children.Count);
 
     public void RefreshCount() =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CountText)));

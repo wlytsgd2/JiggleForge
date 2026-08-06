@@ -26,8 +26,8 @@ public sealed partial class MainWindow : Window
             .OrderBy(group => group, StringComparer.OrdinalIgnoreCase)
             .ToArray();
         GroupSummaryText.Text = groups.Length == 0
-            ? "还没有分组。请先在 Draw 页面填写组名。"
-            : string.Join("、", groups);
+            ? L("NoGroupsYet")
+            : string.Join(AppLanguageService.CurrentLanguage == AppLanguageService.English ? ", " : "、", groups);
 
         List<(string From, string To)> existingEdges = edgeRows
             .Select(edge => (edge.From, edge.To))
@@ -93,7 +93,7 @@ public sealed partial class MainWindow : Window
             ?? string.Empty;
         if (to.Length == 0)
         {
-            ShowMessage("至少需要一个普通组才能添加依赖边。", InfoBarSeverity.Warning);
+            ShowMessage(L("NeedNormalGroupForEdge"), InfoBarSeverity.Warning);
             return;
         }
         AddEdgeRow(from, to);
@@ -129,7 +129,7 @@ public sealed partial class MainWindow : Window
     {
         if (string.Equals(to, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase))
         {
-            ShowMessage("OriginalParts 固定组不能作为依赖关系的终点。", InfoBarSeverity.Warning);
+            ShowMessage(L("OriginalPartsCannotBeTarget"), InfoBarSeverity.Warning);
             return;
         }
         if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase) ||
@@ -188,7 +188,7 @@ public sealed partial class MainWindow : Window
                     TextTrimming = TextTrimming.CharacterEllipsis,
                 },
             };
-            ToolTipService.SetToolTip(body, $"{group}：左键拖动，右键连边");
+            ToolTipService.SetToolTip(body, AppLanguageService.Format("GraphNodeTooltip", group));
             body.PointerPressed += GraphNode_PointerPressed;
             node.Children.Add(body);
 
@@ -433,7 +433,7 @@ public sealed partial class MainWindow : Window
                 Padding = new Thickness(0),
                 Visibility = Visibility.Collapsed,
             };
-            ToolTipService.SetToolTip(delete, $"删除 {edge.From} → {edge.To}");
+            ToolTipService.SetToolTip(delete, AppLanguageService.Format("DeleteEdgeTooltip", edge.From, edge.To));
             delete.Click += DeleteEdge_Click;
             Canvas.SetLeft(delete, (start.X + end.X) / 2 - 14);
             Canvas.SetTop(delete, (start.Y + end.Y) / 2 - 14);

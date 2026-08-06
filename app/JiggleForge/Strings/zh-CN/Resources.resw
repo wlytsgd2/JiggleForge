@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType><xsd:choice maxOccurs="unbounded">
+        <xsd:element name="metadata"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" use="required" type="xsd:string" /><xsd:attribute name="type" type="xsd:string" /><xsd:attribute name="mimetype" type="xsd:string" /><xsd:attribute ref="xml:space" /></xsd:complexType></xsd:element>
+        <xsd:element name="assembly"><xsd:complexType><xsd:attribute name="alias" type="xsd:string" /><xsd:attribute name="name" type="xsd:string" /></xsd:complexType></xsd:element>
+        <xsd:element name="data"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /><xsd:element name="comment" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" /><xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" /><xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" /><xsd:attribute ref="xml:space" /></xsd:complexType></xsd:element>
+        <xsd:element name="resheader"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" type="xsd:string" use="required" /></xsd:complexType></xsd:element>
+      </xsd:choice></xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SettingsPageTitle.Text" xml:space="preserve"><value>设置与运行环境</value></data>
+  <data name="SettingsPageSubtitle.Text" xml:space="preserve"><value>更新和校验 JiggleForge，并管理全局变形运行时、ShaderFix 与滚轮深度输入。</value></data>
+  <data name="LanguageComboBox.Header" xml:space="preserve"><value>显示语言</value></data>
+  <data name="ApplyLanguageButton.Content" xml:space="preserve"><value>应用并重启</value></data>
+  <data name="LanguageAlreadyActive" xml:space="preserve"><value>当前已经使用所选语言。</value></data>
+  <data name="LanguageSwitchFailed" xml:space="preserve"><value>无法切换语言：{0}</value></data>
+  <data name="LanguageRestartPathUnavailable" xml:space="preserve"><value>无法确定应用程序路径，因此不能自动重启。</value></data>
+  <data name="TourWelcomeTitle" xml:space="preserve"><value>欢迎使用 JiggleForge 测试版</value></data>
+  <data name="TourWelcomeDescription" xml:space="preserve"><value>接下来会直接带你浏览每个页面和关键控件。JiggleForge 会修改所选 Mod 文件夹，测试重要 Mod 前请先保留副本。</value></data>
+  <data name="TourOpenProjectTitle" xml:space="preserve"><value>打开 Mod 项目</value></data>
+  <data name="TourOpenProjectDescription" xml:space="preserve"><value>把一个具体的角色 Mod 文件夹拖到这里，或点击“选择文件夹”。不要选择整个 Mods 或 _MANAGED_ 目录。</value></data>
+  <data name="TourZzmiTitle" xml:space="preserve"><value>选择 ZZMI 根目录</value></data>
+  <data name="TourZzmiDescription" xml:space="preserve"><value>这里填写包含 Mods 与 ShaderFixes 的 ZZMI 根目录。默认通常位于 %APPDATA%\XXMI Launcher\ZZMI。</value></data>
+  <data name="TourRuntimeTitle" xml:space="preserve"><value>安装或更新运行环境</value></data>
+  <data name="TourRuntimeDescription" xml:space="preserve"><value>首次使用、应用升级或游戏更新后点击这里。安装完成后回到游戏按 F10 重新加载。</value></data>
+  <data name="TourDragKeysTitle" xml:space="preserve"><value>设置全局拖动键</value></data>
+  <data name="TourDragKeysDescription" xml:space="preserve"><value>可同时勾选多个鼠标键或键盘键。所有原版角色和已适配 Mod 共用这套全局拖动键。</value></data>
+  <data name="TourWheelTitle" xml:space="preserve"><value>启用滚轮深度输入</value></data>
+  <data name="TourWheelDescription" xml:space="preserve"><value>需要用滚轮控制屏幕前后方向时启动 WheelBridge；只使用平面拖动时可以不启动。</value></data>
+  <data name="TourDrawsTitle" xml:space="preserve"><value>识别、命名和分组 Draw</value></data>
+  <data name="TourDrawsDescription" xml:space="preserve"><value>每个 Draw 对应原 Mod 的一次适配绘制。可修改别名、关闭变形，并把有关联的 Draw 放入同一组。没有打开项目时这里会暂时为空。</value></data>
+  <data name="TourInspectorTitle" xml:space="preserve"><value>游戏内 Draw 检测器</value></data>
+  <data name="TourInspectorDescription" xml:space="preserve"><value>辨认模型部位时开启；回到游戏按 F10 后，拖动目标会在左上角显示命中的 Draw。完成配置后建议关闭。</value></data>
+  <data name="TourGraphModeTitle" xml:space="preserve"><value>切换依赖关系编辑方式</value></data>
+  <data name="TourGraphModeDescription" xml:space="preserve"><value>可使用边列表，或切换为可拖动节点、右键连边的互动图。</value></data>
+  <data name="TourEdgesTitle" xml:space="preserve"><value>设置组之间的影响</value></data>
+  <data name="TourEdgesDescription" xml:space="preserve"><value>有向边表示拖动起点组时也会带动终点组。依赖关系支持传递；请避免不需要的循环和跨部件影响。</value></data>
+  <data name="TourMaskTitle" xml:space="preserve"><value>为 Draw 指定纹理 Mask</value></data>
+  <data name="TourMaskDescription" xml:space="preserve"><value>白色区域权重接近 1，黑色区域接近 0。未指定 Mask 时，整个 Draw 默认按 1.0 参与变形。</value></data>
+  <data name="TourPhysicsScopeTitle" xml:space="preserve"><value>选择要调整的物理范围</value></data>
+  <data name="TourPhysicsScopeDescription" xml:space="preserve"><value>可以编辑项目默认参数，也可以为每个 Draw 组设置独立参数。</value></data>
+  <data name="TourPhysicsTitle" xml:space="preserve"><value>调整变形质感</value></data>
+  <data name="TourPhysicsDescription" xml:space="preserve"><value>影响半径和强度决定范围与幅度；频率、阻尼、最大位移、深度范围和体积响应共同决定手感。</value></data>
+  <data name="TourReplayTitle" xml:space="preserve"><value>随时重新查看向导</value></data>
+  <data name="TourReplayDescription" xml:space="preserve"><value>完成配置后点击页面底部的“应用配置”，回到游戏按 F10 测试。以后可从这里重新播放完整界面导览。</value></data>
+  <data name="TourCommunityTitle" xml:space="preserve"><value>加入 QQ 交流群</value></data>
+  <data name="TourCommunityDescription" xml:space="preserve"><value>QQ群：451901293。无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！</value></data>
+  <data name="TourLater" xml:space="preserve"><value>稍后再看</value></data>
+  <data name="TourExit" xml:space="preserve"><value>退出向导</value></data>
+  <data name="TourProgress" xml:space="preserve"><value>第 {0} 步，共 {1} 步</value></data>
+  <data name="TourFinish" xml:space="preserve"><value>完成向导</value></data>
+  <data name="TourNext" xml:space="preserve"><value>下一步</value></data>
+  <data name="TourCompleted" xml:space="preserve"><value>界面导览已完成。以后可从左侧底部的“使用向导”重新查看。</value></data>
+  <data name="TourSaveFailed" xml:space="preserve"><value>导览已完成，但无法保存首次运行状态：{0}</value></data>
+  <data name="DragKeyLeftMouse" xml:space="preserve"><value>鼠标左键</value></data>
+  <data name="DragKeyRightMouse" xml:space="preserve"><value>鼠标右键</value></data>
+  <data name="DragKeyMiddleMouse" xml:space="preserve"><value>鼠标中键</value></data>
+  <data name="DragKeySideMouse1" xml:space="preserve"><value>鼠标侧键 1</value></data>
+  <data name="DragKeySideMouse2" xml:space="preserve"><value>鼠标侧键 2</value></data>
+  <data name="DragKeyKeyboardX" xml:space="preserve"><value>键盘 X</value></data>
+  <data name="DragKeyKeyboardC" xml:space="preserve"><value>键盘 C</value></data>
+  <data name="DragKeyKeyboardV" xml:space="preserve"><value>键盘 V</value></data>
+  <data name="StateFirstImport" xml:space="preserve"><value>首次导入</value></data>
+  <data name="StateReady" xml:space="preserve"><value>配置已就绪</value></data>
+  <data name="StateRuntimeRepair" xml:space="preserve"><value>需要修复运行文件</value></data>
+  <data name="StateConfigMissing" xml:space="preserve"><value>需要恢复配置</value></data>
+  <data name="StateLegacyMigration" xml:space="preserve"><value>需要迁移旧版本</value></data>
+  <data name="StateCannotImport" xml:space="preserve"><value>无法导入</value></data>
+  <data name="DrawCount" xml:space="preserve"><value>{0} 个 Draw</value></data>
+  <data name="OriginalPartsDisplayName" xml:space="preserve"><value>OriginalParts · 原版部件</value></data>
+  <data name="UngroupedDisplayName" xml:space="preserve"><value>未分组</value></data>
+  <data name="NewGroup" xml:space="preserve"><value>新建组</value></data>
+  <data name="MoveToThisGroup" xml:space="preserve"><value>移动到此组</value></data>
+  <data name="MoveToGroup" xml:space="preserve"><value>移动到组</value></data>
+  <data name="NewGroupAndMove" xml:space="preserve"><value>新建组并移动</value></data>
+  <data name="RenameGroup" xml:space="preserve"><value>重命名组</value></data>
+  <data name="DeleteGroup" xml:space="preserve"><value>删除组</value></data>
+  <data name="GroupNameRequired" xml:space="preserve"><value>组名不能为空。</value></data>
+  <data name="GroupNameReserved" xml:space="preserve"><value>该名称由应用保留，请使用其他组名。</value></data>
+  <data name="GroupAlreadyExists" xml:space="preserve"><value>组“{0}”已经存在。</value></data>
+  <data name="EnterGroupName" xml:space="preserve"><value>输入组名</value></data>
+  <data name="Confirm" xml:space="preserve"><value>确定</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="NoGroupsYet" xml:space="preserve"><value>还没有分组。请先在 Draw 页面填写组名。</value></data>
+  <data name="NeedNormalGroupForEdge" xml:space="preserve"><value>至少需要一个普通组才能添加依赖边。</value></data>
+  <data name="OriginalPartsCannotBeTarget" xml:space="preserve"><value>OriginalParts 固定组不能作为依赖关系的终点。</value></data>
+  <data name="GraphNodeTooltip" xml:space="preserve"><value>{0}：左键拖动，右键连边</value></data>
+  <data name="DeleteEdgeTooltip" xml:space="preserve"><value>删除 {0} → {1}</value></data>
+  <data name="OpenModFolder" xml:space="preserve"><value>打开 Mod 文件夹</value></data>
+  <data name="DropFolderNotFile" xml:space="preserve"><value>请拖入文件夹，而不是单个文件。</value></data>
+  <data name="AdaptedDraws" xml:space="preserve"><value>已原地适配 {0} 个 Draw。配置界面已经打开；修改后按 F10 查看效果。</value></data>
+  <data name="RestoreOriginalTitle" xml:space="preserve"><value>恢复原始 Mod？</value></data>
+  <data name="RestoreOriginalDescription" xml:space="preserve"><value>这会还原首次适配前的原始文件，并删除当前 JiggleForge 配置和运行时文件。备份压缩包会保留，可以再次恢复。</value></data>
+  <data name="RestoreOriginalAction" xml:space="preserve"><value>恢复原始 Mod</value></data>
+  <data name="OriginalModRestored" xml:space="preserve"><value>已恢复原始 Mod。原始备份仍保留在 Mod 文件夹中。</value></data>
+  <data name="RestoreFailed" xml:space="preserve"><value>恢复失败：{0}</value></data>
+  <data name="BackupSaved" xml:space="preserve"><value>原始备份：已保存 {0} 个文件（{1}）</value></data>
+  <data name="BackupInvalid" xml:space="preserve"><value>原始备份：文件存在但不可用。{0}</value></data>
+  <data name="BackupCreatedOnAdapt" xml:space="preserve"><value>原始备份：首次适配时自动创建。</value></data>
+  <data name="BackupNotFound" xml:space="preserve"><value>原始备份：未找到（旧版本适配的 Mod 可能无法精确恢复）。</value></data>
+  <data name="RuntimeFilesRepaired" xml:space="preserve"><value>运行文件已修复，共检查 {0} 个 Draw。回到游戏按 F10。</value></data>
+  <data name="ConfigurationApplied" xml:space="preserve"><value>配置已应用到 {0} 个 Draw。回到游戏按 F10 查看效果。</value></data>
+  <data name="InspectorEnabled" xml:space="preserve"><value>Draw 检测器已开启，共覆盖 {0} 个 Draw。回到游戏按 F10，然后拖动模型查看。</value></data>
+  <data name="InspectorDisabled" xml:space="preserve"><value>Draw 检测器已关闭。回到游戏按 F10 生效。</value></data>
+  <data name="EdgeGroupsRequired" xml:space="preserve"><value>依赖边的两个组都必须选择。</value></data>
+  <data name="SelfEdgeInvalid" xml:space="preserve"><value>不能添加自身依赖边：{0} → {1}。</value></data>
+  <data name="DuplicateEdge" xml:space="preserve"><value>依赖边重复：{0} → {1}。</value></data>
+  <data name="InspectorOn" xml:space="preserve"><value>Draw 检测器：已开启</value></data>
+  <data name="InspectorOff" xml:space="preserve"><value>Draw 检测器：已关闭</value></data>
+  <data name="SelectValidZzmiFirst" xml:space="preserve"><value>请先在设置中选择正确的 ZZMI 根目录。</value></data>
+  <data name="CannotScanMods" xml:space="preserve"><value>无法扫描 Mod：{0}</value></data>
+  <data name="ScanningMods" xml:space="preserve"><value>正在扫描 Mod…</value></data>
+  <data name="NoModsDetected" xml:space="preserve"><value>没有识别到 Mod。仍然可以拖入或手动打开外部 Mod。</value></data>
+  <data name="ModsDetected" xml:space="preserve"><value>已识别 {0} 个 Mod。点击任意一项即可打开配置。</value></data>
+  <data name="ModScanFailed" xml:space="preserve"><value>扫描失败：{0}</value></data>
+  <data name="ZzmiCandidatesFound" xml:space="preserve"><value>{0} 已找到：{1}</value></data>
+  <data name="AutoLocatedModRoot" xml:space="preserve"><value>已自动定位到 Mod 根目录：{0}</value></data>
+  <data name="ModDefaultPhysicsScope" xml:space="preserve"><value>Mod 默认参数（未分组 Draw）</value></data>
+  <data name="EditingModDefaultPhysics" xml:space="preserve"><value>当前正在编辑 Mod 默认参数。</value></data>
+  <data name="CopiedPhysicsToGroup" xml:space="preserve"><value>已把 Mod 默认参数复制到组“{0}”。</value></data>
+  <data name="RecommendedPhysicsAutoApplyFailed" xml:space="preserve"><value>无法自动应用 v0.1.8 推荐物理参数：{0}</value></data>
+  <data name="RecommendedPhysicsAppliedInstallLater" xml:space="preserve"><value>v0.1.8 已一次性应用新的推荐物理参数。安装或更新游戏运行时后会自动使用；现有 Mod 的独立参数没有改变。</value></data>
+  <data name="RecommendedPhysicsApplied" xml:space="preserve"><value>v0.1.8 已一次性应用新的推荐物理参数，并同步到游戏运行时。现有 Mod 的独立参数没有改变；回到游戏按 F10 生效。</value></data>
+  <data name="RecommendedPhysicsRuntimeSyncFailed" xml:space="preserve"><value>v0.1.8 推荐参数已保存到应用，但暂时无法同步游戏运行时：{0}</value></data>
+  <data name="RecommendedDefaultsLoaded" xml:space="preserve"><value>已填入推荐默认值；点击“保存全局默认参数”后写入应用和游戏运行时。</value></data>
+  <data name="QqCopied" xml:space="preserve"><value>QQ群号 451901293 已复制。</value></data>
+  <data name="InvalidPath" xml:space="preserve"><value>路径无效：{0}</value></data>
+  <data name="NoValidZzmiRoot" xml:space="preserve"><value>没有找到有效的 ZZMI 根目录。请选择包含 Mods、ShaderFixes 和加载器文件的目录。</value></data>
+  <data name="WheelStoppedForUpdate" xml:space="preserve"><value>WheelBridge 已停止，可以更新运行环境。</value></data>
+  <data name="RuntimeInstalled" xml:space="preserve"><value>运行环境已安装或更新。回到游戏按 F10 生效。</value></data>
+  <data name="DragKeysUpdated" xml:space="preserve"><value>全局拖动键已更新。按下其中任意一个都可以拖动；回到游戏按 F10 生效。</value></data>
+  <data name="Saving" xml:space="preserve"><value>正在保存…</value></data>
+  <data name="DefaultsSavedInvalidZzmi" xml:space="preserve"><value>参数已保存在应用中，但 ZZMI 路径无效，尚未写入游戏。</value></data>
+  <data name="DefaultsSavedToRuntime" xml:space="preserve"><value>全局默认物理参数已保存并写入游戏运行环境。现有 Mod 保持各自参数；回到游戏按 F10 生效。</value></data>
+  <data name="SavedToGame" xml:space="preserve"><value>已保存并写入游戏；按 F10 生效。</value></data>
+  <data name="SavedButRuntimeWriteFailed" xml:space="preserve"><value>应用设置已保存，但游戏运行时写入失败；请查看顶部错误信息。</value></data>
+  <data name="SavedInstallLater" xml:space="preserve"><value>已保存；安装运行环境时会自动写入游戏。</value></data>
+  <data name="GlobalDefaultsSaved" xml:space="preserve"><value>全局默认物理参数已保存。首次生成 Mod 时会使用这些值；安装运行环境后也会用于无 Mod 角色。</value></data>
+  <data name="SaveFailedSeeError" xml:space="preserve"><value>保存失败；请查看顶部错误信息。</value></data>
+  <data name="UninstallingRuntime" xml:space="preserve"><value>正在卸载运行环境</value></data>
+  <data name="UninstallingRuntimeDetails" xml:space="preserve"><value>正在移除全局运行时和 6 个 JiggleForge ShaderFix；安装前备份会自动恢复。</value></data>
+  <data name="UninstallingRuntimeMessage" xml:space="preserve"><value>正在卸载运行环境…</value></data>
+  <data name="WheelStoppedForUninstall" xml:space="preserve"><value>WheelBridge 已停止，可以卸载运行环境。</value></data>
+  <data name="RuntimeUninstalled" xml:space="preserve"><value>运行环境已卸载；安装前备份的 ShaderFix 已恢复。回到游戏按 F10 生效。</value></data>
+  <data name="WaitingForAdmin" xml:space="preserve"><value>等待管理员授权</value></data>
+  <data name="WheelAdminDescription" xml:space="preserve"><value>WheelBridge 需要管理员权限来读取并拦截鼠标滚轮。请在 Windows 用户账户控制窗口中选择“是”。</value></data>
+  <data name="WaitingWheelAdmin" xml:space="preserve"><value>正在等待 WheelBridge 的管理员授权…</value></data>
+  <data name="WheelStarted" xml:space="preserve"><value>WheelBridge 已启动。拖动模型时可以使用滚轮调整冻结法向上的深度。</value></data>
+  <data name="WheelStopped" xml:space="preserve"><value>WheelBridge 已停止。</value></data>
+  <data name="ValidZzmiNotFound" xml:space="preserve"><value>未找到有效的 ZZMI 目录</value></data>
+  <data name="ChooseZzmiRootDetails" xml:space="preserve"><value>请选择包含 Mods、ShaderFixes 和 ZZMI 加载器文件的根目录。错误路径不会被保存。</value></data>
+  <data name="Unknown" xml:space="preserve"><value>未知</value></data>
+  <data name="Running" xml:space="preserve"><value>正在运行</value></data>
+  <data name="NotRunning" xml:space="preserve"><value>未运行</value></data>
+  <data name="InvalidZzmiPath" xml:space="preserve"><value>ZZMI 路径无效：{0}</value></data>
+  <data name="CannotCheckRuntime" xml:space="preserve"><value>无法检查运行环境</value></data>
+  <data name="RuntimeReady" xml:space="preserve"><value>运行环境已就绪</value></data>
+  <data name="RuntimeNeedsInstall" xml:space="preserve"><value>运行环境需要安装或更新</value></data>
+  <data name="ZzmiNotFound" xml:space="preserve"><value>未找到 ZZMI 目录</value></data>
+  <data name="RuntimePayloadMissing" xml:space="preserve"><value>应用目录缺少 RuntimePayload，无法执行安装。请重新构建或重新安装 JiggleForge。</value></data>
+  <data name="DirectoryDoesNotExist" xml:space="preserve"><value>目录不存在：{0}</value></data>
+  <data name="ZzmiMustContainFolders" xml:space="preserve"><value>所选目录必须同时包含 Mods 和 ShaderFixes 文件夹。</value></data>
+  <data name="AllComponentsCurrentWithBackups" xml:space="preserve"><value>所有组件均为当前版本；保留了 {0} 个安装前 ShaderFix 备份。</value></data>
+  <data name="AllComponentsCurrent" xml:space="preserve"><value>所有组件均为当前版本。</value></data>
+  <data name="InstallRuntimeHint" xml:space="preserve"><value>点击“安装或更新运行环境”可补齐缺失文件并更新旧版本。</value></data>
+  <data name="NotInstalled" xml:space="preserve"><value>未安装</value></data>
+  <data name="CurrentVersion" xml:space="preserve"><value>当前版本</value></data>
+  <data name="NeedsUpdate" xml:space="preserve"><value>需要更新</value></data>
+  <data name="ShaderFixCurrentCount" xml:space="preserve"><value>{0}/{1} 当前版本</value></data>
+  <data name="InstalledShaderCount" xml:space="preserve"><value>（检测到 {0} 个）</value></data>
+  <data name="ValidPath" xml:space="preserve"><value>路径有效：{0}</value></data>
+  <data name="AutoCorrectedPath" xml:space="preserve"><value>已自动纠正为：{0}</value></data>
+  <data name="AutoLocatedZzmiRoot" xml:space="preserve"><value>已自动定位到 ZZMI 根目录：{0}</value></data>
+  <data name="ApplicationVersion" xml:space="preserve"><value>当前版本：v{0}</value></data>
+  <data name="AutoCheckStableRelease" xml:space="preserve"><value>启动后会自动检查 GitHub 最新稳定版。</value></data>
+  <data name="VerifyingInstallation" xml:space="preserve"><value>正在校验当前安装…</value></data>
+  <data name="VerificationPassedDetails" xml:space="preserve"><value>校验通过：{0}/{1} 个程序和运行时文件完整。</value></data>
+  <data name="VerificationPassed" xml:space="preserve"><value>JiggleForge 当前安装校验通过。</value></data>
+  <data name="AdditionalIssues" xml:space="preserve"><value>；另有 {0} 项</value></data>
+  <data name="VerificationFailedDetails" xml:space="preserve"><value>校验未通过：{0}/{1} 个文件完整。{2}</value></data>
+  <data name="CannotVerifyVersion" xml:space="preserve"><value>当前版本无法校验。</value></data>
+  <data name="InstallationFilesChanged" xml:space="preserve"><value>当前安装存在缺失或被修改的文件，可以更新或重新安装最新版本。</value></data>
+  <data name="VerificationError" xml:space="preserve"><value>校验失败：{0}</value></data>
+  <data name="CheckingGithubRelease" xml:space="preserve"><value>正在检查 GitHub 最新版本…</value></data>
+  <data name="NewVersionFoundWithName" xml:space="preserve"><value>发现新版本 v{0}：{1}</value></data>
+  <data name="NewVersionFound" xml:space="preserve"><value>发现新版本 v{0}</value></data>
+  <data name="OneClickUpdateAvailable" xml:space="preserve"><value>发现 JiggleForge v{0}，可以一键更新。</value></data>
+  <data name="AlreadyLatestVersion" xml:space="preserve"><value>当前已是最新版本 v{0}。</value></data>
+  <data name="JiggleForgeAlreadyLatest" xml:space="preserve"><value>JiggleForge 当前已是最新版本。</value></data>
+  <data name="VersionAheadOfRelease" xml:space="preserve"><value>当前版本 v{0} 高于最新公开版 v{1}。</value></data>
+  <data name="CannotConnectGithub" xml:space="preserve"><value>暂时无法连接 GitHub 检查更新。</value></data>
+  <data name="UpdateCheckFailed" xml:space="preserve"><value>检查更新失败：{0}</value></data>
+  <data name="NoReleaseNotes" xml:space="preserve"><value>此版本没有附加更新说明。</value></data>
+  <data name="UpdateVersionComparison" xml:space="preserve"><value>当前版本：v{0}&#x0A;最新版本：v{1}</value></data>
+  <data name="WhatsNew" xml:space="preserve"><value>更新内容</value></data>
+  <data name="UpdateCommunityText" xml:space="preserve"><value>QQ 交流群：451901293&#x0A;无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！</value></data>
+  <data name="NewVersionDialogTitle" xml:space="preserve"><value>发现 JiggleForge 新版本</value></data>
+  <data name="UpdateNow" xml:space="preserve"><value>立即更新</value></data>
+  <data name="NotNow" xml:space="preserve"><value>暂不更新</value></data>
+  <data name="DownloadingVersion" xml:space="preserve"><value>正在下载 JiggleForge v{0}…</value></data>
+  <data name="DownloadingVersionProgress" xml:space="preserve"><value>正在下载 JiggleForge v{0}：{1:P0}</value></data>
+  <data name="DownloadVerifiedStartingUpdater" xml:space="preserve"><value>下载完成且 SHA-256 校验通过，正在启动更新器…</value></data>
+  <data name="UpdateFailed" xml:space="preserve"><value>更新失败：{0}</value></data>
+  <data name="UpdaterMissing" xml:space="preserve"><value>应用目录缺少 JiggleForge.Updater.exe，请手动安装包含更新器的新版本。</value></data>
+  <data name="CannotStartUpdater" xml:space="preserve"><value>无法启动 JiggleForge 更新器。</value></data>
+  <data name="UpdateToLatest" xml:space="preserve"><value>更新到最新版本</value></data>
+  <data name="ReinstallLatest" xml:space="preserve"><value>重新安装最新版本</value></data>
+  <data name="UnsupportedQuoteInPath" xml:space="preserve"><value>路径包含不受支持的双引号字符。</value></data>
+  <data name="OriginalPartsToggle.OnContent" xml:space="preserve"><value>允许原版部件变形</value></data>
+  <data name="OriginalPartsToggle.OffContent" xml:space="preserve"><value>禁止原版部件变形</value></data>
+  <data name="DrawAliasTextBox.PlaceholderText" xml:space="preserve"><value>例如 Body</value></data>
+  <data name="UpdateTitleButton.Content" xml:space="preserve"><value>发现新版本</value></data>
+  <data name="OverviewNavItem.Content" xml:space="preserve"><value>概览</value></data>
+  <data name="GraphNavItem.Content" xml:space="preserve"><value>依赖关系</value></data>
+  <data name="PhysicsNavItem.Content" xml:space="preserve"><value>物理参数</value></data>
+  <data name="GuideNavItem.Content" xml:space="preserve"><value>使用向导</value></data>
+  <data name="RuntimeNavItem.Content" xml:space="preserve"><value>设置</value></data>
+  <data name="OverviewTitle.Text" xml:space="preserve"><value>打开变形项目</value></data>
+  <data name="OverviewSubtitle.Text" xml:space="preserve"><value>拖入原 Mod 或已经适配的 Mod 文件夹。应用会自动判断导入状态。</value></data>
+  <data name="DropCardTitle.Text" xml:space="preserve"><value>将 Mod 文件夹拖到这里</value></data>
+  <data name="DropCardSubtitle.Text" xml:space="preserve"><value>也可以手动选择文件夹</value></data>
+  <data name="ChooseModFolderButton.Content" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>当前 ZZMI 的 Mod</value></data>
+  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>刷新 Mod 列表</value></data>
+  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>正在等待 ZZMI 路径检查…</value></data>
+  <data name="RecognizedDrawsLabel.Text" xml:space="preserve"><value>识别到的 Draw</value></data>
+  <data name="SchemaVersionLabel.Text" xml:space="preserve"><value>配置版本</value></data>
+  <data name="CreateConfigButton.Content" xml:space="preserve"><value>首次适配</value></data>
+  <data name="RepairRuntimeButton.Content" xml:space="preserve"><value>修复运行文件</value></data>
+  <data name="RestoreOriginalButton.Content" xml:space="preserve"><value>恢复原始 Mod</value></data>
+  <data name="OpenExplorerButton.Content" xml:space="preserve"><value>在资源管理器中打开</value></data>
+  <data name="DrawPageTitle.Text" xml:space="preserve"><value>Draw 配置</value></data>
+  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。</value></data>
+  <data name="CreateDrawGroupButton.Content" xml:space="preserve"><value>新建组</value></data>
+  <data name="DrawDeformColumn.Text" xml:space="preserve"><value>变形</value></data>
+  <data name="DrawNameColumn.Text" xml:space="preserve"><value>名称</value></data>
+  <data name="DrawSourceColumn.Text" xml:space="preserve"><value>来源</value></data>
+  <data name="InspectorToggleButton.Content" xml:space="preserve"><value>Draw 检测器：已关闭</value></data>
+  <data name="ApplyConfigurationButton.Content" xml:space="preserve"><value>应用配置</value></data>
+  <data name="GraphPageTitle.Text" xml:space="preserve"><value>有向依赖关系</value></data>
+  <data name="GraphPageSubtitle.Text" xml:space="preserve"><value>依赖会沿有向边继续传递：A → B → C 时，拖动 A 会同时影响 B 和 C。环形依赖会安全合并，不会重复计算；OriginalParts 固定组只能作为起点，不能作为终点。</value></data>
+  <data name="GraphModeComboBox.Header" xml:space="preserve"><value>显示方式</value></data>
+  <data name="GraphEdgeListOption.Content" xml:space="preserve"><value>边列表</value></data>
+  <data name="GraphInteractiveOption.Content" xml:space="preserve"><value>互动图</value></data>
+  <data name="CurrentGroupsLabel.Text" xml:space="preserve"><value>当前组</value></data>
+  <data name="EdgeFromComboBox.PlaceholderText" xml:space="preserve"><value>触发组</value></data>
+  <data name="EdgeToComboBox.PlaceholderText" xml:space="preserve"><value>受影响组</value></data>
+  <data name="DeleteEdgeButton.Content" xml:space="preserve"><value>删除</value></data>
+  <data name="AddEdgeButton.Content" xml:space="preserve"><value>添加边</value></data>
+  <data name="InteractiveGraphHelp.Text" xml:space="preserve"><value>在节点上按住左键可调整位置；按住右键拖到另一个节点即可连边。把鼠标放到边上会显示删除按钮。</value></data>
+  <data name="ApplyGraphButton.Content" xml:space="preserve"><value>应用依赖关系</value></data>
+  <data name="MaskPageTitle.Text" xml:space="preserve"><value>纹理 Mask</value></data>
+  <data name="MaskPageSubtitle.Text" xml:space="preserve"><value>填写 Mod 文件夹内的 DDS 相对路径。空白表示全白 1.0。多个 Draw 可以使用同一个文件。</value></data>
+  <data name="ApplyMaskButton.Content" xml:space="preserve"><value>应用 Mask</value></data>
+  <data name="PhysicsPageTitle.Text" xml:space="preserve"><value>物理参数</value></data>
+  <data name="PhysicsPageSubtitle.Text" xml:space="preserve"><value>每个组使用独立参数；未分组 Draw 使用 Mod 默认参数。依赖关系中的每个状态仍保留其所属组的参数。</value></data>
+  <data name="PhysicsScopeComboBox.Header" xml:space="preserve"><value>正在编辑</value></data>
+  <data name="CopyDefaultPhysicsButton.Content" xml:space="preserve"><value>复制 Mod 默认参数</value></data>
+  <data name="RadiusNumber.Header" xml:space="preserve"><value>影响半径</value></data>
+  <data name="StrengthNumber.Header" xml:space="preserve"><value>强度</value></data>
+  <data name="FalloffNumber.Header" xml:space="preserve"><value>衰减指数</value></data>
+  <data name="DragScaleNumber.Header" xml:space="preserve"><value>拖动比例</value></data>
+  <data name="GrabDampingNumber.Header" xml:space="preserve"><value>抓取阻尼比</value></data>
+  <data name="GrabSpringNumber.Header" xml:space="preserve"><value>抓取频率（Hz）</value></data>
+  <data name="ReleaseDampingNumber.Header" xml:space="preserve"><value>松手阻尼比</value></data>
+  <data name="ReleaseSpringNumber.Header" xml:space="preserve"><value>松手频率（Hz）</value></data>
+  <data name="ReleaseKickNumber.Header" xml:space="preserve"><value>释放/拍打冲量</value></data>
+  <data name="TargetFollowNumber.Header" xml:space="preserve"><value>目标跟随时间（秒）</value></data>
+  <data name="MaxOffsetNumber.Header" xml:space="preserve"><value>最大位移</value></data>
+  <data name="WheelStepNumber.Header" xml:space="preserve"><value>滚轮深度步长</value></data>
+  <data name="WheelMinDepthNumber.Header" xml:space="preserve"><value>滚轮最小深度（负值进入屏幕）</value></data>
+  <data name="WheelMaxDepthNumber.Header" xml:space="preserve"><value>滚轮最大深度（正值朝向镜头）</value></data>
+  <data name="VolumeResponseNumber.Header" xml:space="preserve"><value>体积响应</value></data>
+  <data name="SavePhysicsButton.Content" xml:space="preserve"><value>保存参数</value></data>
+  <data name="ApplicationUpdateTitle.Text" xml:space="preserve"><value>应用更新与校验</value></data>
+  <data name="ApplicationUpdateStatusText.Text" xml:space="preserve"><value>尚未检查更新。</value></data>
+  <data name="ApplicationIntegrityStatusText.Text" xml:space="preserve"><value>可校验当前程序和运行时文件是否完整。</value></data>
+  <data name="CheckApplicationUpdateButton.Content" xml:space="preserve"><value>检查更新</value></data>
+  <data name="UpdateApplicationButton.Content" xml:space="preserve"><value>更新到最新版本</value></data>
+  <data name="VerifyApplicationButton.Content" xml:space="preserve"><value>校验当前安装</value></data>
+  <data name="CommunityTitle.Text" xml:space="preserve"><value>项目链接与社区</value></data>
+  <data name="CommunityDescription.Text" xml:space="preserve"><value>无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！</value></data>
+  <data name="OpenGithubButton.Content" xml:space="preserve"><value>打开 GitHub 仓库</value></data>
+  <data name="OpenBilibiliButton.Content" xml:space="preserve"><value>观看 B站介绍视频</value></data>
+  <data name="QqGroupLabel.Text" xml:space="preserve"><value>QQ 交流群：451901293</value></data>
+  <data name="CopyQqButton.Content" xml:space="preserve"><value>复制群号</value></data>
+  <data name="RuntimePathTextBox.Header" xml:space="preserve"><value>ZZMI 根目录</value></data>
+  <data name="ChooseRuntimeFolderButton.Content" xml:space="preserve"><value>选择文件夹</value></data>
+  <data name="RuntimePathValidationText.Text" xml:space="preserve"><value>尚未检查路径。</value></data>
+  <data name="DefaultPhysicsTitle.Text" xml:space="preserve"><value>全局默认物理参数</value></data>
+  <data name="DefaultPhysicsDescription.Text" xml:space="preserve"><value>首次生成 Mod 与没有适配 Mod 的原版角色共用这套默认值。已经生成的 Mod 保留自己的独立参数。</value></data>
+  <data name="ResetDefaultPhysicsButton.Content" xml:space="preserve"><value>恢复推荐值</value></data>
+  <data name="SaveDefaultPhysicsButton.Content" xml:space="preserve"><value>保存全局默认参数</value></data>
+  <data name="DragKeysTitle.Text" xml:space="preserve"><value>全局拖动键（可多选）</value></data>
+  <data name="ApplyDragKeyButton.Content" xml:space="preserve"><value>应用拖动键</value></data>
+  <data name="DragKeysDescription.Text" xml:space="preserve"><value>这是所有角色和 Mod 共用的键位。按下任意一个已勾选按键都能拖动；修改后回到游戏按 F10 生效。</value></data>
+  <data name="GlobalRuntimeLabel.Text" xml:space="preserve"><value>全局运行时</value></data>
+  <data name="InstallRuntimeButton.Content" xml:space="preserve"><value>安装或更新运行环境</value></data>
+  <data name="UninstallRuntimeButton.Content" xml:space="preserve"><value>卸载运行环境</value></data>
+  <data name="StartWheelButton.Content" xml:space="preserve"><value>启动滚轮输入</value></data>
+  <data name="StopWheelButton.Content" xml:space="preserve"><value>停止滚轮输入</value></data>
+  <data name="RefreshRuntimeButton.Content" xml:space="preserve"><value>刷新状态</value></data>
+  <data name="OnboardingPreviousButton.Content" xml:space="preserve"><value>上一步</value></data>
+  <data name="OnboardingExitButton.Content" xml:space="preserve"><value>退出向导</value></data>
+  <data name="OnboardingNextButton.Content" xml:space="preserve"><value>下一步</value></data>
+  <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>控制所有未被当前 Mod 替换的原版部件。</value></data>
+  <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>打开设置并更新 JiggleForge</value></data>
+</root>

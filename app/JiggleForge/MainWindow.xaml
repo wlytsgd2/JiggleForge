@@ -103,6 +103,7 @@
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Border>
                     <ToggleSwitch Grid.Column="3"
+                                  local:Localization.Key="OriginalPartsToggle"
                                   IsOn="{Binding Content.OriginalPartsEnabled, Mode=TwoWay}"
                                   Visibility="{Binding Content.OriginalToggleVisibility}"
                                   OnContent="允许原版部件变形"
@@ -140,6 +141,7 @@
                                   OffContent=""
                                   VerticalAlignment="Center" />
                     <TextBox Grid.Column="2"
+                             local:Localization.Key="DrawAliasTextBox"
                              Text="{Binding Content.Row.Alias, Mode=TwoWay}"
                              PlaceholderText="例如 Body" />
                     <StackPanel Grid.Column="3" VerticalAlignment="Center">
@@ -170,6 +172,7 @@
                        Stretch="Uniform" />
                 <TextBlock Text="JiggleForge" FontSize="14" FontWeight="SemiBold" />
                 <Button x:Name="UpdateTitleButton"
+                        local:Localization.Key="UpdateTitleButton"
                         Content="发现新版本"
                         Padding="9,3"
                         FontSize="12"
@@ -192,19 +195,20 @@
                         ItemInvoked="Navigation_ItemInvoked"
                         SelectionChanged="Navigation_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="OverviewNavItem" Content="概览" Icon="Home" Tag="overview" IsSelected="True" />
+                <NavigationViewItem x:Name="OverviewNavItem" local:Localization.Key="OverviewNavItem" Content="概览" Icon="Home" Tag="overview" IsSelected="True" />
                 <NavigationViewItem x:Name="DrawNavItem" Content="Draw" Icon="List" Tag="draws" IsEnabled="False" />
-                <NavigationViewItem x:Name="GraphNavItem" Content="依赖关系" Icon="Share" Tag="graph" IsEnabled="False" />
+                <NavigationViewItem x:Name="GraphNavItem" local:Localization.Key="GraphNavItem" Content="依赖关系" Icon="Share" Tag="graph" IsEnabled="False" />
                 <NavigationViewItem x:Name="MaskNavItem" Content="Mask" Icon="Pictures" Tag="mask" IsEnabled="False" />
-                <NavigationViewItem x:Name="PhysicsNavItem" Content="物理参数" Icon="Repair" Tag="physics" IsEnabled="False" />
+                <NavigationViewItem x:Name="PhysicsNavItem" local:Localization.Key="PhysicsNavItem" Content="物理参数" Icon="Repair" Tag="physics" IsEnabled="False" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem x:Name="GuideNavItem"
+                                    local:Localization.Key="GuideNavItem"
                                     Content="使用向导"
                                     Icon="Help"
                                     Tag="guide"
                                     SelectsOnInvoked="False" />
-                <NavigationViewItem x:Name="RuntimeNavItem" Content="设置" Icon="Setting" Tag="runtime" />
+                <NavigationViewItem x:Name="RuntimeNavItem" local:Localization.Key="RuntimeNavItem" Content="设置" Icon="Setting" Tag="runtime" />
             </NavigationView.FooterMenuItems>
 
             <Grid HorizontalAlignment="Stretch" Background="Transparent">
@@ -224,8 +228,8 @@
                         <Grid HorizontalAlignment="Stretch" Padding="28,22,28,36">
                             <StackPanel HorizontalAlignment="Stretch" Spacing="18">
                                 <StackPanel Spacing="5">
-                                    <TextBlock Text="打开变形项目" Style="{StaticResource PageTitleTextStyle}" />
-                                    <TextBlock Text="拖入原 Mod 或已经适配的 Mod 文件夹。应用会自动判断导入状态。"
+                                    <TextBlock local:Localization.Key="OverviewTitle" Text="打开变形项目" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock local:Localization.Key="OverviewSubtitle" Text="拖入原 Mod 或已经适配的 Mod 文件夹。应用会自动判断导入状态。"
                                                Style="{StaticResource PageSubtitleTextStyle}" />
                                 </StackPanel>
                                 <Border x:Name="DropCard"
@@ -234,9 +238,9 @@
                                         Padding="28">
                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                                         <FontIcon Glyph="&#xE8B7;" FontSize="38" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
-                                        <TextBlock Text="将 Mod 文件夹拖到这里" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                                        <TextBlock Text="也可以手动选择文件夹" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
-                                        <Button Content="选择文件夹" Click="ChooseFolder_Click" HorizontalAlignment="Center" />
+                                        <TextBlock local:Localization.Key="DropCardTitle" Text="将 Mod 文件夹拖到这里" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                        <TextBlock local:Localization.Key="DropCardSubtitle" Text="也可以手动选择文件夹" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                        <Button local:Localization.Key="ChooseModFolderButton" Content="选择文件夹" Click="ChooseFolder_Click" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
 
@@ -250,7 +254,7 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Spacing="3">
-                                                <TextBlock Text="当前 ZZMI 的 Mod"
+                                                <TextBlock local:Localization.Key="ModLibraryTitle" Text="当前 ZZMI 的 Mod"
                                                            FontSize="20"
                                                            FontWeight="SemiBold" />
                                                 <TextBlock x:Name="ModLibraryRootText"
@@ -264,11 +268,13 @@
                                                           IsActive="False"
                                                           VerticalAlignment="Center" />
                                             <Button Grid.Column="2"
+                                                    local:Localization.Key="RefreshModLibraryButton"
                                                     Content="刷新 Mod 列表"
                                                     VerticalAlignment="Center"
                                                     Click="RefreshModLibrary_Click" />
                                         </Grid>
                                         <TextBlock x:Name="ModLibraryStatusText"
+                                                   local:Localization.Key="ModLibraryStatusText"
                                                    Text="正在等待 ZZMI 路径检查…"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -345,13 +351,13 @@
                                             </Grid.ColumnDefinitions>
                                             <Border CornerRadius="10" Padding="14" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                                                 <StackPanel>
-                                                    <TextBlock Text="识别到的 Draw" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock local:Localization.Key="RecognizedDrawsLabel" Text="识别到的 Draw" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                     <TextBlock x:Name="DrawCountText" FontSize="24" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Border>
                                             <Border Grid.Column="1" CornerRadius="10" Padding="14" Background="{ThemeResource SubtleFillColorSecondaryBrush}">
                                                 <StackPanel>
-                                                    <TextBlock Text="配置版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                                    <TextBlock local:Localization.Key="SchemaVersionLabel" Text="配置版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                                     <TextBlock x:Name="SchemaText" FontSize="24" FontWeight="SemiBold" />
                                                 </StackPanel>
                                             </Border>
@@ -364,20 +370,23 @@
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <StackPanel Orientation="Horizontal" Spacing="10">
                                             <Button x:Name="CreateConfigButton"
+                                                    local:Localization.Key="CreateConfigButton"
                                                     Content="首次适配"
                                                     Style="{StaticResource AccentButtonStyle}"
                                                     Visibility="Collapsed"
                                                     Click="CreateConfig_Click" />
                                             <Button x:Name="RepairRuntimeButton"
+                                                    local:Localization.Key="RepairRuntimeButton"
                                                     Content="修复运行文件"
                                                     Style="{StaticResource AccentButtonStyle}"
                                                     Visibility="Collapsed"
                                                     Click="RepairRuntime_Click" />
                                             <Button x:Name="RestoreOriginalButton"
+                                                    local:Localization.Key="RestoreOriginalButton"
                                                     Content="恢复原始 Mod"
                                                     Visibility="Collapsed"
                                                     Click="RestoreOriginal_Click" />
-                                            <Button Content="在资源管理器中打开" Click="OpenExplorer_Click" />
+                                            <Button local:Localization.Key="OpenExplorerButton" Content="在资源管理器中打开" Click="OpenExplorer_Click" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
@@ -398,11 +407,12 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="Draw 配置" Style="{StaticResource PageTitleTextStyle}" />
-                                        <TextBlock Text="拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。"
+                                        <TextBlock local:Localization.Key="DrawPageTitle" Text="Draw 配置" Style="{StaticResource PageTitleTextStyle}" />
+                                        <TextBlock local:Localization.Key="DrawPageSubtitle" Text="拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。"
                                                    Style="{StaticResource PageSubtitleTextStyle}" />
                                     </StackPanel>
                                     <Button Grid.Column="1"
+                                            local:Localization.Key="CreateDrawGroupButton"
                                             Content="新建组"
                                             Click="CreateDrawGroup_Click"
                                             Style="{StaticResource AccentButtonStyle}"
@@ -427,9 +437,9 @@
                                                     <ColumnDefinition Width="2*" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Text="Draw" FontWeight="SemiBold" />
-                                                <TextBlock Grid.Column="1" Text="变形" FontWeight="SemiBold" />
-                                                <TextBlock Grid.Column="2" Text="名称" FontWeight="SemiBold" />
-                                                <TextBlock Grid.Column="3" Text="来源" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="1" local:Localization.Key="DrawDeformColumn" Text="变形" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="2" local:Localization.Key="DrawNameColumn" Text="名称" FontWeight="SemiBold" />
+                                                <TextBlock Grid.Column="3" local:Localization.Key="DrawSourceColumn" Text="来源" FontWeight="SemiBold" />
                                             </Grid>
                                         </Border>
                                         <TreeView x:Name="DrawGroupTree"
@@ -452,10 +462,12 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <ToggleButton x:Name="InspectorToggleButton"
+                                              local:Localization.Key="InspectorToggleButton"
                                               Content="Draw 检测器：已关闭"
                                               HorizontalAlignment="Left"
                                               Click="InspectorToggle_Click" />
                                 <Button Grid.Column="1"
+                                        local:Localization.Key="ApplyConfigurationButton"
                                         Content="应用配置"
                                         Style="{StaticResource AccentButtonStyle}"
                                         Click="ApplyConfiguration_Click"
@@ -480,23 +492,24 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="有向依赖关系" Style="{StaticResource PageTitleTextStyle}" />
-                                        <TextBlock Text="依赖会沿有向边继续传递：A → B → C 时，拖动 A 会同时影响 B 和 C。环形依赖会安全合并，不会重复计算；OriginalParts 固定组只能作为起点，不能作为终点。"
+                                        <TextBlock local:Localization.Key="GraphPageTitle" Text="有向依赖关系" Style="{StaticResource PageTitleTextStyle}" />
+                                        <TextBlock local:Localization.Key="GraphPageSubtitle" Text="依赖会沿有向边继续传递：A → B → C 时，拖动 A 会同时影响 B 和 C。环形依赖会安全合并，不会重复计算；OriginalParts 固定组只能作为起点，不能作为终点。"
                                                    Style="{StaticResource PageSubtitleTextStyle}" />
                                     </StackPanel>
                                     <ComboBox x:Name="GraphModeComboBox"
+                                              local:Localization.Key="GraphModeComboBox"
                                               Grid.Column="1"
                                               Header="显示方式"
                                               SelectedIndex="0"
                                               SelectionChanged="GraphMode_SelectionChanged">
-                                        <ComboBoxItem Content="边列表" />
-                                        <ComboBoxItem Content="互动图" />
+                                        <ComboBoxItem local:Localization.Key="GraphEdgeListOption" Content="边列表" />
+                                        <ComboBoxItem local:Localization.Key="GraphInteractiveOption" Content="互动图" />
                                     </ComboBox>
                                 </Grid>
 
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="6">
-                                        <TextBlock Text="当前组" FontWeight="SemiBold" />
+                                        <TextBlock local:Localization.Key="CurrentGroupsLabel" Text="当前组" FontWeight="SemiBold" />
                                         <TextBlock x:Name="GroupSummaryText"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -522,6 +535,7 @@
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
                                                     <ComboBox ItemsSource="{Binding FromOptions}"
+                                                              local:Localization.Key="EdgeFromComboBox"
                                                               SelectedItem="{Binding From, Mode=TwoWay}"
                                                               HorizontalAlignment="Stretch"
                                                               PlaceholderText="触发组" />
@@ -530,11 +544,13 @@
                                                                FontSize="20"
                                                                VerticalAlignment="Center" />
                                                     <ComboBox Grid.Column="2"
+                                                              local:Localization.Key="EdgeToComboBox"
                                                               ItemsSource="{Binding ToOptions}"
                                                               SelectedItem="{Binding To, Mode=TwoWay}"
                                                               HorizontalAlignment="Stretch"
                                                               PlaceholderText="受影响组" />
                                                     <Button Grid.Column="3"
+                                                            local:Localization.Key="DeleteEdgeButton"
                                                             Content="删除"
                                                             Tag="{Binding}"
                                                             Click="DeleteEdge_Click" />
@@ -543,6 +559,7 @@
                                         </ListView.ItemTemplate>
                                     </ListView>
                                     <Button Grid.Row="1"
+                                            local:Localization.Key="AddEdgeButton"
                                             Content="添加边"
                                             Click="AddEdge_Click"
                                             HorizontalAlignment="Left"
@@ -551,7 +568,7 @@
 
                                 <Grid x:Name="InteractiveGraphPanel" Visibility="Collapsed">
                                     <StackPanel Spacing="10">
-                                        <TextBlock Text="在节点上按住左键可调整位置；按住右键拖到另一个节点即可连边。把鼠标放到边上会显示删除按钮。"
+                                        <TextBlock local:Localization.Key="InteractiveGraphHelp" Text="在节点上按住左键可调整位置；按住右键拖到另一个节点即可连边。把鼠标放到边上会显示删除按钮。"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <Border Style="{StaticResource PageCardStyle}" Padding="0">
@@ -571,7 +588,7 @@
                             </StackPanel>
                         </ScrollViewer>
                         <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
-                            <Button Content="应用依赖关系"
+                            <Button local:Localization.Key="ApplyGraphButton" Content="应用依赖关系"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Click="ApplyConfiguration_Click"
                                     HorizontalAlignment="Right" />
@@ -586,8 +603,8 @@
                         <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
                             <StackPanel>
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="纹理 Mask" Style="{StaticResource PageTitleTextStyle}" />
-                                    <TextBlock Text="填写 Mod 文件夹内的 DDS 相对路径。空白表示全白 1.0。多个 Draw 可以使用同一个文件。"
+                                    <TextBlock local:Localization.Key="MaskPageTitle" Text="纹理 Mask" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock local:Localization.Key="MaskPageSubtitle" Text="填写 Mod 文件夹内的 DDS 相对路径。空白表示全白 1.0。多个 Draw 可以使用同一个文件。"
                                                Style="{StaticResource PageSubtitleTextStyle}" />
                                 </StackPanel>
                                 <ListView x:Name="MaskEditorList"
@@ -616,7 +633,7 @@
                             </StackPanel>
                         </ScrollViewer>
                         <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
-                            <Button Content="应用 Mask"
+                            <Button local:Localization.Key="ApplyMaskButton" Content="应用 Mask"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Click="ApplyConfiguration_Click"
                                     HorizontalAlignment="Right" />
@@ -634,8 +651,8 @@
                         <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
                             <StackPanel Spacing="16">
                             <StackPanel Spacing="4">
-                                <TextBlock Text="物理参数" Style="{StaticResource PageTitleTextStyle}" />
-                                <TextBlock Text="每个组使用独立参数；未分组 Draw 使用 Mod 默认参数。依赖关系中的每个状态仍保留其所属组的参数。"
+                                <TextBlock local:Localization.Key="PhysicsPageTitle" Text="物理参数" Style="{StaticResource PageTitleTextStyle}" />
+                                <TextBlock local:Localization.Key="PhysicsPageSubtitle" Text="每个组使用独立参数；未分组 Draw 使用 Mod 默认参数。依赖关系中的每个状态仍保留其所属组的参数。"
                                            Style="{StaticResource PageSubtitleTextStyle}" />
                             </StackPanel>
                             <Grid ColumnSpacing="12">
@@ -644,11 +661,13 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <ComboBox x:Name="PhysicsScopeComboBox"
+                                          local:Localization.Key="PhysicsScopeComboBox"
                                           Header="正在编辑"
                                           DisplayMemberPath="DisplayName"
                                           HorizontalAlignment="Stretch"
                                           SelectionChanged="PhysicsScopeComboBox_SelectionChanged" />
                                 <Button Grid.Column="1"
+                                        local:Localization.Key="CopyDefaultPhysicsButton"
                                         Content="复制 Mod 默认参数"
                                         VerticalAlignment="Bottom"
                                         Click="CopyDefaultPhysicsToGroup_Click" />
@@ -716,27 +735,27 @@
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <NumberBox x:Name="RadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="StrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="FalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="DragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="GrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="GrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="ReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="ReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="ReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="TargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="MaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="WheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="WheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="WheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
-                                    <NumberBox x:Name="VolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="RadiusNumber" local:Localization.Key="RadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="StrengthNumber" local:Localization.Key="StrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="FalloffNumber" local:Localization.Key="FalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="DragScaleNumber" local:Localization.Key="DragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="GrabDampingNumber" local:Localization.Key="GrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="GrabSpringNumber" local:Localization.Key="GrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseDampingNumber" local:Localization.Key="ReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseSpringNumber" local:Localization.Key="ReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="ReleaseKickNumber" local:Localization.Key="ReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="TargetFollowNumber" local:Localization.Key="TargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="MaxOffsetNumber" local:Localization.Key="MaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelStepNumber" local:Localization.Key="WheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelMinDepthNumber" local:Localization.Key="WheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="WheelMaxDepthNumber" local:Localization.Key="WheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
+                                    <NumberBox x:Name="VolumeResponseNumber" local:Localization.Key="VolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
                                 </Grid>
                             </Border>
                             </StackPanel>
                         </ScrollViewer>
                         <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
-                            <Button Content="保存参数"
+                            <Button local:Localization.Key="SavePhysicsButton" Content="保存参数"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Click="ApplyConfiguration_Click"
                                     HorizontalAlignment="Right" />
@@ -749,10 +768,31 @@
                         <Grid HorizontalAlignment="Stretch" Padding="28,22,28,36">
                             <StackPanel Spacing="16">
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="设置与运行环境" Style="{StaticResource PageTitleTextStyle}" />
-                                    <TextBlock Text="更新和校验 JiggleForge，并管理全局变形运行时、ShaderFix 与滚轮深度输入。"
+                                    <TextBlock local:Localization.Key="SettingsPageTitle" Text="设置与运行环境" Style="{StaticResource PageTitleTextStyle}" />
+                                    <TextBlock local:Localization.Key="SettingsPageSubtitle" Text="更新和校验 JiggleForge，并管理全局变形运行时、ShaderFix 与滚轮深度输入。"
                                                Style="{StaticResource PageSubtitleTextStyle}" />
                                 </StackPanel>
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <Grid ColumnSpacing="14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="LanguageComboBox"
+                                                  local:Localization.Key="LanguageComboBox"
+                                                  Header="显示语言"
+                                                  MinWidth="220">
+                                            <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                                            <ComboBoxItem Content="English" Tag="en-US" />
+                                        </ComboBox>
+                                        <Button Grid.Column="1"
+                                                local:Localization.Key="ApplyLanguageButton"
+                                                Content="应用并重启"
+                                                VerticalAlignment="Bottom"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                Click="ApplyLanguage_Click" />
+                                    </Grid>
+                                </Border>
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="13">
                                         <Grid ColumnSpacing="14">
@@ -761,7 +801,7 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="应用更新与校验" FontSize="18" FontWeight="SemiBold" />
+                                                <TextBlock local:Localization.Key="ApplicationUpdateTitle" Text="应用更新与校验" FontSize="18" FontWeight="SemiBold" />
                                                 <TextBlock x:Name="ApplicationVersionText"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                             </StackPanel>
@@ -773,6 +813,7 @@
                                                           VerticalAlignment="Center" />
                                         </Grid>
                                         <TextBlock x:Name="ApplicationUpdateStatusText"
+                                                   local:Localization.Key="ApplicationUpdateStatusText"
                                                    Text="尚未检查更新。"
                                                    TextWrapping="Wrap" />
                                         <ProgressBar x:Name="ApplicationUpdateProgressBar"
@@ -781,6 +822,7 @@
                                                      Value="0"
                                                      Visibility="Collapsed" />
                                         <TextBlock x:Name="ApplicationIntegrityStatusText"
+                                                   local:Localization.Key="ApplicationIntegrityStatusText"
                                                    Text="可校验当前程序和运行时文件是否完整。"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -791,10 +833,12 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <Button x:Name="CheckApplicationUpdateButton"
+                                                    local:Localization.Key="CheckApplicationUpdateButton"
                                                     Content="检查更新"
                                                     HorizontalAlignment="Stretch"
                                                     Click="CheckApplicationUpdate_Click" />
                                             <Button x:Name="UpdateApplicationButton"
+                                                    local:Localization.Key="UpdateApplicationButton"
                                                     Grid.Column="1"
                                                     Content="更新到最新版本"
                                                     Style="{StaticResource AccentButtonStyle}"
@@ -802,6 +846,7 @@
                                                     IsEnabled="False"
                                                     Click="UpdateApplication_Click" />
                                             <Button x:Name="VerifyApplicationButton"
+                                                    local:Localization.Key="VerifyApplicationButton"
                                                     Grid.Column="2"
                                                     Content="校验当前安装"
                                                     HorizontalAlignment="Stretch"
@@ -813,20 +858,20 @@
                                         Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="10">
                                         <StackPanel Spacing="3">
-                                            <TextBlock Text="项目链接与社区" FontSize="18" FontWeight="SemiBold" />
-                                            <TextBlock Text="无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！"
+                                            <TextBlock local:Localization.Key="CommunityTitle" Text="项目链接与社区" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock local:Localization.Key="CommunityDescription" Text="无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！"
                                                        TextWrapping="Wrap"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
                                         <StackPanel Spacing="4" HorizontalAlignment="Left">
-                                            <HyperlinkButton Content="打开 GitHub 仓库"
+                                            <HyperlinkButton local:Localization.Key="OpenGithubButton" Content="打开 GitHub 仓库"
                                                              NavigateUri="https://github.com/wlytsgd2/JiggleForge" />
-                                            <HyperlinkButton Content="观看 B站介绍视频"
+                                            <HyperlinkButton local:Localization.Key="OpenBilibiliButton" Content="观看 B站介绍视频"
                                                              NavigateUri="https://www.bilibili.com/video/BV1Bt3d6DEYN/" />
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="QQ 交流群：451901293"
+                                                <TextBlock local:Localization.Key="QqGroupLabel" Text="QQ 交流群：451901293"
                                                            VerticalAlignment="Center" />
-                                                <Button Content="复制群号"
+                                                <Button local:Localization.Key="CopyQqButton" Content="复制群号"
                                                         Click="CopyQqGroup_Click" />
                                             </StackPanel>
                                         </StackPanel>
@@ -840,14 +885,17 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <TextBox x:Name="RuntimePathTextBox"
+                                                     local:Localization.Key="RuntimePathTextBox"
                                                      Header="ZZMI 根目录"
                                                      PlaceholderText="%APPDATA%\XXMI Launcher\ZZMI" />
                                             <Button Grid.Column="1"
+                                                    local:Localization.Key="ChooseRuntimeFolderButton"
                                                     Content="选择文件夹"
                                                     VerticalAlignment="Bottom"
                                                     Click="ChooseRuntimeFolder_Click" />
                                         </Grid>
                                         <TextBlock x:Name="RuntimePathValidationText"
+                                                   local:Localization.Key="RuntimePathValidationText"
                                                    Text="尚未检查路径。"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -857,8 +905,8 @@
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="14">
                                         <StackPanel Spacing="3">
-                                            <TextBlock Text="全局默认物理参数" FontSize="18" FontWeight="SemiBold" />
-                                            <TextBlock Text="首次生成 Mod 与没有适配 Mod 的原版角色共用这套默认值。已经生成的 Mod 保留自己的独立参数。"
+                                            <TextBlock local:Localization.Key="DefaultPhysicsTitle" Text="全局默认物理参数" FontSize="18" FontWeight="SemiBold" />
+                                            <TextBlock local:Localization.Key="DefaultPhysicsDescription" Text="首次生成 Mod 与没有适配 Mod 的原版角色共用这套默认值。已经生成的 Mod 保留自己的独立参数。"
                                                        TextWrapping="Wrap"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         </StackPanel>
@@ -877,21 +925,21 @@
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
-                                            <NumberBox x:Name="DefaultRadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultStrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultFalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultDragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultGrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultGrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultTargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultMaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultWheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultWheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultWheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
-                                            <NumberBox x:Name="DefaultVolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultRadiusNumber" local:Localization.Key="RadiusNumber" Header="影响半径" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultStrengthNumber" local:Localization.Key="StrengthNumber" Grid.Column="1" Header="强度" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultFalloffNumber" local:Localization.Key="FalloffNumber" Grid.Row="1" Header="衰减指数" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultDragScaleNumber" local:Localization.Key="DragScaleNumber" Grid.Row="1" Grid.Column="1" Header="拖动比例" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultGrabDampingNumber" local:Localization.Key="GrabDampingNumber" Grid.Row="2" Header="抓取阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultGrabSpringNumber" local:Localization.Key="GrabSpringNumber" Grid.Row="2" Grid.Column="1" Header="抓取频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseDampingNumber" local:Localization.Key="ReleaseDampingNumber" Grid.Row="3" Header="松手阻尼比" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseSpringNumber" local:Localization.Key="ReleaseSpringNumber" Grid.Row="3" Grid.Column="1" Header="松手频率（Hz）" Minimum="0" Maximum="60" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultReleaseKickNumber" local:Localization.Key="ReleaseKickNumber" Grid.Row="4" Header="释放/拍打冲量" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultTargetFollowNumber" local:Localization.Key="TargetFollowNumber" Grid.Row="4" Grid.Column="1" Header="目标跟随时间（秒）" Minimum="0" Maximum="1" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultMaxOffsetNumber" local:Localization.Key="MaxOffsetNumber" Grid.Row="5" Header="最大位移" Minimum="0.001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelStepNumber" local:Localization.Key="WheelStepNumber" Grid.Row="5" Grid.Column="1" Header="滚轮深度步长" Minimum="0.0001" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelMinDepthNumber" local:Localization.Key="WheelMinDepthNumber" Grid.Row="6" Header="滚轮最小深度（负值进入屏幕）" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultWheelMaxDepthNumber" local:Localization.Key="WheelMaxDepthNumber" Grid.Row="6" Grid.Column="1" Header="滚轮最大深度（正值朝向镜头）" SpinButtonPlacementMode="Compact" />
+                                            <NumberBox x:Name="DefaultVolumeResponseNumber" local:Localization.Key="VolumeResponseNumber" Grid.Row="7" Header="体积响应" Minimum="0" Maximum="10" SpinButtonPlacementMode="Compact" />
                                         </Grid>
                                         <Grid ColumnSpacing="12">
                                             <Grid.ColumnDefinitions>
@@ -907,9 +955,10 @@
                                                         Orientation="Horizontal"
                                                         Spacing="8"
                                                         HorizontalAlignment="Right">
-                                                <Button Content="恢复推荐值"
+                                                <Button local:Localization.Key="ResetDefaultPhysicsButton" Content="恢复推荐值"
                                                         Click="ResetDefaultPhysics_Click" />
                                                 <Button x:Name="SaveDefaultPhysicsButton"
+                                                        local:Localization.Key="SaveDefaultPhysicsButton"
                                                         Content="保存全局默认参数"
                                                         Style="{StaticResource AccentButtonStyle}"
                                                         Click="SaveDefaultPhysics_Click" />
@@ -929,30 +978,43 @@
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <StackPanel Spacing="6">
-                                            <TextBlock Text="全局拖动键（可多选）" FontWeight="SemiBold" />
+                                            <TextBlock local:Localization.Key="DragKeysTitle" Text="全局拖动键（可多选）" FontWeight="SemiBold" />
                                             <ItemsControl x:Name="DragKeyOptionsList">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
-                                                        <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4" />
+                                                        <ItemsWrapGrid Orientation="Horizontal"
+                                                                       ItemWidth="210"
+                                                                       ItemHeight="38" />
                                                     </ItemsPanelTemplate>
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <CheckBox Content="{Binding DisplayName}"
                                                                   IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                                                  MinWidth="130"
-                                                                  Margin="0,0,8,2" />
+                                                                  Width="202"
+                                                                  HorizontalContentAlignment="Stretch"
+                                                                  Margin="0,0,8,2">
+                                                            <CheckBox.ContentTemplate>
+                                                                <DataTemplate>
+                                                                    <TextBlock Text="{Binding}"
+                                                                               TextWrapping="WrapWholeWords"
+                                                                               MaxLines="2" />
+                                                                </DataTemplate>
+                                                            </CheckBox.ContentTemplate>
+                                                        </CheckBox>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
                                         </StackPanel>
                                         <Button x:Name="ApplyDragKeyButton"
+                                                local:Localization.Key="ApplyDragKeyButton"
                                                 Grid.Column="1"
                                                 Content="应用拖动键"
                                                 Style="{StaticResource AccentButtonStyle}"
                                                 VerticalAlignment="Bottom"
                                                 Click="ApplyDragKey_Click" />
                                         <TextBlock Grid.Row="1"
+                                                   local:Localization.Key="DragKeysDescription"
                                                    Grid.ColumnSpan="2"
                                                    Text="这是所有角色和 Mod 共用的键位。按下任意一个已勾选按键都能拖动；修改后回到游戏按 F10 生效。"
                                                    TextWrapping="Wrap"
@@ -988,7 +1050,7 @@
                                                     <RowDefinition Height="Auto" />
                                                     <RowDefinition Height="Auto" />
                                                 </Grid.RowDefinitions>
-                                                <TextBlock Text="全局运行时" FontWeight="SemiBold" />
+                                                <TextBlock local:Localization.Key="GlobalRuntimeLabel" Text="全局运行时" FontWeight="SemiBold" />
                                                 <TextBlock x:Name="RuntimeComponentStatusText"
                                                            Grid.Column="1"
                                                            TextWrapping="Wrap"
@@ -1020,27 +1082,32 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Button x:Name="InstallRuntimeButton"
+                                            local:Localization.Key="InstallRuntimeButton"
                                             Content="安装或更新运行环境"
                                             Style="{StaticResource AccentButtonStyle}"
                                             HorizontalAlignment="Stretch"
                                             Click="InstallRuntime_Click" />
                                     <Button x:Name="UninstallRuntimeButton"
+                                            local:Localization.Key="UninstallRuntimeButton"
                                             Grid.Column="1"
                                             Content="卸载运行环境"
                                             HorizontalAlignment="Stretch"
                                             Click="UninstallRuntime_Click" />
                                     <Button x:Name="StartWheelButton"
+                                            local:Localization.Key="StartWheelButton"
                                             Grid.Row="1"
                                             Content="启动滚轮输入"
                                             HorizontalAlignment="Stretch"
                                             Click="StartWheel_Click" />
                                     <Button x:Name="StopWheelButton"
+                                            local:Localization.Key="StopWheelButton"
                                             Grid.Row="1"
                                             Grid.Column="1"
                                             Content="停止滚轮输入"
                                             HorizontalAlignment="Stretch"
                                             Click="StopWheel_Click" />
                                     <Button x:Name="RefreshRuntimeButton"
+                                            local:Localization.Key="RefreshRuntimeButton"
                                             Grid.Row="2"
                                             Grid.ColumnSpan="2"
                                             Content="刷新状态"
@@ -1084,15 +1151,18 @@
                                VerticalAlignment="Center"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     <Button x:Name="OnboardingPreviousButton"
+                            local:Localization.Key="OnboardingPreviousButton"
                             Grid.Column="1"
                             Content="上一步"
                             Visibility="Collapsed"
                             Click="OnboardingPreviousButton_Click" />
                     <Button x:Name="OnboardingExitButton"
+                            local:Localization.Key="OnboardingExitButton"
                             Grid.Column="2"
                             Content="退出向导"
                             Click="OnboardingExitButton_Click" />
                     <Button x:Name="OnboardingNextButton"
+                            local:Localization.Key="OnboardingNextButton"
                             Grid.Column="3"
                             Content="下一步"
                             Style="{StaticResource AccentButtonStyle}"

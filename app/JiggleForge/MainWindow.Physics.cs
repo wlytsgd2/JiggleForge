@@ -53,7 +53,7 @@ public sealed partial class MainWindow : Window
         physicsScopeOptions.Clear();
         physicsScopeOptions.Add(new PhysicsScopeOption(
             DefaultPhysicsScopeKey,
-            "Mod 默认参数（未分组 Draw）"));
+            L("ModDefaultPhysicsScope")));
         foreach (string groupName in editorGroupNames
                      .OrderBy(name =>
                          string.Equals(name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)
@@ -68,7 +68,7 @@ public sealed partial class MainWindow : Window
                 groupName,
                 OriginalPartsConfig.GroupName,
                 StringComparison.OrdinalIgnoreCase)
-                ? "OriginalParts · 原版部件"
+                ? L("OriginalPartsDisplayName")
                 : groupName;
             physicsScopeOptions.Add(new PhysicsScopeOption(groupName, displayName));
         }
@@ -120,14 +120,14 @@ public sealed partial class MainWindow : Window
                 DefaultPhysicsScopeKey,
                 StringComparison.OrdinalIgnoreCase))
         {
-            ShowMessage("当前正在编辑 Mod 默认参数。", InfoBarSeverity.Informational);
+            ShowMessage(L("EditingModDefaultPhysics"), InfoBarSeverity.Informational);
             return;
         }
 
         PhysicsSettings copied = GetDefaultProjectPhysics().Clone();
         editorPhysicsByScope[activePhysicsScopeKey] = copied;
         LoadProjectPhysicsFields(copied);
-        ShowMessage($"已把 Mod 默认参数复制到组“{activePhysicsScopeKey}”。", InfoBarSeverity.Success);
+        ShowMessage(AppLanguageService.Format("CopiedPhysicsToGroup", activePhysicsScopeKey), InfoBarSeverity.Success);
     }
 
     private PhysicsSettings GetDefaultProjectPhysics() =>
@@ -230,7 +230,7 @@ public sealed partial class MainWindow : Window
                                           InvalidDataException or ArgumentException)
         {
             ShowMessage(
-                "无法自动应用 v0.1.8 推荐物理参数：" + exception.Message,
+                AppLanguageService.Format("RecommendedPhysicsAutoApplyFailed", exception.Message),
                 InfoBarSeverity.Warning);
             return;
         }
@@ -243,7 +243,7 @@ public sealed partial class MainWindow : Window
             if (!status.RuntimeInstalled)
             {
                 ShowMessage(
-                    "v0.1.8 已一次性应用新的推荐物理参数。安装或更新游戏运行时后会自动使用；现有 Mod 的独立参数没有改变。",
+                    L("RecommendedPhysicsAppliedInstallLater"),
                     InfoBarSeverity.Success);
                 return;
             }
@@ -251,14 +251,14 @@ public sealed partial class MainWindow : Window
             await Task.Run(
                 () => runtimeEnvironmentService.SetDefaultPhysics(runtimePath, recommended));
             ShowMessage(
-                "v0.1.8 已一次性应用新的推荐物理参数，并同步到游戏运行时。现有 Mod 的独立参数没有改变；回到游戏按 F10 生效。",
+                L("RecommendedPhysicsApplied"),
                 InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
                                           InvalidDataException or ArgumentException)
         {
             ShowMessage(
-                "v0.1.8 推荐参数已保存到应用，但暂时无法同步游戏运行时：" + exception.Message,
+                AppLanguageService.Format("RecommendedPhysicsRuntimeSyncFailed", exception.Message),
                 InfoBarSeverity.Warning);
         }
     }
@@ -266,7 +266,7 @@ public sealed partial class MainWindow : Window
     private void ResetDefaultPhysics_Click(object sender, RoutedEventArgs e)
     {
         LoadDefaultPhysicsEditor(new PhysicsSettings());
-        DefaultPhysicsSaveStatusText.Text = "已填入推荐默认值；点击“保存全局默认参数”后写入应用和游戏运行时。";
+        DefaultPhysicsSaveStatusText.Text = L("RecommendedDefaultsLoaded");
         DefaultPhysicsSaveStatusText.Visibility = Visibility.Visible;
     }
 

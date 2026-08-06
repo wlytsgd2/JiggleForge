@@ -25,7 +25,7 @@ public sealed partial class MainWindow : Window
         e.AcceptedOperation = e.DataView.Contains(StandardDataFormats.StorageItems)
             ? DataPackageOperation.Link
             : DataPackageOperation.None;
-        e.DragUIOverride.Caption = "打开 Mod 文件夹";
+        e.DragUIOverride.Caption = L("OpenModFolder");
         e.DragUIOverride.IsCaptionVisible = true;
     }
 
@@ -40,7 +40,7 @@ public sealed partial class MainWindow : Window
         StorageFolder? folder = items.OfType<StorageFolder>().FirstOrDefault();
         if (folder is null)
         {
-            ShowMessage("请拖入文件夹，而不是单个文件。", InfoBarSeverity.Warning);
+            ShowMessage(L("DropFolderNotFile"), InfoBarSeverity.Warning);
             return;
         }
 
@@ -194,7 +194,7 @@ public sealed partial class MainWindow : Window
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, config);
             OpenProject(currentInspection.ModPath);
             await RefreshModLibraryAsync();
-            ShowMessage($"已原地适配 {result.DrawCount} 个 Draw。配置界面已经打开；修改后按 F10 查看效果。", InfoBarSeverity.Success);
+            ShowMessage(AppLanguageService.Format("AdaptedDraws", result.DrawCount), InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
@@ -211,10 +211,10 @@ public sealed partial class MainWindow : Window
 
         ContentDialog dialog = new()
         {
-            Title = "恢复原始 Mod？",
-            Content = "这会还原首次适配前的原始文件，并删除当前 JiggleForge 配置和运行时文件。备份压缩包会保留，可以再次恢复。",
-            PrimaryButtonText = "恢复原始 Mod",
-            CloseButtonText = "取消",
+            Title = L("RestoreOriginalTitle"),
+            Content = L("RestoreOriginalDescription"),
+            PrimaryButtonText = L("RestoreOriginalAction"),
+            CloseButtonText = L("Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = RootGrid.XamlRoot,
         };
@@ -230,11 +230,11 @@ public sealed partial class MainWindow : Window
             backupService.Restore(path);
             OpenProject(path);
             await RefreshModLibraryAsync();
-            ShowMessage("已恢复原始 Mod。原始备份仍保留在 Mod 文件夹中。", InfoBarSeverity.Success);
+            ShowMessage(L("OriginalModRestored"), InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ShowMessage($"恢复失败：{exception.Message}", InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.Format("RestoreFailed", exception.Message), InfoBarSeverity.Error);
         }
     }
 
@@ -249,19 +249,19 @@ public sealed partial class MainWindow : Window
         ModBackupInspection backup = backupService.Inspect(currentInspection.ModPath);
         if (backup.IsValid)
         {
-            BackupStatusText.Text = $"原始备份：已保存 {backup.Files.Count} 个文件（{ModBackupService.BackupFileName}）";
+            BackupStatusText.Text = AppLanguageService.Format("BackupSaved", backup.Files.Count, ModBackupService.BackupFileName);
             BackupStatusText.Foreground = new SolidColorBrush(Colors.DarkGreen);
         }
         else if (backup.Exists)
         {
-            BackupStatusText.Text = $"原始备份：文件存在但不可用。{backup.Error}";
+            BackupStatusText.Text = AppLanguageService.Format("BackupInvalid", backup.Error);
             BackupStatusText.Foreground = new SolidColorBrush(Colors.DarkRed);
         }
         else
         {
             BackupStatusText.Text = currentInspection.State == ModImportState.FirstImport
-                ? "原始备份：首次适配时自动创建。"
-                : "原始备份：未找到（旧版本适配的 Mod 可能无法精确恢复）。";
+                ? L("BackupCreatedOnAdapt")
+                : L("BackupNotFound");
             BackupStatusText.Foreground = new SolidColorBrush(Colors.Gray);
         }
     }
@@ -278,7 +278,7 @@ public sealed partial class MainWindow : Window
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, currentInspection.Configuration);
             OpenProject(currentInspection.ModPath);
             await RefreshModLibraryAsync();
-            ShowMessage($"运行文件已修复，共检查 {result.DrawCount} 个 Draw。回到游戏按 F10。", InfoBarSeverity.Success);
+            ShowMessage(AppLanguageService.Format("RuntimeFilesRepaired", result.DrawCount), InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
@@ -300,7 +300,7 @@ public sealed partial class MainWindow : Window
             string path = currentInspection.ModPath;
             OpenProject(path);
             await RefreshModLibraryAsync();
-            ShowMessage($"配置已应用到 {result.DrawCount} 个 Draw。回到游戏按 F10 查看效果。", InfoBarSeverity.Success);
+            ShowMessage(AppLanguageService.Format("ConfigurationApplied", result.DrawCount), InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
         {
@@ -326,8 +326,8 @@ public sealed partial class MainWindow : Window
             await RefreshModLibraryAsync();
             ShowMessage(
                 enabled
-                    ? $"Draw 检测器已开启，共覆盖 {result.DrawCount} 个 Draw。回到游戏按 F10，然后拖动模型查看。"
-                    : "Draw 检测器已关闭。回到游戏按 F10 生效。",
+                    ? AppLanguageService.Format("InspectorEnabled", result.DrawCount)
+                    : L("InspectorDisabled"),
                 InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
@@ -393,17 +393,17 @@ public sealed partial class MainWindow : Window
             string to = row.To.Trim();
             if (from.Length == 0 || to.Length == 0)
             {
-                throw new InvalidDataException("依赖边的两个组都必须选择。");
+                throw new InvalidDataException(L("EdgeGroupsRequired"));
             }
 
             if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidDataException($"不能添加自身依赖边：{from} → {to}。");
+                throw new InvalidDataException(AppLanguageService.Format("SelfEdgeInvalid", from, to));
             }
 
             if (!edgeKeys.Add(from + "\0" + to))
             {
-                throw new InvalidDataException($"依赖边重复：{from} → {to}。");
+                throw new InvalidDataException(AppLanguageService.Format("DuplicateEdge", from, to));
             }
 
             config.Edges.Add(new JiggleEdgeConfig { From = from, To = to });
@@ -415,8 +415,8 @@ public sealed partial class MainWindow : Window
     private void UpdateInspectorButtonText()
     {
         InspectorToggleButton.Content = InspectorToggleButton.IsChecked == true
-            ? "Draw 检测器：已开启"
-            : "Draw 检测器：已关闭";
+            ? L("InspectorOn")
+            : L("InspectorOff");
     }
 
 }

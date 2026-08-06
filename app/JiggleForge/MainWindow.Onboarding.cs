@@ -60,79 +60,79 @@ public sealed partial class MainWindow
         new(
             "overview",
             AppTitleBar,
-            "欢迎使用 JiggleForge 测试版",
-            "接下来会直接带你浏览每个页面和关键控件。JiggleForge 会修改所选 Mod 文件夹，测试重要 Mod 前请先保留副本。"),
+            L("TourWelcomeTitle"),
+            L("TourWelcomeDescription")),
         new(
             "overview",
             DropCard,
-            "打开 Mod 项目",
-            "把一个具体的角色 Mod 文件夹拖到这里，或点击“选择文件夹”。不要选择整个 Mods 或 _MANAGED_ 目录。"),
+            L("TourOpenProjectTitle"),
+            L("TourOpenProjectDescription")),
         new(
             "runtime",
             RuntimePathTextBox,
-            "选择 ZZMI 根目录",
-            "这里填写包含 Mods 与 ShaderFixes 的 ZZMI 根目录。默认通常位于 %APPDATA%\\XXMI Launcher\\ZZMI。"),
+            L("TourZzmiTitle"),
+            L("TourZzmiDescription")),
         new(
             "runtime",
             InstallRuntimeButton,
-            "安装或更新运行环境",
-            "首次使用、应用升级或游戏更新后点击这里。安装完成后回到游戏按 F10 重新加载。"),
+            L("TourRuntimeTitle"),
+            L("TourRuntimeDescription")),
         new(
             "runtime",
             DragKeyOptionsList,
-            "设置全局拖动键",
-            "可同时勾选多个鼠标键或键盘键。所有原版角色和已适配 Mod 共用这套全局拖动键。"),
+            L("TourDragKeysTitle"),
+            L("TourDragKeysDescription")),
         new(
             "runtime",
             StartWheelButton,
-            "启用滚轮深度输入",
-            "需要用滚轮控制屏幕前后方向时启动 WheelBridge；只使用平面拖动时可以不启动。",
+            L("TourWheelTitle"),
+            L("TourWheelDescription"),
             RuntimeOverallStatusText),
         new(
             "draws",
             DrawGroupTree,
-            "识别、命名和分组 Draw",
-            "每个 Draw 对应原 Mod 的一次适配绘制。可修改别名、关闭变形，并把有关联的 Draw 放入同一组。没有打开项目时这里会暂时为空。"),
+            L("TourDrawsTitle"),
+            L("TourDrawsDescription")),
         new(
             "draws",
             InspectorToggleButton,
-            "游戏内 Draw 检测器",
-            "辨认模型部位时开启；回到游戏按 F10 后，拖动目标会在左上角显示命中的 Draw。完成配置后建议关闭。"),
+            L("TourInspectorTitle"),
+            L("TourInspectorDescription")),
         new(
             "graph",
             GraphModeComboBox,
-            "切换依赖关系编辑方式",
-            "可使用边列表，或切换为可拖动节点、右键连边的互动图。"),
+            L("TourGraphModeTitle"),
+            L("TourGraphModeDescription")),
         new(
             "graph",
             EdgeEditorList,
-            "设置组之间的影响",
-            "有向边表示拖动起点组时也会带动终点组。依赖关系支持传递；请避免不需要的循环和跨部件影响。"),
+            L("TourEdgesTitle"),
+            L("TourEdgesDescription")),
         new(
             "mask",
             MaskEditorList,
-            "为 Draw 指定纹理 Mask",
-            "白色区域权重接近 1，黑色区域接近 0。未指定 Mask 时，整个 Draw 默认按 1.0 参与变形。"),
+            L("TourMaskTitle"),
+            L("TourMaskDescription")),
         new(
             "physics",
             PhysicsScopeComboBox,
-            "选择要调整的物理范围",
-            "可以编辑项目默认参数，也可以为每个 Draw 组设置独立参数。"),
+            L("TourPhysicsScopeTitle"),
+            L("TourPhysicsScopeDescription")),
         new(
             "physics",
             PhysicsFieldsGrid,
-            "调整变形质感",
-            "影响半径和强度决定范围与幅度；频率、阻尼、最大位移、深度范围和体积响应共同决定手感。"),
+            L("TourPhysicsTitle"),
+            L("TourPhysicsDescription")),
         new(
             "overview",
             GuideNavItem,
-            "随时重新查看向导",
-            "完成配置后点击页面底部的“应用配置”，回到游戏按 F10 测试。以后可从这里重新播放完整界面导览。"),
+            L("TourReplayTitle"),
+            L("TourReplayDescription")),
         new(
             "runtime",
             CommunityCard,
-            "加入 QQ 交流群",
-            "QQ群：451901293。无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！"),
+            L("TourCommunityTitle"),
+            L("TourCommunityDescription")),
     ];
 
     private async Task ShowOnboardingAsync(bool automatic)
@@ -161,7 +161,7 @@ public sealed partial class MainWindow
         MaskNavItem.IsEnabled = true;
         PhysicsNavItem.IsEnabled = true;
         Navigation.IsPaneOpen = true;
-        OnboardingExitButton.Content = automatic ? "稍后再看" : "退出向导";
+        OnboardingExitButton.Content = automatic ? L("TourLater") : L("TourExit");
         OnboardingHighlightLayer.Visibility = Visibility.Visible;
         RootGrid.SizeChanged += OnboardingRoot_SizeChanged;
 
@@ -210,11 +210,11 @@ public sealed partial class MainWindow
             OnboardingTip.Title = step.Title;
             OnboardingTip.Subtitle = step.Description;
             OnboardingProgressText.Text =
-                $"第 {stepIndex + 1} 步，共 {onboardingTourSteps.Count} 步";
+                AppLanguageService.Format("TourProgress", stepIndex + 1, onboardingTourSteps.Count);
             OnboardingPreviousButton.Visibility =
                 stepIndex == 0 ? Visibility.Collapsed : Visibility.Visible;
             OnboardingNextButton.Content =
-                stepIndex == onboardingTourSteps.Count - 1 ? "完成向导" : "下一步";
+                stepIndex == onboardingTourSteps.Count - 1 ? L("TourFinish") : L("TourNext");
             if (!tipWasOpen)
             {
                 OnboardingTip.IsOpen = true;
@@ -298,14 +298,12 @@ public sealed partial class MainWindow
         {
             SaveOnboardingCompletion();
             EndOnboardingTour();
-            ShowMessage(
-                "界面导览已完成。以后可从左侧底部的“使用向导”重新查看。",
-                InfoBarSeverity.Success);
+            ShowMessage(L("TourCompleted"), InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             EndOnboardingTour();
-            ShowMessage($"导览已完成，但无法保存首次运行状态：{exception.Message}", InfoBarSeverity.Warning);
+            ShowMessage(AppLanguageService.Format("TourSaveFailed", exception.Message), InfoBarSeverity.Warning);
         }
     }
 

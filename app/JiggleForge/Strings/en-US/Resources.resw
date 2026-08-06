@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType><xsd:choice maxOccurs="unbounded">
+        <xsd:element name="metadata"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" use="required" type="xsd:string" /><xsd:attribute name="type" type="xsd:string" /><xsd:attribute name="mimetype" type="xsd:string" /><xsd:attribute ref="xml:space" /></xsd:complexType></xsd:element>
+        <xsd:element name="assembly"><xsd:complexType><xsd:attribute name="alias" type="xsd:string" /><xsd:attribute name="name" type="xsd:string" /></xsd:complexType></xsd:element>
+        <xsd:element name="data"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /><xsd:element name="comment" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" /><xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" /><xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" /><xsd:attribute ref="xml:space" /></xsd:complexType></xsd:element>
+        <xsd:element name="resheader"><xsd:complexType><xsd:sequence><xsd:element name="value" type="xsd:string" minOccurs="0" /></xsd:sequence><xsd:attribute name="name" type="xsd:string" use="required" /></xsd:complexType></xsd:element>
+      </xsd:choice></xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SettingsPageTitle.Text" xml:space="preserve"><value>Settings &amp; Runtime</value></data>
+  <data name="SettingsPageSubtitle.Text" xml:space="preserve"><value>Update and verify JiggleForge, and manage the global deformation runtime, ShaderFixes, and wheel depth input.</value></data>
+  <data name="LanguageComboBox.Header" xml:space="preserve"><value>Display language</value></data>
+  <data name="ApplyLanguageButton.Content" xml:space="preserve"><value>Apply and restart</value></data>
+  <data name="LanguageAlreadyActive" xml:space="preserve"><value>The selected language is already active.</value></data>
+  <data name="LanguageSwitchFailed" xml:space="preserve"><value>Could not change the language: {0}</value></data>
+  <data name="LanguageRestartPathUnavailable" xml:space="preserve"><value>The application path could not be determined, so JiggleForge cannot restart automatically.</value></data>
+  <data name="TourWelcomeTitle" xml:space="preserve"><value>Welcome to the JiggleForge beta</value></data>
+  <data name="TourWelcomeDescription" xml:space="preserve"><value>This tour introduces every page and key control. JiggleForge modifies the selected Mod folder, so keep a backup before testing an important Mod.</value></data>
+  <data name="TourOpenProjectTitle" xml:space="preserve"><value>Open a Mod project</value></data>
+  <data name="TourOpenProjectDescription" xml:space="preserve"><value>Drop one character Mod folder here, or select Choose folder. Do not select the entire Mods or _MANAGED_ directory.</value></data>
+  <data name="TourZzmiTitle" xml:space="preserve"><value>Select the ZZMI root</value></data>
+  <data name="TourZzmiDescription" xml:space="preserve"><value>Select the ZZMI root containing Mods and ShaderFixes. It is usually under %APPDATA%\XXMI Launcher\ZZMI.</value></data>
+  <data name="TourRuntimeTitle" xml:space="preserve"><value>Install or update the runtime</value></data>
+  <data name="TourRuntimeDescription" xml:space="preserve"><value>Use this after first launch, an app update, or a game update. Return to the game and press F10 when installation finishes.</value></data>
+  <data name="TourDragKeysTitle" xml:space="preserve"><value>Set global drag keys</value></data>
+  <data name="TourDragKeysDescription" xml:space="preserve"><value>You may select multiple mouse or keyboard buttons. Original characters and adapted Mods share these global drag keys.</value></data>
+  <data name="TourWheelTitle" xml:space="preserve"><value>Enable wheel depth input</value></data>
+  <data name="TourWheelDescription" xml:space="preserve"><value>Start WheelBridge to control depth with the mouse wheel. It is not required for screen-plane dragging only.</value></data>
+  <data name="TourDrawsTitle" xml:space="preserve"><value>Identify, name, and group Draws</value></data>
+  <data name="TourDrawsDescription" xml:space="preserve"><value>Each Draw represents one adapted draw call from the source Mod. Rename it, disable deformation, or place related Draws in the same group. This page is empty until a project is open.</value></data>
+  <data name="TourInspectorTitle" xml:space="preserve"><value>In-game Draw inspector</value></data>
+  <data name="TourInspectorDescription" xml:space="preserve"><value>Enable it while identifying model parts. Press F10 in game, then drag a target to show the matched Draw in the top-left corner. Disable it after configuration.</value></data>
+  <data name="TourGraphModeTitle" xml:space="preserve"><value>Choose a dependency editor</value></data>
+  <data name="TourGraphModeDescription" xml:space="preserve"><value>Use the edge list or switch to the interactive graph, where nodes can be moved and connected with the right mouse button.</value></data>
+  <data name="TourEdgesTitle" xml:space="preserve"><value>Set influence between groups</value></data>
+  <data name="TourEdgesDescription" xml:space="preserve"><value>A directed edge means dragging the source group also moves the destination group. Dependencies are transitive; avoid unwanted cycles and cross-part influence.</value></data>
+  <data name="TourMaskTitle" xml:space="preserve"><value>Assign texture Masks to Draws</value></data>
+  <data name="TourMaskDescription" xml:space="preserve"><value>White has a weight near 1 and black near 0. Without a Mask, the entire Draw deforms with a default weight of 1.0.</value></data>
+  <data name="TourPhysicsScopeTitle" xml:space="preserve"><value>Select a physics scope</value></data>
+  <data name="TourPhysicsScopeDescription" xml:space="preserve"><value>Edit the project defaults or assign independent settings to each Draw group.</value></data>
+  <data name="TourPhysicsTitle" xml:space="preserve"><value>Tune deformation feel</value></data>
+  <data name="TourPhysicsDescription" xml:space="preserve"><value>Radius and strength define reach and magnitude. Frequency, damping, maximum offset, depth range, and volume response define the feel.</value></data>
+  <data name="TourReplayTitle" xml:space="preserve"><value>Replay this tour at any time</value></data>
+  <data name="TourReplayDescription" xml:space="preserve"><value>When finished, apply the configuration at the bottom of the page and press F10 in game. Replay the complete tour from here later.</value></data>
+  <data name="TourCommunityTitle" xml:space="preserve"><value>Join the QQ community</value></data>
+  <data name="TourCommunityDescription" xml:space="preserve"><value>QQ group: 451901293. Join us for questions, suggestions, update news, or simply to chat.</value></data>
+  <data name="TourLater" xml:space="preserve"><value>Later</value></data>
+  <data name="TourExit" xml:space="preserve"><value>Exit tour</value></data>
+  <data name="TourProgress" xml:space="preserve"><value>Step {0} of {1}</value></data>
+  <data name="TourFinish" xml:space="preserve"><value>Finish tour</value></data>
+  <data name="TourNext" xml:space="preserve"><value>Next</value></data>
+  <data name="TourCompleted" xml:space="preserve"><value>The interface tour is complete. You can replay it from Guide at the bottom of the navigation pane.</value></data>
+  <data name="TourSaveFailed" xml:space="preserve"><value>The tour is complete, but its completion state could not be saved: {0}</value></data>
+  <data name="OriginalPartsToggle.OnContent" xml:space="preserve"><value>Allow original parts</value></data>
+  <data name="OriginalPartsToggle.OffContent" xml:space="preserve"><value>Disable original parts</value></data>
+  <data name="DrawAliasTextBox.PlaceholderText" xml:space="preserve"><value>For example: Body</value></data>
+  <data name="UpdateTitleButton.Content" xml:space="preserve"><value>Update available</value></data>
+  <data name="OverviewNavItem.Content" xml:space="preserve"><value>Overview</value></data>
+  <data name="GraphNavItem.Content" xml:space="preserve"><value>Dependencies</value></data>
+  <data name="PhysicsNavItem.Content" xml:space="preserve"><value>Physics</value></data>
+  <data name="GuideNavItem.Content" xml:space="preserve"><value>Guide</value></data>
+  <data name="RuntimeNavItem.Content" xml:space="preserve"><value>Settings</value></data>
+  <data name="OverviewTitle.Text" xml:space="preserve"><value>Open a deformation project</value></data>
+  <data name="OverviewSubtitle.Text" xml:space="preserve"><value>Drop an original or already-adapted Mod folder. JiggleForge detects its import state automatically.</value></data>
+  <data name="DropCardTitle.Text" xml:space="preserve"><value>Drop a Mod folder here</value></data>
+  <data name="DropCardSubtitle.Text" xml:space="preserve"><value>Or select a folder manually</value></data>
+  <data name="ChooseModFolderButton.Content" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>Mods in the current ZZMI</value></data>
+  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>Refresh Mod list</value></data>
+  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>Waiting for ZZMI path validation…</value></data>
+  <data name="RecognizedDrawsLabel.Text" xml:space="preserve"><value>Recognized Draws</value></data>
+  <data name="SchemaVersionLabel.Text" xml:space="preserve"><value>Configuration version</value></data>
+  <data name="CreateConfigButton.Content" xml:space="preserve"><value>Adapt for the first time</value></data>
+  <data name="RepairRuntimeButton.Content" xml:space="preserve"><value>Repair runtime files</value></data>
+  <data name="RestoreOriginalButton.Content" xml:space="preserve"><value>Restore original Mod</value></data>
+  <data name="OpenExplorerButton.Content" xml:space="preserve"><value>Open in File Explorer</value></data>
+  <data name="DrawPageTitle.Text" xml:space="preserve"><value>Draw configuration</value></data>
+  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>Drag a Draw onto a group header, or right-click it to choose a group. OriginalParts is fixed and its switch is beside the group name.</value></data>
+  <data name="CreateDrawGroupButton.Content" xml:space="preserve"><value>New group</value></data>
+  <data name="DrawDeformColumn.Text" xml:space="preserve"><value>Deform</value></data>
+  <data name="DrawNameColumn.Text" xml:space="preserve"><value>Name</value></data>
+  <data name="DrawSourceColumn.Text" xml:space="preserve"><value>Source</value></data>
+  <data name="InspectorToggleButton.Content" xml:space="preserve"><value>Draw inspector: Off</value></data>
+  <data name="ApplyConfigurationButton.Content" xml:space="preserve"><value>Apply configuration</value></data>
+  <data name="GraphPageTitle.Text" xml:space="preserve"><value>Directed dependencies</value></data>
+  <data name="GraphPageSubtitle.Text" xml:space="preserve"><value>Dependencies propagate along directed edges: with A → B → C, dragging A affects B and C. Cycles are merged safely. OriginalParts may only be a source.</value></data>
+  <data name="GraphModeComboBox.Header" xml:space="preserve"><value>View</value></data>
+  <data name="GraphEdgeListOption.Content" xml:space="preserve"><value>Edge list</value></data>
+  <data name="GraphInteractiveOption.Content" xml:space="preserve"><value>Interactive graph</value></data>
+  <data name="CurrentGroupsLabel.Text" xml:space="preserve"><value>Current groups</value></data>
+  <data name="EdgeFromComboBox.PlaceholderText" xml:space="preserve"><value>Source group</value></data>
+  <data name="EdgeToComboBox.PlaceholderText" xml:space="preserve"><value>Affected group</value></data>
+  <data name="DeleteEdgeButton.Content" xml:space="preserve"><value>Delete</value></data>
+  <data name="AddEdgeButton.Content" xml:space="preserve"><value>Add edge</value></data>
+  <data name="InteractiveGraphHelp.Text" xml:space="preserve"><value>Hold the left mouse button on a node to move it. Drag from one node to another with the right mouse button to connect them. Hover over an edge to show its delete button.</value></data>
+  <data name="ApplyGraphButton.Content" xml:space="preserve"><value>Apply dependencies</value></data>
+  <data name="MaskPageTitle.Text" xml:space="preserve"><value>Texture Masks</value></data>
+  <data name="MaskPageSubtitle.Text" xml:space="preserve"><value>Enter a DDS path relative to the Mod folder. Blank means solid white (1.0). Multiple Draws may share one file.</value></data>
+  <data name="ApplyMaskButton.Content" xml:space="preserve"><value>Apply Masks</value></data>
+  <data name="PhysicsPageTitle.Text" xml:space="preserve"><value>Physics</value></data>
+  <data name="PhysicsPageSubtitle.Text" xml:space="preserve"><value>Each group can use independent settings. Ungrouped Draws use the Mod defaults, while dependency states retain their own group settings.</value></data>
+  <data name="PhysicsScopeComboBox.Header" xml:space="preserve"><value>Editing</value></data>
+  <data name="CopyDefaultPhysicsButton.Content" xml:space="preserve"><value>Copy Mod defaults</value></data>
+  <data name="RadiusNumber.Header" xml:space="preserve"><value>Influence radius</value></data>
+  <data name="StrengthNumber.Header" xml:space="preserve"><value>Strength</value></data>
+  <data name="FalloffNumber.Header" xml:space="preserve"><value>Falloff exponent</value></data>
+  <data name="DragScaleNumber.Header" xml:space="preserve"><value>Drag scale</value></data>
+  <data name="GrabDampingNumber.Header" xml:space="preserve"><value>Grab damping ratio</value></data>
+  <data name="GrabSpringNumber.Header" xml:space="preserve"><value>Grab frequency (Hz)</value></data>
+  <data name="ReleaseDampingNumber.Header" xml:space="preserve"><value>Release damping ratio</value></data>
+  <data name="ReleaseSpringNumber.Header" xml:space="preserve"><value>Release frequency (Hz)</value></data>
+  <data name="ReleaseKickNumber.Header" xml:space="preserve"><value>Release/slap impulse</value></data>
+  <data name="TargetFollowNumber.Header" xml:space="preserve"><value>Target follow time (seconds)</value></data>
+  <data name="MaxOffsetNumber.Header" xml:space="preserve"><value>Maximum offset</value></data>
+  <data name="WheelStepNumber.Header" xml:space="preserve"><value>Wheel depth step</value></data>
+  <data name="WheelMinDepthNumber.Header" xml:space="preserve"><value>Minimum wheel depth (negative goes into screen)</value></data>
+  <data name="WheelMaxDepthNumber.Header" xml:space="preserve"><value>Maximum wheel depth (positive moves toward camera)</value></data>
+  <data name="VolumeResponseNumber.Header" xml:space="preserve"><value>Volume response</value></data>
+  <data name="SavePhysicsButton.Content" xml:space="preserve"><value>Save settings</value></data>
+  <data name="ApplicationUpdateTitle.Text" xml:space="preserve"><value>App updates &amp; integrity</value></data>
+  <data name="ApplicationUpdateStatusText.Text" xml:space="preserve"><value>Updates have not been checked yet.</value></data>
+  <data name="ApplicationIntegrityStatusText.Text" xml:space="preserve"><value>Verify the integrity of the current application and runtime files.</value></data>
+  <data name="CheckApplicationUpdateButton.Content" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="UpdateApplicationButton.Content" xml:space="preserve"><value>Update to latest</value></data>
+  <data name="VerifyApplicationButton.Content" xml:space="preserve"><value>Verify installation</value></data>
+  <data name="CommunityTitle.Text" xml:space="preserve"><value>Project links &amp; community</value></data>
+  <data name="CommunityDescription.Text" xml:space="preserve"><value>Join us for questions, suggestions, update news, or simply to chat.</value></data>
+  <data name="OpenGithubButton.Content" xml:space="preserve"><value>Open GitHub repository</value></data>
+  <data name="OpenBilibiliButton.Content" xml:space="preserve"><value>Watch the Bilibili introduction</value></data>
+  <data name="QqGroupLabel.Text" xml:space="preserve"><value>QQ group: 451901293</value></data>
+  <data name="CopyQqButton.Content" xml:space="preserve"><value>Copy group number</value></data>
+  <data name="RuntimePathTextBox.Header" xml:space="preserve"><value>ZZMI root</value></data>
+  <data name="ChooseRuntimeFolderButton.Content" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="RuntimePathValidationText.Text" xml:space="preserve"><value>Path has not been validated yet.</value></data>
+  <data name="DefaultPhysicsTitle.Text" xml:space="preserve"><value>Global default physics</value></data>
+  <data name="DefaultPhysicsDescription.Text" xml:space="preserve"><value>New Mods and original characters without adapted Mods share these defaults. Existing adapted Mods retain their own settings.</value></data>
+  <data name="ResetDefaultPhysicsButton.Content" xml:space="preserve"><value>Restore recommended values</value></data>
+  <data name="SaveDefaultPhysicsButton.Content" xml:space="preserve"><value>Save global defaults</value></data>
+  <data name="DragKeysTitle.Text" xml:space="preserve"><value>Global drag keys (multiple selection)</value></data>
+  <data name="ApplyDragKeyButton.Content" xml:space="preserve"><value>Apply drag keys</value></data>
+  <data name="DragKeysDescription.Text" xml:space="preserve"><value>All characters and Mods share these keys. Any selected key can drag; press F10 in game after changing them.</value></data>
+  <data name="GlobalRuntimeLabel.Text" xml:space="preserve"><value>Global runtime</value></data>
+  <data name="InstallRuntimeButton.Content" xml:space="preserve"><value>Install or update runtime</value></data>
+  <data name="UninstallRuntimeButton.Content" xml:space="preserve"><value>Uninstall runtime</value></data>
+  <data name="StartWheelButton.Content" xml:space="preserve"><value>Start wheel input</value></data>
+  <data name="StopWheelButton.Content" xml:space="preserve"><value>Stop wheel input</value></data>
+  <data name="RefreshRuntimeButton.Content" xml:space="preserve"><value>Refresh status</value></data>
+  <data name="OnboardingPreviousButton.Content" xml:space="preserve"><value>Previous</value></data>
+  <data name="OnboardingExitButton.Content" xml:space="preserve"><value>Exit tour</value></data>
+  <data name="OnboardingNextButton.Content" xml:space="preserve"><value>Next</value></data>
+  <data name="DragKeyLeftMouse" xml:space="preserve"><value>Left mouse button</value></data>
+  <data name="DragKeyRightMouse" xml:space="preserve"><value>Right mouse button</value></data>
+  <data name="DragKeyMiddleMouse" xml:space="preserve"><value>Middle mouse button</value></data>
+  <data name="DragKeySideMouse1" xml:space="preserve"><value>Mouse side button 1</value></data>
+  <data name="DragKeySideMouse2" xml:space="preserve"><value>Mouse side button 2</value></data>
+  <data name="DragKeyKeyboardX" xml:space="preserve"><value>Keyboard X</value></data>
+  <data name="DragKeyKeyboardC" xml:space="preserve"><value>Keyboard C</value></data>
+  <data name="DragKeyKeyboardV" xml:space="preserve"><value>Keyboard V</value></data>
+  <data name="StateFirstImport" xml:space="preserve"><value>First import</value></data>
+  <data name="StateReady" xml:space="preserve"><value>Configuration ready</value></data>
+  <data name="StateRuntimeRepair" xml:space="preserve"><value>Runtime repair required</value></data>
+  <data name="StateConfigMissing" xml:space="preserve"><value>Configuration restore required</value></data>
+  <data name="StateLegacyMigration" xml:space="preserve"><value>Legacy migration required</value></data>
+  <data name="StateCannotImport" xml:space="preserve"><value>Cannot import</value></data>
+  <data name="DrawCount" xml:space="preserve"><value>{0} Draw(s)</value></data>
+  <data name="OriginalPartsDisplayName" xml:space="preserve"><value>OriginalParts · Original model parts</value></data>
+  <data name="UngroupedDisplayName" xml:space="preserve"><value>Ungrouped</value></data>
+  <data name="NewGroup" xml:space="preserve"><value>New group</value></data>
+  <data name="MoveToThisGroup" xml:space="preserve"><value>Move to this group</value></data>
+  <data name="MoveToGroup" xml:space="preserve"><value>Move to group</value></data>
+  <data name="NewGroupAndMove" xml:space="preserve"><value>Create group and move</value></data>
+  <data name="RenameGroup" xml:space="preserve"><value>Rename group</value></data>
+  <data name="DeleteGroup" xml:space="preserve"><value>Delete group</value></data>
+  <data name="GroupNameRequired" xml:space="preserve"><value>Group name cannot be empty.</value></data>
+  <data name="GroupNameReserved" xml:space="preserve"><value>This name is reserved by the application. Choose another name.</value></data>
+  <data name="GroupAlreadyExists" xml:space="preserve"><value>Group “{0}” already exists.</value></data>
+  <data name="EnterGroupName" xml:space="preserve"><value>Enter a group name</value></data>
+  <data name="Confirm" xml:space="preserve"><value>OK</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="NoGroupsYet" xml:space="preserve"><value>No groups yet. Create one on the Draw page first.</value></data>
+  <data name="NeedNormalGroupForEdge" xml:space="preserve"><value>At least one normal group is required to add a dependency edge.</value></data>
+  <data name="OriginalPartsCannotBeTarget" xml:space="preserve"><value>The fixed OriginalParts group cannot be the destination of a dependency.</value></data>
+  <data name="GraphNodeTooltip" xml:space="preserve"><value>{0}: left-drag to move, right-drag to connect</value></data>
+  <data name="DeleteEdgeTooltip" xml:space="preserve"><value>Delete {0} → {1}</value></data>
+  <data name="OpenModFolder" xml:space="preserve"><value>Open Mod folder</value></data>
+  <data name="DropFolderNotFile" xml:space="preserve"><value>Drop a folder, not an individual file.</value></data>
+  <data name="AdaptedDraws" xml:space="preserve"><value>Adapted {0} Draw(s) in place. The configuration is now open; press F10 in game after making changes.</value></data>
+  <data name="RestoreOriginalTitle" xml:space="preserve"><value>Restore the original Mod?</value></data>
+  <data name="RestoreOriginalDescription" xml:space="preserve"><value>This restores the files from before the first adaptation and removes the current JiggleForge configuration and runtime files. The backup archive is kept for future restores.</value></data>
+  <data name="RestoreOriginalAction" xml:space="preserve"><value>Restore original Mod</value></data>
+  <data name="OriginalModRestored" xml:space="preserve"><value>The original Mod has been restored. Its original backup remains in the Mod folder.</value></data>
+  <data name="RestoreFailed" xml:space="preserve"><value>Restore failed: {0}</value></data>
+  <data name="BackupSaved" xml:space="preserve"><value>Original backup: {0} file(s) saved ({1})</value></data>
+  <data name="BackupInvalid" xml:space="preserve"><value>Original backup: the file exists but is unusable. {0}</value></data>
+  <data name="BackupCreatedOnAdapt" xml:space="preserve"><value>Original backup: created automatically during first adaptation.</value></data>
+  <data name="BackupNotFound" xml:space="preserve"><value>Original backup: not found (Mods adapted by older versions may not restore exactly).</value></data>
+  <data name="RuntimeFilesRepaired" xml:space="preserve"><value>Runtime files repaired; checked {0} Draw(s). Press F10 in game.</value></data>
+  <data name="ConfigurationApplied" xml:space="preserve"><value>Configuration applied to {0} Draw(s). Press F10 in game to view the result.</value></data>
+  <data name="InspectorEnabled" xml:space="preserve"><value>The Draw inspector is enabled for {0} Draw(s). Press F10 in game, then drag the model to inspect it.</value></data>
+  <data name="InspectorDisabled" xml:space="preserve"><value>The Draw inspector is disabled. Press F10 in game to apply.</value></data>
+  <data name="EdgeGroupsRequired" xml:space="preserve"><value>Both groups on a dependency edge must be selected.</value></data>
+  <data name="SelfEdgeInvalid" xml:space="preserve"><value>A self-dependency cannot be added: {0} → {1}.</value></data>
+  <data name="DuplicateEdge" xml:space="preserve"><value>Duplicate dependency edge: {0} → {1}.</value></data>
+  <data name="InspectorOn" xml:space="preserve"><value>Draw inspector: On</value></data>
+  <data name="InspectorOff" xml:space="preserve"><value>Draw inspector: Off</value></data>
+  <data name="SelectValidZzmiFirst" xml:space="preserve"><value>Select a valid ZZMI root in Settings first.</value></data>
+  <data name="CannotScanMods" xml:space="preserve"><value>Could not scan Mods: {0}</value></data>
+  <data name="ScanningMods" xml:space="preserve"><value>Scanning Mods…</value></data>
+  <data name="NoModsDetected" xml:space="preserve"><value>No Mods were detected. You can still drop or manually open an external Mod.</value></data>
+  <data name="ModsDetected" xml:space="preserve"><value>Detected {0} Mod(s). Select one to open its configuration.</value></data>
+  <data name="ModScanFailed" xml:space="preserve"><value>Scan failed: {0}</value></data>
+  <data name="ZzmiCandidatesFound" xml:space="preserve"><value>{0} Found: {1}</value></data>
+  <data name="AutoLocatedModRoot" xml:space="preserve"><value>Located the Mod root automatically: {0}</value></data>
+  <data name="ModDefaultPhysicsScope" xml:space="preserve"><value>Mod defaults (ungrouped Draws)</value></data>
+  <data name="EditingModDefaultPhysics" xml:space="preserve"><value>You are editing the Mod default physics.</value></data>
+  <data name="CopiedPhysicsToGroup" xml:space="preserve"><value>Copied the Mod default physics to group “{0}”.</value></data>
+  <data name="RecommendedPhysicsAutoApplyFailed" xml:space="preserve"><value>Could not apply the v0.1.8 recommended physics automatically: {0}</value></data>
+  <data name="RecommendedPhysicsAppliedInstallLater" xml:space="preserve"><value>The new v0.1.8 recommended physics were applied once. They will be used after installing or updating the game runtime; existing Mod settings were not changed.</value></data>
+  <data name="RecommendedPhysicsApplied" xml:space="preserve"><value>The new v0.1.8 recommended physics were applied once and synchronized to the game runtime. Existing Mod settings were not changed; press F10 in game.</value></data>
+  <data name="RecommendedPhysicsRuntimeSyncFailed" xml:space="preserve"><value>The v0.1.8 recommended settings were saved in the app but could not be synchronized to the game runtime: {0}</value></data>
+  <data name="RecommendedDefaultsLoaded" xml:space="preserve"><value>Recommended defaults loaded. Select Save global defaults to write them to the app and game runtime.</value></data>
+  <data name="QqCopied" xml:space="preserve"><value>QQ group number 451901293 copied.</value></data>
+  <data name="InvalidPath" xml:space="preserve"><value>Invalid path: {0}</value></data>
+  <data name="NoValidZzmiRoot" xml:space="preserve"><value>No valid ZZMI root was found. Select the directory containing Mods, ShaderFixes, and the loader files.</value></data>
+  <data name="WheelStoppedForUpdate" xml:space="preserve"><value>WheelBridge stopped. The runtime can now be updated.</value></data>
+  <data name="RuntimeInstalled" xml:space="preserve"><value>The runtime was installed or updated. Press F10 in game.</value></data>
+  <data name="DragKeysUpdated" xml:space="preserve"><value>Global drag keys updated. Any selected key can drag; press F10 in game.</value></data>
+  <data name="Saving" xml:space="preserve"><value>Saving…</value></data>
+  <data name="DefaultsSavedInvalidZzmi" xml:space="preserve"><value>Settings were saved in the app, but the ZZMI path is invalid, so they were not written to the game.</value></data>
+  <data name="DefaultsSavedToRuntime" xml:space="preserve"><value>Global default physics were saved and written to the game runtime. Existing Mods kept their own settings; press F10 in game.</value></data>
+  <data name="SavedToGame" xml:space="preserve"><value>Saved and written to the game. Press F10.</value></data>
+  <data name="SavedButRuntimeWriteFailed" xml:space="preserve"><value>App settings were saved, but writing the game runtime failed. See the error above.</value></data>
+  <data name="SavedInstallLater" xml:space="preserve"><value>Saved. The settings will be written when the runtime is installed.</value></data>
+  <data name="GlobalDefaultsSaved" xml:space="preserve"><value>Global default physics were saved. New Mods use these values; after runtime installation they also apply to characters without Mods.</value></data>
+  <data name="SaveFailedSeeError" xml:space="preserve"><value>Save failed. See the error above.</value></data>
+  <data name="UninstallingRuntime" xml:space="preserve"><value>Uninstalling runtime</value></data>
+  <data name="UninstallingRuntimeDetails" xml:space="preserve"><value>Removing the global runtime and 6 JiggleForge ShaderFixes. Pre-installation backups will be restored automatically.</value></data>
+  <data name="UninstallingRuntimeMessage" xml:space="preserve"><value>Uninstalling runtime…</value></data>
+  <data name="WheelStoppedForUninstall" xml:space="preserve"><value>WheelBridge stopped. The runtime can now be uninstalled.</value></data>
+  <data name="RuntimeUninstalled" xml:space="preserve"><value>The runtime was uninstalled and pre-installation ShaderFix backups were restored. Press F10 in game.</value></data>
+  <data name="WaitingForAdmin" xml:space="preserve"><value>Waiting for administrator approval</value></data>
+  <data name="WheelAdminDescription" xml:space="preserve"><value>WheelBridge requires administrator permission to read and intercept the mouse wheel. Select Yes in Windows User Account Control.</value></data>
+  <data name="WaitingWheelAdmin" xml:space="preserve"><value>Waiting for WheelBridge administrator approval…</value></data>
+  <data name="WheelStarted" xml:space="preserve"><value>WheelBridge started. Use the wheel while dragging to adjust depth along the frozen normal.</value></data>
+  <data name="WheelStopped" xml:space="preserve"><value>WheelBridge stopped.</value></data>
+  <data name="ValidZzmiNotFound" xml:space="preserve"><value>No valid ZZMI directory found</value></data>
+  <data name="ChooseZzmiRootDetails" xml:space="preserve"><value>Select the root containing Mods, ShaderFixes, and the ZZMI loader files. Invalid paths are not saved.</value></data>
+  <data name="Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Running" xml:space="preserve"><value>Running</value></data>
+  <data name="NotRunning" xml:space="preserve"><value>Not running</value></data>
+  <data name="InvalidZzmiPath" xml:space="preserve"><value>Invalid ZZMI path: {0}</value></data>
+  <data name="CannotCheckRuntime" xml:space="preserve"><value>Could not check runtime</value></data>
+  <data name="RuntimeReady" xml:space="preserve"><value>Runtime ready</value></data>
+  <data name="RuntimeNeedsInstall" xml:space="preserve"><value>Runtime installation or update required</value></data>
+  <data name="ZzmiNotFound" xml:space="preserve"><value>ZZMI directory not found</value></data>
+  <data name="RuntimePayloadMissing" xml:space="preserve"><value>RuntimePayload is missing from the application directory. Rebuild or reinstall JiggleForge.</value></data>
+  <data name="DirectoryDoesNotExist" xml:space="preserve"><value>Directory does not exist: {0}</value></data>
+  <data name="ZzmiMustContainFolders" xml:space="preserve"><value>The selected directory must contain both Mods and ShaderFixes.</value></data>
+  <data name="AllComponentsCurrentWithBackups" xml:space="preserve"><value>All components are current; {0} pre-installation ShaderFix backup(s) are retained.</value></data>
+  <data name="AllComponentsCurrent" xml:space="preserve"><value>All components are current.</value></data>
+  <data name="InstallRuntimeHint" xml:space="preserve"><value>Select Install or update runtime to add missing files and update old ones.</value></data>
+  <data name="NotInstalled" xml:space="preserve"><value>Not installed</value></data>
+  <data name="CurrentVersion" xml:space="preserve"><value>Current</value></data>
+  <data name="NeedsUpdate" xml:space="preserve"><value>Update required</value></data>
+  <data name="ShaderFixCurrentCount" xml:space="preserve"><value>{0}/{1} current</value></data>
+  <data name="InstalledShaderCount" xml:space="preserve"><value> ({0} detected)</value></data>
+  <data name="ValidPath" xml:space="preserve"><value>Valid path: {0}</value></data>
+  <data name="AutoCorrectedPath" xml:space="preserve"><value>Corrected automatically to: {0}</value></data>
+  <data name="AutoLocatedZzmiRoot" xml:space="preserve"><value>Located the ZZMI root automatically: {0}</value></data>
+  <data name="ApplicationVersion" xml:space="preserve"><value>Current version: v{0}</value></data>
+  <data name="AutoCheckStableRelease" xml:space="preserve"><value>JiggleForge checks the latest stable GitHub release automatically after launch.</value></data>
+  <data name="VerifyingInstallation" xml:space="preserve"><value>Verifying the current installation…</value></data>
+  <data name="VerificationPassedDetails" xml:space="preserve"><value>Verification passed: {0}/{1} application and runtime files are intact.</value></data>
+  <data name="VerificationPassed" xml:space="preserve"><value>The current JiggleForge installation passed verification.</value></data>
+  <data name="AdditionalIssues" xml:space="preserve"><value>; {0} more issue(s)</value></data>
+  <data name="VerificationFailedDetails" xml:space="preserve"><value>Verification failed: {0}/{1} files are intact. {2}</value></data>
+  <data name="CannotVerifyVersion" xml:space="preserve"><value>This version cannot be verified.</value></data>
+  <data name="InstallationFilesChanged" xml:space="preserve"><value>The installation has missing or modified files. Update or reinstall the latest version.</value></data>
+  <data name="VerificationError" xml:space="preserve"><value>Verification failed: {0}</value></data>
+  <data name="CheckingGithubRelease" xml:space="preserve"><value>Checking the latest GitHub release…</value></data>
+  <data name="NewVersionFoundWithName" xml:space="preserve"><value>New version v{0}: {1}</value></data>
+  <data name="NewVersionFound" xml:space="preserve"><value>Update v{0} available</value></data>
+  <data name="OneClickUpdateAvailable" xml:space="preserve"><value>JiggleForge v{0} is available for one-click update.</value></data>
+  <data name="AlreadyLatestVersion" xml:space="preserve"><value>You already have the latest version, v{0}.</value></data>
+  <data name="JiggleForgeAlreadyLatest" xml:space="preserve"><value>JiggleForge is up to date.</value></data>
+  <data name="VersionAheadOfRelease" xml:space="preserve"><value>Current version v{0} is newer than the latest public release v{1}.</value></data>
+  <data name="CannotConnectGithub" xml:space="preserve"><value>Could not connect to GitHub to check for updates.</value></data>
+  <data name="UpdateCheckFailed" xml:space="preserve"><value>Update check failed: {0}</value></data>
+  <data name="NoReleaseNotes" xml:space="preserve"><value>No release notes are available for this version.</value></data>
+  <data name="UpdateVersionComparison" xml:space="preserve"><value>Current version: v{0}&#x0A;Latest version: v{1}</value></data>
+  <data name="WhatsNew" xml:space="preserve"><value>What's new</value></data>
+  <data name="UpdateCommunityText" xml:space="preserve"><value>QQ group: 451901293&#x0A;Join us for questions, suggestions, update news, or simply to chat.</value></data>
+  <data name="NewVersionDialogTitle" xml:space="preserve"><value>A new JiggleForge version is available</value></data>
+  <data name="UpdateNow" xml:space="preserve"><value>Update now</value></data>
+  <data name="NotNow" xml:space="preserve"><value>Not now</value></data>
+  <data name="DownloadingVersion" xml:space="preserve"><value>Downloading JiggleForge v{0}…</value></data>
+  <data name="DownloadingVersionProgress" xml:space="preserve"><value>Downloading JiggleForge v{0}: {1:P0}</value></data>
+  <data name="DownloadVerifiedStartingUpdater" xml:space="preserve"><value>Download completed and SHA-256 verification passed. Starting the updater…</value></data>
+  <data name="UpdateFailed" xml:space="preserve"><value>Update failed: {0}</value></data>
+  <data name="UpdaterMissing" xml:space="preserve"><value>JiggleForge.Updater.exe is missing. Install a newer package that includes the updater manually.</value></data>
+  <data name="CannotStartUpdater" xml:space="preserve"><value>Could not start the JiggleForge updater.</value></data>
+  <data name="UpdateToLatest" xml:space="preserve"><value>Update to latest</value></data>
+  <data name="ReinstallLatest" xml:space="preserve"><value>Reinstall latest version</value></data>
+  <data name="UnsupportedQuoteInPath" xml:space="preserve"><value>The path contains an unsupported double-quote character.</value></data>
+  <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>Controls all original parts not replaced by the current Mod.</value></data>
+  <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>Open Settings and update JiggleForge</value></data>
+</root>

@@ -32,19 +32,19 @@ public sealed partial class MainWindow : Window
         if (!resolution.IsValid)
         {
             modLibraryRows.Clear();
-            ModLibraryStatusText.Text = "请先在设置中选择正确的 ZZMI 根目录。";
+            ModLibraryStatusText.Text = L("SelectValidZzmiFirst");
             ModLibraryRootText.Text = resolution.Message;
             ModLibraryBusyRing.IsActive = false;
             if (showErrors)
             {
-                ShowMessage("无法扫描 Mod：" + resolution.Message, InfoBarSeverity.Warning);
+                ShowMessage(AppLanguageService.Format("CannotScanMods", resolution.Message), InfoBarSeverity.Warning);
             }
             return;
         }
 
         ApplyResolvedRuntimePath(resolution, showCorrectionMessage: showErrors);
         ModLibraryBusyRing.IsActive = true;
-        ModLibraryStatusText.Text = "正在扫描 Mod…";
+        ModLibraryStatusText.Text = L("ScanningMods");
         ModLibraryRootText.Text = Path.Combine(resolution.ResolvedPath, "Mods");
         try
         {
@@ -65,8 +65,8 @@ public sealed partial class MainWindow : Window
             }
 
             ModLibraryStatusText.Text = entries.Count == 0
-                ? "没有识别到 Mod。仍然可以拖入或手动打开外部 Mod。"
-                : $"已识别 {entries.Count} 个 Mod。点击任意一项即可打开配置。";
+                ? L("NoModsDetected")
+                : AppLanguageService.Format("ModsDetected", entries.Count);
         }
         catch (OperationCanceledException)
         {
@@ -74,7 +74,7 @@ public sealed partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
         {
             modLibraryRows.Clear();
-            ModLibraryStatusText.Text = "扫描失败：" + exception.Message;
+            ModLibraryStatusText.Text = AppLanguageService.Format("ModScanFailed", exception.Message);
             if (showErrors)
             {
                 ShowMessage(ModLibraryStatusText.Text, InfoBarSeverity.Error);
@@ -95,7 +95,7 @@ public sealed partial class MainWindow : Window
         if (!resolution.IsValid || resolution.ResolvedPath is null)
         {
             string detail = resolution.Candidates.Count > 1
-                ? $"{resolution.Message} 已找到：{string.Join("、", resolution.Candidates.Select(Path.GetFileName))}"
+                ? AppLanguageService.Format("ZzmiCandidatesFound", resolution.Message, string.Join(AppLanguageService.CurrentLanguage == AppLanguageService.English ? ", " : "、", resolution.Candidates.Select(Path.GetFileName)))
                 : resolution.Message;
             ShowMessage(detail, InfoBarSeverity.Warning);
             return;
@@ -104,7 +104,7 @@ public sealed partial class MainWindow : Window
         if (resolution.WasCorrected)
         {
             ShowMessage(
-                $"已自动定位到 Mod 根目录：{resolution.ResolvedPath}",
+                AppLanguageService.Format("AutoLocatedModRoot", resolution.ResolvedPath),
                 InfoBarSeverity.Informational);
         }
         OpenProject(resolution.ResolvedPath);

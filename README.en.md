@@ -17,6 +17,7 @@ JiggleForge is a Windows desktop application for 《Zenless Zone Zero》 XXMI/ZZ
 - Creates `JiggleForge.original.zip` before first adaptation and restores the original Mod from the Overview page.
 - Checks the latest stable GitHub Release at startup, with one-click update or a persistent title-bar reminder when postponed.
 - Checks for updates, reinstalls the latest version, and verifies installed files from **Settings**.
+- Asks for Simplified Chinese or English on first launch, with language switching available later in **Settings**.
 
 ## Requirements
 
@@ -29,7 +30,7 @@ Game updates can change shader hashes. If a pass is no longer recognized, update
 ## Quick start
 
 1. Download and extract the latest self-contained package from [Releases](https://github.com/wlytsgd2/JiggleForge/releases).
-2. Start `JiggleForge.exe` and follow the first-run guide.
+2. Start `JiggleForge.exe`, choose a display language, and follow the first-run guide.
 3. Open **Settings**, select the ZZMI root folder containing `Mods` and `ShaderFixes`, and install or update the runtime.
 4. Select a Mod from the automatically discovered library on the home page. Mods outside ZZMI can still be dragged in or opened manually.
 5. Review Draws, groups, masks, dependencies, and physics, then click **Apply configuration**.

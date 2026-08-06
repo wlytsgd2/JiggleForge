@@ -19,8 +19,8 @@ public sealed partial class MainWindow
 
     private void InitializeApplicationUpdateView()
     {
-        ApplicationVersionText.Text = $"当前版本：v{applicationUpdateService.CurrentVersionText}";
-        ApplicationUpdateStatusText.Text = "启动后会自动检查 GitHub 最新稳定版。";
+        ApplicationVersionText.Text = AppLanguageService.Format("ApplicationVersion", applicationUpdateService.CurrentVersionText);
+        ApplicationUpdateStatusText.Text = L("AutoCheckStableRelease");
         RenderApplicationUpdateControls();
     }
 
@@ -53,7 +53,7 @@ public sealed partial class MainWindow
         }
 
         SetApplicationUpdateBusy(true);
-        ApplicationIntegrityStatusText.Text = "正在校验当前安装…";
+        ApplicationIntegrityStatusText.Text = L("VerifyingInstallation");
         bool checkReleaseAfterVerification = false;
         try
         {
@@ -61,21 +61,21 @@ public sealed partial class MainWindow
             if (result.IsValid)
             {
                 ApplicationIntegrityStatusText.Text =
-                    $"校验通过：{result.VerifiedFileCount}/{result.ExpectedFileCount} 个程序和运行时文件完整。";
-                ShowMessage("JiggleForge 当前安装校验通过。", InfoBarSeverity.Success);
+                    AppLanguageService.Format("VerificationPassedDetails", result.VerifiedFileCount, result.ExpectedFileCount);
+                ShowMessage(L("VerificationPassed"), InfoBarSeverity.Success);
                 return;
             }
 
             string details = string.Join("；", result.Errors.Take(4));
             if (result.Errors.Count > 4)
             {
-                details += $"；另有 {result.Errors.Count - 4} 项";
+                details += AppLanguageService.Format("AdditionalIssues", result.Errors.Count - 4);
             }
 
             ApplicationIntegrityStatusText.Text = result.ManifestFound
-                ? $"校验未通过：{result.VerifiedFileCount}/{result.ExpectedFileCount} 个文件完整。{details}"
-                : result.Errors.FirstOrDefault() ?? "当前版本无法校验。";
-            ShowMessage("当前安装存在缺失或被修改的文件，可以更新或重新安装最新版本。", InfoBarSeverity.Warning);
+                ? AppLanguageService.Format("VerificationFailedDetails", result.VerifiedFileCount, result.ExpectedFileCount, details)
+                : result.Errors.FirstOrDefault() ?? L("CannotVerifyVersion");
+            ShowMessage(L("InstallationFilesChanged"), InfoBarSeverity.Warning);
             if (latestApplicationRelease is null)
             {
                 checkReleaseAfterVerification = true;
@@ -87,7 +87,7 @@ public sealed partial class MainWindow
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ApplicationIntegrityStatusText.Text = "校验失败：" + exception.Message;
+            ApplicationIntegrityStatusText.Text = AppLanguageService.Format("VerificationError", exception.Message);
             ShowMessage(ApplicationIntegrityStatusText.Text, InfoBarSeverity.Error);
         }
         finally
@@ -116,7 +116,7 @@ public sealed partial class MainWindow
         }
 
         SetApplicationUpdateBusy(true);
-        ApplicationUpdateStatusText.Text = "正在检查 GitHub 最新版本…";
+        ApplicationUpdateStatusText.Text = L("CheckingGithubRelease");
         ApplicationUpdateCheckResult? result = null;
         try
         {
@@ -126,39 +126,39 @@ public sealed partial class MainWindow
             if (result.UpdateAvailable)
             {
                 ApplicationUpdateStatusText.Text =
-                    $"发现新版本 v{result.LatestRelease.VersionText}：{result.LatestRelease.Name}";
-                UpdateTitleButton.Content = $"发现新版本 v{result.LatestRelease.VersionText}";
+                    AppLanguageService.Format("NewVersionFoundWithName", result.LatestRelease.VersionText, result.LatestRelease.Name);
+                UpdateTitleButton.Content = AppLanguageService.Format("NewVersionFound", result.LatestRelease.VersionText);
                 UpdateTitleButton.Visibility = Visibility.Visible;
                 if (showResult)
                 {
                     ShowMessage(
-                        $"发现 JiggleForge v{result.LatestRelease.VersionText}，可以一键更新。",
+                        AppLanguageService.Format("OneClickUpdateAvailable", result.LatestRelease.VersionText),
                         InfoBarSeverity.Informational);
                 }
             }
             else if (result.LatestRelease.Version == result.CurrentVersion)
             {
-                ApplicationUpdateStatusText.Text = $"当前已是最新版本 v{result.CurrentVersionText}。";
+                ApplicationUpdateStatusText.Text = AppLanguageService.Format("AlreadyLatestVersion", result.CurrentVersionText);
                 UpdateTitleButton.Visibility = Visibility.Collapsed;
                 if (showResult)
                 {
-                    ShowMessage("JiggleForge 当前已是最新版本。", InfoBarSeverity.Success);
+                    ShowMessage(L("JiggleForgeAlreadyLatest"), InfoBarSeverity.Success);
                 }
             }
             else
             {
                 ApplicationUpdateStatusText.Text =
-                    $"当前版本 v{result.CurrentVersionText} 高于最新公开版 v{result.LatestRelease.VersionText}。";
+                    AppLanguageService.Format("VersionAheadOfRelease", result.CurrentVersionText, result.LatestRelease.VersionText);
                 UpdateTitleButton.Visibility = Visibility.Collapsed;
             }
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or
                                           IOException or InvalidDataException or JsonException)
         {
-            ApplicationUpdateStatusText.Text = "暂时无法连接 GitHub 检查更新。";
+            ApplicationUpdateStatusText.Text = L("CannotConnectGithub");
             if (showResult)
             {
-                ShowMessage("检查更新失败：" + exception.Message, InfoBarSeverity.Warning);
+                ShowMessage(AppLanguageService.Format("UpdateCheckFailed", exception.Message), InfoBarSeverity.Warning);
             }
         }
         finally
@@ -175,7 +175,7 @@ public sealed partial class MainWindow
     private async Task ShowApplicationUpdateDialogAsync(ApplicationReleaseInfo release)
     {
         string notes = string.IsNullOrWhiteSpace(release.ReleaseNotes)
-            ? "此版本没有附加更新说明。"
+            ? L("NoReleaseNotes")
             : release.ReleaseNotes.Trim();
         if (notes.Length > 1600)
         {
@@ -185,12 +185,12 @@ public sealed partial class MainWindow
         StackPanel content = new() { Spacing = 10 };
         content.Children.Add(new TextBlock
         {
-            Text = $"当前版本：v{applicationUpdateService.CurrentVersionText}\n最新版本：v{release.VersionText}",
+            Text = AppLanguageService.Format("UpdateVersionComparison", applicationUpdateService.CurrentVersionText, release.VersionText),
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
         });
         content.Children.Add(new TextBlock
         {
-            Text = "更新内容",
+            Text = L("WhatsNew"),
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
         });
         content.Children.Add(new ScrollViewer
@@ -205,7 +205,7 @@ public sealed partial class MainWindow
         });
         content.Children.Add(new TextBlock
         {
-            Text = "QQ 交流群：451901293\n无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！",
+            Text = L("UpdateCommunityText"),
             TextWrapping = TextWrapping.Wrap,
             IsTextSelectionEnabled = true,
             Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
@@ -213,10 +213,10 @@ public sealed partial class MainWindow
 
         ContentDialog dialog = new()
         {
-            Title = "发现 JiggleForge 新版本",
+            Title = L("NewVersionDialogTitle"),
             Content = content,
-            PrimaryButtonText = "立即更新",
-            CloseButtonText = "暂不更新",
+            PrimaryButtonText = L("UpdateNow"),
+            CloseButtonText = L("NotNow"),
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = RootGrid.XamlRoot,
         };
@@ -237,19 +237,19 @@ public sealed partial class MainWindow
         ApplicationUpdateProgressBar.Value = 0;
         ApplicationUpdateProgressBar.Visibility = Visibility.Visible;
         ApplicationUpdateProgressBar.IsIndeterminate = false;
-        ApplicationUpdateStatusText.Text = $"正在下载 JiggleForge v{release.VersionText}…";
+        ApplicationUpdateStatusText.Text = AppLanguageService.Format("DownloadingVersion", release.VersionText);
         try
         {
             Progress<double> progress = new(value =>
             {
                 ApplicationUpdateProgressBar.Value = value * 100;
                 ApplicationUpdateStatusText.Text =
-                    $"正在下载 JiggleForge v{release.VersionText}：{value:P0}";
+                    AppLanguageService.Format("DownloadingVersionProgress", release.VersionText, value);
             });
             ApplicationUpdateDownload download = await applicationUpdateService.DownloadUpdateAsync(
                 release,
                 progress);
-            ApplicationUpdateStatusText.Text = "下载完成且 SHA-256 校验通过，正在启动更新器…";
+            ApplicationUpdateStatusText.Text = L("DownloadVerifiedStartingUpdater");
             LaunchApplicationUpdater(download);
             Close();
         }
@@ -257,7 +257,7 @@ public sealed partial class MainWindow
                                           IOException or UnauthorizedAccessException or InvalidDataException or
                                           InvalidOperationException or Win32Exception)
         {
-            ApplicationUpdateStatusText.Text = "更新失败：" + exception.Message;
+            ApplicationUpdateStatusText.Text = AppLanguageService.Format("UpdateFailed", exception.Message);
             ApplicationUpdateProgressBar.Visibility = Visibility.Collapsed;
             ShowMessage(ApplicationUpdateStatusText.Text, InfoBarSeverity.Error);
         }
@@ -272,7 +272,7 @@ public sealed partial class MainWindow
         string sourceUpdater = Path.Combine(AppContext.BaseDirectory, "JiggleForge.Updater.exe");
         if (!File.Exists(sourceUpdater))
         {
-            throw new InvalidOperationException("应用目录缺少 JiggleForge.Updater.exe，请手动安装包含更新器的新版本。");
+            throw new InvalidOperationException(L("UpdaterMissing"));
         }
 
         string updaterDirectory = Path.Combine(
@@ -302,7 +302,7 @@ public sealed partial class MainWindow
             startInfo.Verb = "runas";
         }
 
-        _ = Process.Start(startInfo) ?? throw new InvalidOperationException("无法启动 JiggleForge 更新器。");
+        _ = Process.Start(startInfo) ?? throw new InvalidOperationException(L("CannotStartUpdater"));
     }
 
     private void SetApplicationUpdateBusy(bool busy)
@@ -321,8 +321,8 @@ public sealed partial class MainWindow
             latestApplicationRelease is not null &&
             latestApplicationRelease.Version >= applicationUpdateService.CurrentVersion;
         UpdateApplicationButton.Content = latestApplicationRelease is null || applicationUpdateAvailable
-            ? "更新到最新版本"
-            : "重新安装最新版本";
+            ? L("UpdateToLatest")
+            : L("ReinstallLatest");
     }
 
     private static bool CanWriteInstallationDirectory(string directory)
@@ -348,7 +348,7 @@ public sealed partial class MainWindow
     {
         if (value.Contains('"'))
         {
-            throw new ArgumentException("路径包含不受支持的双引号字符。", nameof(value));
+            throw new ArgumentException(L("UnsupportedQuoteInPath"), nameof(value));
         }
 
         return '"' + value + '"';

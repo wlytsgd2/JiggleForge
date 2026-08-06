@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.11 — 2026-08-07
+
+- Added complete Simplified Chinese and English application interfaces.
+- Added a bilingual language choice before the first-run guide and a language
+  selector in Settings.
+- Replaced literal-text substitution and packaged-app language overrides with a
+  unified resource-key localization service that works in the unpackaged,
+  self-contained application.
+- Localized static controls, dynamic status messages, dialogs, onboarding,
+  templates, and tooltips through the same language resource set.
+- Improved the global drag-key layout so longer English labels wrap cleanly and
+  remain readable at narrower window sizes.
+- Added automated checks for resource parity, missing XAML localization keys,
+  and untranslated Chinese XAML literals.
+
 ## 0.1.10 — 2026-08-07
 
 - Added an automatic Mod library that scans the selected ZZMI `Mods` directory

@@ -49,7 +49,7 @@ public sealed partial class MainWindow
         List<DrawTreeItem> rebuiltRoots = [];
         DrawGroupEditorNode original = CreateGroupNode(
             OriginalPartsConfig.GroupName,
-            "OriginalParts · 原版部件",
+            L("OriginalPartsDisplayName"),
             isOriginalParts: true,
             isUngrouped: false,
             expanded);
@@ -59,7 +59,7 @@ public sealed partial class MainWindow
 
         DrawGroupEditorNode ungrouped = CreateGroupNode(
             string.Empty,
-            "未分组",
+            L("UngroupedDisplayName"),
             isOriginalParts: false,
             isUngrouped: true,
             expanded);
@@ -132,7 +132,7 @@ public sealed partial class MainWindow
 
     private async void CreateDrawGroup_Click(object sender, RoutedEventArgs e)
     {
-        string? name = await PromptGroupNameAsync("新建组", string.Empty);
+        string? name = await PromptGroupNameAsync(L("NewGroup"), string.Empty);
         if (name is null || !TryAddGroupName(name))
         {
             return;
@@ -162,7 +162,7 @@ public sealed partial class MainWindow
                 : DataPackageOperation.None;
             if (isDraw)
             {
-                e.DragUIOverride.Caption = "移动到此组";
+                e.DragUIOverride.Caption = L("MoveToThisGroup");
             }
             e.Handled = true;
         }
@@ -199,8 +199,8 @@ public sealed partial class MainWindow
         }
 
         MenuFlyout flyout = new();
-        MenuFlyoutSubItem move = new() { Text = "移动到组" };
-        move.Items.Add(CreateMoveMenuItem(row, string.Empty, "未分组"));
+        MenuFlyoutSubItem move = new() { Text = L("MoveToGroup") };
+        move.Items.Add(CreateMoveMenuItem(row, string.Empty, L("UngroupedDisplayName")));
         foreach (string groupName in editorGroupNames
                      .OrderBy(name =>
                          string.Equals(name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)
@@ -212,10 +212,10 @@ public sealed partial class MainWindow
         }
         flyout.Items.Add(move);
 
-        MenuFlyoutItem create = new() { Text = "新建组并移动" };
+        MenuFlyoutItem create = new() { Text = L("NewGroupAndMove") };
         create.Click += async (_, _) =>
         {
-            string? name = await PromptGroupNameAsync("新建组并移动", string.Empty);
+            string? name = await PromptGroupNameAsync(L("NewGroupAndMove"), string.Empty);
             if (name is not null && TryAddGroupName(name))
             {
                 MoveDrawToGroup(row, name.Trim());
@@ -252,10 +252,10 @@ public sealed partial class MainWindow
         }
 
         MenuFlyout flyout = new();
-        MenuFlyoutItem rename = new() { Text = "重命名组" };
+        MenuFlyoutItem rename = new() { Text = L("RenameGroup") };
         rename.Click += async (_, _) =>
         {
-            string? name = await PromptGroupNameAsync("重命名组", group.Name);
+            string? name = await PromptGroupNameAsync(L("RenameGroup"), group.Name);
             if (name is not null)
             {
                 RenameGroup(group.Name, name);
@@ -263,7 +263,7 @@ public sealed partial class MainWindow
         };
         flyout.Items.Add(rename);
 
-        MenuFlyoutItem delete = new() { Text = "删除组" };
+        MenuFlyoutItem delete = new() { Text = L("DeleteGroup") };
         delete.Click += (_, _) => DeleteGroup(group.Name);
         flyout.Items.Add(delete);
         flyout.ShowAt(element, e.GetPosition(element));
@@ -287,18 +287,18 @@ public sealed partial class MainWindow
         name = name.Trim();
         if (name.Length == 0)
         {
-            ShowMessage("组名不能为空。", InfoBarSeverity.Warning);
+            ShowMessage(L("GroupNameRequired"), InfoBarSeverity.Warning);
             return false;
         }
-        if (string.Equals(name, "未分组", StringComparison.OrdinalIgnoreCase) ||
+        if (string.Equals(name, L("UngroupedDisplayName"), StringComparison.OrdinalIgnoreCase) ||
             string.Equals(name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase))
         {
-            ShowMessage("该名称由应用保留，请使用其他组名。", InfoBarSeverity.Warning);
+            ShowMessage(L("GroupNameReserved"), InfoBarSeverity.Warning);
             return false;
         }
         if (!editorGroupNames.Add(name))
         {
-            ShowMessage($"组“{name}”已经存在。", InfoBarSeverity.Warning);
+            ShowMessage(AppLanguageService.Format("GroupAlreadyExists", name), InfoBarSeverity.Warning);
             return false;
         }
         editorPhysicsByScope[name] = GetDefaultProjectPhysics().Clone();
@@ -391,7 +391,7 @@ public sealed partial class MainWindow
         TextBox input = new()
         {
             Text = initialValue,
-            PlaceholderText = "输入组名",
+            PlaceholderText = L("EnterGroupName"),
             MinWidth = 320,
             SelectionStart = 0,
             SelectionLength = initialValue.Length,
@@ -401,8 +401,8 @@ public sealed partial class MainWindow
             XamlRoot = DrawView.XamlRoot,
             Title = title,
             Content = input,
-            PrimaryButtonText = "确定",
-            CloseButtonText = "取消",
+            PrimaryButtonText = L("Confirm"),
+            CloseButtonText = L("Cancel"),
             DefaultButton = ContentDialogButton.Primary,
         };
         ContentDialogResult result = await dialog.ShowAsync();

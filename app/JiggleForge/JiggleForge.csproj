@@ -4,9 +4,10 @@
     <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RootNamespace>JiggleForge</RootNamespace>
-    <Version>0.1.10</Version>
-    <AssemblyVersion>0.1.10.0</AssemblyVersion>
-    <FileVersion>0.1.10.0</FileVersion>
+    <DefaultLanguage>zh-CN</DefaultLanguage>
+    <Version>0.1.11</Version>
+    <AssemblyVersion>0.1.11.0</AssemblyVersion>
+    <FileVersion>0.1.11.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>..\..\assets\branding\JiggleForge.ico</ApplicationIcon>
     <Platforms>x64</Platforms>

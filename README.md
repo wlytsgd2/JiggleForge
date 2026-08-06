@@ -17,6 +17,7 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 - 首次适配前自动创建 `JiggleForge.original.zip`，可以从概览页恢复原始 Mod。
 - 启动时检查 GitHub 最新稳定版；可以立即一键更新，也可以暂不更新并在标题栏保留提醒。
 - 在“设置”中可以随时检查更新、重新安装最新版本并校验当前安装文件。
+- 首次启动先选择简体中文或 English；之后可随时在“设置”中切换显示语言。
 
 ## 运行要求
 
@@ -29,7 +30,7 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 ## 快速开始
 
 1. 从 [Releases](https://github.com/wlytsgd2/JiggleForge/releases) 下载并解压最新自包含版本。
-2. 启动 `JiggleForge.exe`，按首次使用向导完成设置。
+2. 启动 `JiggleForge.exe`，先选择显示语言，再按首次使用向导完成设置。
 3. 打开“设置”，选择包含 `Mods` 和 `ShaderFixes` 的 ZZMI 根目录，然后安装或更新运行时。
 4. 从首页自动识别的 Mod 列表中选择一项；ZZMI 以外的 Mod 仍可拖入或手动打开。
 5. 检查 Draw、分组、Mask、依赖关系和物理参数，然后点击“应用配置”。
