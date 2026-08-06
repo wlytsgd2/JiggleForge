@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.8-beta.3 — test build
+## 0.1.9 — 2026-08-06
 
 - Replaced fixed scene cursor offsets with automatic previous-frame calibration
   from both role-texture composition and whole-scene composition passes.
@@ -14,6 +14,8 @@
   by earlier releases, while newly generated patches use `activePickPipeline`.
 - Added runtime ABI contract tests so public variables, resources, and command
   lists used by already-adapted Mods cannot be removed accidentally.
+- Disabled the blue runtime diagnostic overlay in distributed builds while
+  preserving the independently controlled per-Mod Draw inspector.
 
 ## 0.1.8 — 2026-08-04
 
