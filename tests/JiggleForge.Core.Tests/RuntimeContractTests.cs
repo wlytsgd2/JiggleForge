@@ -178,6 +178,7 @@ public sealed class RuntimeContractTests
         StringAssert.Contains(ini, "hash = 6443f79de027d780");
         StringAssert.Contains(ini, "hash = edf794e6c2599288");
         StringAssert.Contains(ini, "hash = 1da80a4543267137");
+        StringAssert.Contains(ini, "hash = 788ff53c1e1d1227");
         string edfOverride = ReadSection(
             ini,
             "ShaderOverrideJiggleForgeCalibrationRoleCompositeEDF7");
@@ -232,6 +233,12 @@ public sealed class RuntimeContractTests
             "CommandListCaptureWorldCalibration");
         StringAssert.Contains(worldCapture, "run = CustomShaderCaptureWorldCalibrationMap");
         StringAssert.Contains(worldCapture, "$calibrationRouteThisFrame = 10");
+
+        string combatOverride = ReadSection(
+            ini,
+            "ShaderOverrideJiggleForgeCalibrationCombatComposite");
+        StringAssert.Contains(combatOverride, "hash = 788ff53c1e1d1227");
+        StringAssert.Contains(combatOverride, "run = CommandListCaptureWorldCalibration");
 
         string present = ReadSection(ini, "Present");
         int promoteIndex = present.IndexOf(

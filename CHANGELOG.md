@@ -1,11 +1,13 @@
 # Changelog
 
-## 0.1.8-beta.2 — test build
+## 0.1.8-beta.3 — test build
 
 - Replaced fixed scene cursor offsets with automatic previous-frame calibration
   from both role-texture composition and whole-scene composition passes.
 - Added wallpaper-scene calibration through the shared 857 composition shader,
   filtered against the role texture produced earlier in the frame.
+- Added combat-scene calibration through the unique full-screen
+  `788ff53c1e1d1227` composition pass.
 - Removed the post-Skin fallback pick so restored and otherwise unadapted Mods
   cannot lose the valid pre-Skin selection to a later incompatible buffer.
 - Restored the public `activePickProfile` compatibility symbol for Mods adapted
