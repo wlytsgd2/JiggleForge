@@ -51,20 +51,32 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        RuntimePathTextBox.Text = folder.Path;
-        SaveZzmiRootPreference(folder.Path);
+        ZzmiPathResolution resolution = ZzmiPathResolver.Resolve(folder.Path);
+        if (!resolution.IsValid)
+        {
+            RuntimePathTextBox.Text = folder.Path;
+            RuntimePathValidationText.Text = "路径无效：" + resolution.Message;
+            ShowMessage("没有找到有效的 ZZMI 根目录。请选择包含 Mods、ShaderFixes 和加载器文件的目录。", InfoBarSeverity.Warning);
+            return;
+        }
+
+        ApplyResolvedRuntimePath(resolution, showCorrectionMessage: true);
         await RefreshRuntimeStatusAsync();
+        await RefreshModLibraryAsync();
     }
 
     private async void RefreshRuntime_Click(object sender, RoutedEventArgs e)
     {
         await RefreshRuntimeStatusAsync();
+        await RefreshModLibraryAsync();
     }
 
     private async void InstallRuntime_Click(object sender, RoutedEventArgs e)
     {
-        string runtimePath = RuntimePathTextBox.Text;
-        SaveZzmiRootPreference(runtimePath);
+        if (!TryGetValidatedRuntimePath(out string runtimePath))
+        {
+            return;
+        }
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
         SaveDragKeyPreference(dragKeys);
         if (RuntimeEnvironmentService.IsWheelBridgeRunning() &&
@@ -82,8 +94,10 @@ public sealed partial class MainWindow : Window
 
     private async void ApplyDragKey_Click(object sender, RoutedEventArgs e)
     {
-        string runtimePath = RuntimePathTextBox.Text;
-        SaveZzmiRootPreference(runtimePath);
+        if (!TryGetValidatedRuntimePath(out string runtimePath))
+        {
+            return;
+        }
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
         SaveDragKeyPreference(dragKeys);
         await RunRuntimeOperationAsync(
@@ -108,8 +122,11 @@ public sealed partial class MainWindow : Window
 
             SaveDefaultPhysicsPreference(settings);
             defaultPhysics = settings;
-            string runtimePath = RuntimePathTextBox.Text;
-            SaveZzmiRootPreference(runtimePath);
+            if (!TryGetValidatedRuntimePath(out string runtimePath))
+            {
+                DefaultPhysicsSaveStatusText.Text = "参数已保存在应用中，但 ZZMI 路径无效，尚未写入游戏。";
+                return;
+            }
             RuntimeEnvironmentStatus liveStatus = await Task.Run(
                 () => runtimeEnvironmentService.Inspect(runtimePath));
             if (liveStatus.RuntimeInstalled)
@@ -143,8 +160,10 @@ public sealed partial class MainWindow : Window
 
     private async void UninstallRuntime_Click(object sender, RoutedEventArgs e)
     {
-        string runtimePath = RuntimePathTextBox.Text;
-        SaveZzmiRootPreference(runtimePath);
+        if (!TryGetValidatedRuntimePath(out string runtimePath))
+        {
+            return;
+        }
         RuntimeOverallStatusText.Text = "正在卸载运行环境";
         RuntimeDetailText.Text = "正在移除全局运行时和 6 个 JiggleForge ShaderFix；安装前备份会自动恢复。";
         ShowMessage("正在卸载运行环境…", InfoBarSeverity.Informational);
@@ -165,12 +184,15 @@ public sealed partial class MainWindow : Window
 
     private async void StartWheel_Click(object sender, RoutedEventArgs e)
     {
-        SaveZzmiRootPreference(RuntimePathTextBox.Text);
+        if (!TryGetValidatedRuntimePath(out string runtimePath))
+        {
+            return;
+        }
         RuntimeOverallStatusText.Text = "等待管理员授权";
         RuntimeDetailText.Text = "WheelBridge 需要管理员权限来读取并拦截鼠标滚轮。请在 Windows 用户账户控制窗口中选择“是”。";
         ShowMessage("正在等待 WheelBridge 的管理员授权…", InfoBarSeverity.Informational);
         await RunWheelOperationOnUiThreadAsync(
-            () => runtimeEnvironmentService.StartWheelBridge(RuntimePathTextBox.Text),
+            () => runtimeEnvironmentService.StartWheelBridge(runtimePath),
             "WheelBridge 已启动。拖动模型时可以使用滚轮调整冻结法向上的深度。" );
     }
 
@@ -234,8 +256,25 @@ public sealed partial class MainWindow : Window
         SetRuntimeBusy(true);
         try
         {
-            string path = RuntimePathTextBox.Text;
-            runtimeStatus = await Task.Run(() => runtimeEnvironmentService.Inspect(path));
+            ZzmiPathResolution resolution = ZzmiPathResolver.Resolve(RuntimePathTextBox.Text);
+            if (!resolution.IsValid)
+            {
+                runtimeStatus = null;
+                RuntimePathValidationText.Text = "路径无效：" + resolution.Message;
+                RuntimeOverallStatusText.Text = "未找到有效的 ZZMI 目录";
+                RuntimeDetailText.Text = "请选择包含 Mods、ShaderFixes 和 ZZMI 加载器文件的根目录。错误路径不会被保存。";
+                RuntimeComponentStatusText.Text = "未知";
+                ShaderFixStatusText.Text = "未知";
+                WheelBridgeStatusText.Text = RuntimeEnvironmentService.IsWheelBridgeRunning() ? "正在运行" : "未运行";
+                if (showErrors)
+                {
+                    ShowMessage("ZZMI 路径无效：" + resolution.Message, InfoBarSeverity.Warning);
+                }
+                return;
+            }
+
+            ApplyResolvedRuntimePath(resolution, showCorrectionMessage: showErrors);
+            runtimeStatus = await Task.Run(() => runtimeEnvironmentService.Inspect(resolution.ResolvedPath));
             if (runtimeStatus.DragKeys is not null)
             {
                 SelectDragKeys(runtimeStatus.DragKeys);
@@ -243,7 +282,7 @@ public sealed partial class MainWindow : Window
             }
             RenderRuntimeStatus(runtimeStatus);
         }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException)
         {
             runtimeStatus = null;
             RuntimeOverallStatusText.Text = "无法检查运行环境";
@@ -302,6 +341,7 @@ public sealed partial class MainWindow : Window
             ShaderFixStatusText.Text += $"（检测到 {status.InstalledShaderCount} 个）";
         }
         WheelBridgeStatusText.Text = status.WheelBridgeRunning ? "正在运行" : "未运行";
+        RuntimePathValidationText.Text = "路径有效：" + status.ZzmiRoot;
 
         bool directoriesReady = status.PayloadAvailable && status.ModsDirectoryExists && status.ShaderFixesDirectoryExists;
         InstallRuntimeButton.IsEnabled = directoriesReady;
@@ -453,6 +493,37 @@ public sealed partial class MainWindow : Window
         }
         catch (UnauthorizedAccessException)
         {
+        }
+    }
+
+    private bool TryGetValidatedRuntimePath(out string runtimePath)
+    {
+        ZzmiPathResolution resolution = ZzmiPathResolver.Resolve(RuntimePathTextBox.Text);
+        if (!resolution.IsValid)
+        {
+            runtimePath = string.Empty;
+            RuntimePathValidationText.Text = "路径无效：" + resolution.Message;
+            ShowMessage("ZZMI 路径无效：" + resolution.Message, InfoBarSeverity.Error);
+            return false;
+        }
+
+        ApplyResolvedRuntimePath(resolution, showCorrectionMessage: true);
+        runtimePath = resolution.ResolvedPath;
+        return true;
+    }
+
+    private void ApplyResolvedRuntimePath(
+        ZzmiPathResolution resolution,
+        bool showCorrectionMessage)
+    {
+        RuntimePathTextBox.Text = resolution.ResolvedPath;
+        RuntimePathValidationText.Text = resolution.WasCorrected
+            ? "已自动纠正为：" + resolution.ResolvedPath
+            : "路径有效：" + resolution.ResolvedPath;
+        SaveZzmiRootPreference(resolution.ResolvedPath);
+        if (resolution.WasCorrected && showCorrectionMessage)
+        {
+            ShowMessage("已自动定位到 ZZMI 根目录：" + resolution.ResolvedPath, InfoBarSeverity.Informational);
         }
     }
 

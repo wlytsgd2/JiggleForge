@@ -240,6 +240,85 @@
                                     </StackPanel>
                                 </Border>
 
+                                <Border Style="{StaticResource PageCardStyle}"
+                                        Padding="22">
+                                    <StackPanel Spacing="12">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="3">
+                                                <TextBlock Text="当前 ZZMI 的 Mod"
+                                                           FontSize="20"
+                                                           FontWeight="SemiBold" />
+                                                <TextBlock x:Name="ModLibraryRootText"
+                                                           TextWrapping="Wrap"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                            <ProgressRing x:Name="ModLibraryBusyRing"
+                                                          Grid.Column="1"
+                                                          Width="26"
+                                                          Height="26"
+                                                          IsActive="False"
+                                                          VerticalAlignment="Center" />
+                                            <Button Grid.Column="2"
+                                                    Content="刷新 Mod 列表"
+                                                    VerticalAlignment="Center"
+                                                    Click="RefreshModLibrary_Click" />
+                                        </Grid>
+                                        <TextBlock x:Name="ModLibraryStatusText"
+                                                   Text="正在等待 ZZMI 路径检查…"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <ListView x:Name="ModLibraryList"
+                                                  MaxHeight="360"
+                                                  IsItemClickEnabled="True"
+                                                  SelectionMode="None"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  ItemClick="ModLibraryList_ItemClick">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Padding="8,7"
+                                                          ColumnSpacing="14">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="1.2*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="2*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Spacing="2">
+                                                            <TextBlock Text="{Binding DisplayName}"
+                                                                       FontWeight="SemiBold"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                            <TextBlock Text="{Binding ModPath}"
+                                                                       FontSize="12"
+                                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                       TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                        <Border Grid.Column="1"
+                                                                Padding="8,3"
+                                                                CornerRadius="8"
+                                                                Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                                                VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding StateText}" />
+                                                        </Border>
+                                                        <TextBlock Grid.Column="2"
+                                                                   Text="{Binding DrawCountText}"
+                                                                   VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="3"
+                                                                   Text="{Binding Detail}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                   VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </StackPanel>
+                                </Border>
+
                                 <Border x:Name="ProjectCard"
                                         Visibility="Collapsed"
                                         Style="{StaticResource PageCardStyle}"
@@ -754,19 +833,25 @@
                                     </StackPanel>
                                 </Border>
                                 <Border Style="{StaticResource PageCardStyle}">
-                                    <Grid ColumnSpacing="12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="RuntimePathTextBox"
-                                                 Header="ZZMI 根目录"
-                                                 PlaceholderText="%APPDATA%\XXMI Launcher\ZZMI" />
-                                        <Button Grid.Column="1"
-                                                Content="选择文件夹"
-                                                VerticalAlignment="Bottom"
-                                                Click="ChooseRuntimeFolder_Click" />
-                                    </Grid>
+                                    <StackPanel Spacing="8">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox x:Name="RuntimePathTextBox"
+                                                     Header="ZZMI 根目录"
+                                                     PlaceholderText="%APPDATA%\XXMI Launcher\ZZMI" />
+                                            <Button Grid.Column="1"
+                                                    Content="选择文件夹"
+                                                    VerticalAlignment="Bottom"
+                                                    Click="ChooseRuntimeFolder_Click" />
+                                        </Grid>
+                                        <TextBlock x:Name="RuntimePathValidationText"
+                                                   Text="尚未检查路径。"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
                                 </Border>
 
                                 <Border Style="{StaticResource PageCardStyle}">

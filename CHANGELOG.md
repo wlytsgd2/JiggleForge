@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.10 — 2026-08-07
+
+- Added an automatic Mod library that scans the selected ZZMI `Mods` directory
+  and opens detected projects directly from the application.
+- Distinguished real Mod roots from collection, manager, resource, and global
+  runtime folders instead of treating every first-level directory as one Mod.
+- Added safe handling for dragging a ZZMI root, the complete `Mods` directory,
+  wrapper folders, and paths containing non-ASCII characters.
+- Added ZZMI root validation and automatic correction when a user selects its
+  parent directory or a child such as `Mods`.
+- Refreshed library state after adaptation, restoration, repair, inspector, and
+  runtime operations.
+- Added automated coverage for path validation, Unicode paths, nested Mod
+  discovery, wrapper correction, and invalid library selections.
+
 ## 0.1.9 — 2026-08-06
 
 - Replaced fixed scene cursor offsets with automatic previous-frame calibration

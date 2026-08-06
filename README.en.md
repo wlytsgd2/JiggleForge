@@ -7,6 +7,7 @@ JiggleForge is a Windows desktop application for 《Zenless Zone Zero》 XXMI/ZZ
 ## Features
 
 - Installs, updates, checks, and removes the global JiggleForge runtime.
+- Automatically scans the selected ZZMI `Mods` directory and opens detected Mods directly from the app.
 - Scans a Mod's DrawIndexed commands and adapts the Mod in place.
 - Assigns each Draw a stable identity, with editable aliases and deformation switches.
 - Groups Draws and edits directed dependencies, so related parts can deform together.
@@ -30,7 +31,7 @@ Game updates can change shader hashes. If a pass is no longer recognized, update
 1. Download and extract the latest self-contained package from [Releases](https://github.com/wlytsgd2/JiggleForge/releases).
 2. Start `JiggleForge.exe` and follow the first-run guide.
 3. Open **Settings**, select the ZZMI root folder containing `Mods` and `ShaderFixes`, and install or update the runtime.
-4. Drag one replacement Mod folder into the app, or select it with the folder picker.
+4. Select a Mod from the automatically discovered library on the home page. Mods outside ZZMI can still be dragged in or opened manually.
 5. Review Draws, groups, masks, dependencies, and physics, then click **Apply configuration**.
 6. Return to the game and press `F10`.
 7. Hold a configured drag key to drag the model, or briefly click to tap along the picked triangle normal. Start WheelBridge from **Settings** if wheel depth is needed.

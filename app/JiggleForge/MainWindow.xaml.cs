@@ -21,12 +21,14 @@ namespace JiggleForge;
 public sealed partial class MainWindow : Window
 {
     private readonly ModProjectService projectService = new();
+    private readonly ModLibraryService modLibraryService;
     private readonly ModRuntimeCompiler runtimeCompiler = new();
     private readonly ModBackupService backupService = new();
     private readonly RuntimeEnvironmentService runtimeEnvironmentService = new(
         Path.Combine(AppContext.BaseDirectory, "RuntimePayload"));
     private readonly ObservableCollection<DrawEditorRow> drawRows = [];
     private readonly ObservableCollection<DrawEditorRow> maskRows = [];
+    private readonly ObservableCollection<ModLibraryRow> modLibraryRows = [];
     private ObservableCollection<DrawTreeItem> drawTreeRoots = [];
     private readonly HashSet<string> editorGroupNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<PhysicsScopeOption> physicsScopeOptions = [];
@@ -84,9 +86,11 @@ public sealed partial class MainWindow : Window
     private const string DefaultPhysicsScopeKey = "";
     private string activePhysicsScopeKey = DefaultPhysicsScopeKey;
     private bool physicsScopeChanging;
+    private CancellationTokenSource? modLibraryScanCancellation;
 
     public MainWindow()
     {
+        modLibraryService = new ModLibraryService(projectService);
         InitializeComponent();
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -102,6 +106,7 @@ public sealed partial class MainWindow : Window
         EdgeEditorList.ItemsSource = edgeRows;
         PhysicsScopeComboBox.ItemsSource = physicsScopeOptions;
         DragKeyOptionsList.ItemsSource = dragKeyOptions;
+        ModLibraryList.ItemsSource = modLibraryRows;
         RuntimePathTextBox.Text = LoadZzmiRootPreference();
         SelectDragKeys(LoadDragKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
@@ -118,6 +123,7 @@ public sealed partial class MainWindow : Window
         runtimeStatusInitialized = true;
         await ApplyRecommendedPhysicsDefaultsMigrationAsync();
         await RefreshRuntimeStatusAsync();
+        await RefreshModLibraryAsync();
         await CheckApplicationUpdatesAsync(promptIfAvailable: true, showResult: false);
         if (ShouldShowOnboarding())
         {

@@ -44,7 +44,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        OpenProject(folder.Path);
+        OpenSelectedProject(folder.Path);
     }
 
     private async void ChooseFolder_Click(object sender, RoutedEventArgs e)
@@ -56,7 +56,7 @@ public sealed partial class MainWindow : Window
         StorageFolder? folder = await picker.PickSingleFolderAsync();
         if (folder is not null)
         {
-            OpenProject(folder.Path);
+            OpenSelectedProject(folder.Path);
         }
     }
 
@@ -176,7 +176,7 @@ public sealed partial class MainWindow : Window
         InspectorToggleButton.IsEnabled = enabled;
     }
 
-    private void CreateConfig_Click(object sender, RoutedEventArgs e)
+    private async void CreateConfig_Click(object sender, RoutedEventArgs e)
     {
         if (currentInspection?.State != ModImportState.FirstImport)
         {
@@ -193,6 +193,7 @@ public sealed partial class MainWindow : Window
                 config);
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, config);
             OpenProject(currentInspection.ModPath);
+            await RefreshModLibraryAsync();
             ShowMessage($"已原地适配 {result.DrawCount} 个 Draw。配置界面已经打开；修改后按 F10 查看效果。", InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
@@ -228,6 +229,7 @@ public sealed partial class MainWindow : Window
             string path = currentInspection.ModPath;
             backupService.Restore(path);
             OpenProject(path);
+            await RefreshModLibraryAsync();
             ShowMessage("已恢复原始 Mod。原始备份仍保留在 Mod 文件夹中。", InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
@@ -264,7 +266,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void RepairRuntime_Click(object sender, RoutedEventArgs e)
+    private async void RepairRuntime_Click(object sender, RoutedEventArgs e)
     {
         if (currentInspection?.Configuration is null)
         {
@@ -275,6 +277,7 @@ public sealed partial class MainWindow : Window
         {
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, currentInspection.Configuration);
             OpenProject(currentInspection.ModPath);
+            await RefreshModLibraryAsync();
             ShowMessage($"运行文件已修复，共检查 {result.DrawCount} 个 Draw。回到游戏按 F10。", InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
@@ -283,7 +286,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void ApplyConfiguration_Click(object sender, RoutedEventArgs e)
+    private async void ApplyConfiguration_Click(object sender, RoutedEventArgs e)
     {
         if (currentInspection is null || currentConfiguration is null)
         {
@@ -296,6 +299,7 @@ public sealed partial class MainWindow : Window
             RuntimeApplyResult result = runtimeCompiler.Apply(currentInspection.ModPath, currentConfiguration);
             string path = currentInspection.ModPath;
             OpenProject(path);
+            await RefreshModLibraryAsync();
             ShowMessage($"配置已应用到 {result.DrawCount} 个 Draw。回到游戏按 F10 查看效果。", InfoBarSeverity.Success);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
@@ -304,7 +308,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void InspectorToggle_Click(object sender, RoutedEventArgs e)
+    private async void InspectorToggle_Click(object sender, RoutedEventArgs e)
     {
         if (currentInspection is null || currentConfiguration is null)
         {
@@ -319,6 +323,7 @@ public sealed partial class MainWindow : Window
             string path = currentInspection.ModPath;
             bool enabled = currentConfiguration.Inspector.Enabled;
             OpenProject(path);
+            await RefreshModLibraryAsync();
             ShowMessage(
                 enabled
                     ? $"Draw 检测器已开启，共覆盖 {result.DrawCount} 个 Draw。回到游戏按 F10，然后拖动模型查看。"
