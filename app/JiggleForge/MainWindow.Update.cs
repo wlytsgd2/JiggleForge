@@ -66,7 +66,9 @@ public sealed partial class MainWindow
                 return;
             }
 
-            string details = string.Join("；", result.Errors.Take(4));
+            string details = string.Join(
+                AppLanguageService.Get("ListSeparator"),
+                result.Errors.Take(4).Select(AppLanguageService.Localize));
             if (result.Errors.Count > 4)
             {
                 details += AppLanguageService.Format("AdditionalIssues", result.Errors.Count - 4);
@@ -74,7 +76,9 @@ public sealed partial class MainWindow
 
             ApplicationIntegrityStatusText.Text = result.ManifestFound
                 ? AppLanguageService.Format("VerificationFailedDetails", result.VerifiedFileCount, result.ExpectedFileCount, details)
-                : result.Errors.FirstOrDefault() ?? L("CannotVerifyVersion");
+                : result.Errors.FirstOrDefault() is { } firstError
+                    ? AppLanguageService.Localize(firstError)
+                    : L("CannotVerifyVersion");
             ShowMessage(L("InstallationFilesChanged"), InfoBarSeverity.Warning);
             if (latestApplicationRelease is null)
             {
@@ -87,7 +91,9 @@ public sealed partial class MainWindow
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ApplicationIntegrityStatusText.Text = AppLanguageService.Format("VerificationError", exception.Message);
+            ApplicationIntegrityStatusText.Text = AppLanguageService.Format(
+                "VerificationError",
+                AppLanguageService.LocalizeException(exception));
             ShowMessage(ApplicationIntegrityStatusText.Text, InfoBarSeverity.Error);
         }
         finally
@@ -158,7 +164,9 @@ public sealed partial class MainWindow
             ApplicationUpdateStatusText.Text = L("CannotConnectGithub");
             if (showResult)
             {
-                ShowMessage(AppLanguageService.Format("UpdateCheckFailed", exception.Message), InfoBarSeverity.Warning);
+                ShowMessage(
+                    AppLanguageService.Format("UpdateCheckFailed", AppLanguageService.LocalizeException(exception)),
+                    InfoBarSeverity.Warning);
             }
         }
         finally
@@ -257,7 +265,9 @@ public sealed partial class MainWindow
                                           IOException or UnauthorizedAccessException or InvalidDataException or
                                           InvalidOperationException or Win32Exception)
         {
-            ApplicationUpdateStatusText.Text = AppLanguageService.Format("UpdateFailed", exception.Message);
+            ApplicationUpdateStatusText.Text = AppLanguageService.Format(
+                "UpdateFailed",
+                AppLanguageService.LocalizeException(exception));
             ApplicationUpdateProgressBar.Visibility = Visibility.Collapsed;
             ShowMessage(ApplicationUpdateStatusText.Text, InfoBarSeverity.Error);
         }

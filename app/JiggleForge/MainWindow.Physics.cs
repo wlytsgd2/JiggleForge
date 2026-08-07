@@ -230,7 +230,9 @@ public sealed partial class MainWindow : Window
                                           InvalidDataException or ArgumentException)
         {
             ShowMessage(
-                AppLanguageService.Format("RecommendedPhysicsAutoApplyFailed", exception.Message),
+                AppLanguageService.Format(
+                    "RecommendedPhysicsAutoApplyFailed",
+                    AppLanguageService.LocalizeException(exception)),
                 InfoBarSeverity.Warning);
             return;
         }
@@ -258,7 +260,9 @@ public sealed partial class MainWindow : Window
                                           InvalidDataException or ArgumentException)
         {
             ShowMessage(
-                AppLanguageService.Format("RecommendedPhysicsRuntimeSyncFailed", exception.Message),
+                AppLanguageService.Format(
+                    "RecommendedPhysicsRuntimeSyncFailed",
+                    AppLanguageService.LocalizeException(exception)),
                 InfoBarSeverity.Warning);
         }
     }

@@ -162,8 +162,8 @@ public sealed class ApplicationUpdateServiceTests
         Assert.AreEqual(3, result.ExpectedFileCount);
         Assert.AreEqual(1, result.VerifiedFileCount);
         Assert.AreEqual(2, result.Errors.Count);
-        Assert.IsTrue(result.Errors.Any(error => error.Contains("changed.bin", StringComparison.Ordinal)));
-        Assert.IsTrue(result.Errors.Any(error => error.Contains("missing.bin", StringComparison.Ordinal)));
+        Assert.IsTrue(result.Errors.Any(error => error.Arguments.Contains("changed.bin")));
+        Assert.IsTrue(result.Errors.Any(error => error.Arguments.Contains("missing.bin")));
     }
 
     [TestMethod]

@@ -227,9 +227,9 @@
   <data name="DropCardTitle.Text" xml:space="preserve"><value>将 Mod 文件夹拖到这里</value></data>
   <data name="DropCardSubtitle.Text" xml:space="preserve"><value>也可以手动选择文件夹</value></data>
   <data name="ChooseModFolderButton.Content" xml:space="preserve"><value>选择文件夹</value></data>
-  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>当前 ZZMI 的 Mod</value></data>
-  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>刷新 Mod 列表</value></data>
-  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>正在等待 ZZMI 路径检查…</value></data>
+  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>已适配的 Mod</value></data>
+  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>刷新项目记录</value></data>
+  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>尚未加载项目记录。</value></data>
   <data name="RecognizedDrawsLabel.Text" xml:space="preserve"><value>识别到的 Draw</value></data>
   <data name="SchemaVersionLabel.Text" xml:space="preserve"><value>配置版本</value></data>
   <data name="CreateConfigButton.Content" xml:space="preserve"><value>首次适配</value></data>
@@ -312,4 +312,56 @@
   <data name="OnboardingNextButton.Content" xml:space="preserve"><value>下一步</value></data>
   <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>控制所有未被当前 Mod 替换的原版部件。</value></data>
   <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>打开设置并更新 JiggleForge</value></data>
+  <data name="LoadingModHistory" xml:space="preserve"><value>正在读取已适配项目…</value></data>
+  <data name="ModHistoryDescription" xml:space="preserve"><value>显示项目历史，并在当前 ZZMI 中只检索带有 JiggleForge 适配标记的 Mod；普通 Mod 不会被扫描或列出。</value></data>
+  <data name="NoAdaptedModsRecorded" xml:space="preserve"><value>尚未记录已适配的 Mod。拖入并适配一次后会自动出现在这里。</value></data>
+  <data name="AdaptedModsRecorded" xml:space="preserve"><value>已记录 {0} 个适配项目。点击即可直接打开。</value></data>
+  <data name="ModHistoryLoadFailed" xml:space="preserve"><value>读取项目记录失败：{0}</value></data>
+  <data name="AdaptedModSearchFailed" xml:space="preserve"><value>检索已适配 Mod 时遇到问题：{0}</value></data>
+  <data name="CoreZzmiPathEmpty" xml:space="preserve"><value>ZZMI 路径为空。</value></data>
+  <data name="CoreZzmiPathInvalid" xml:space="preserve"><value>ZZMI 路径格式无效，请检查路径后重试。</value></data>
+  <data name="CoreSelectedFolderMissing" xml:space="preserve"><value>所选文件夹不存在：{0}</value></data>
+  <data name="CoreZzmiPathCorrected" xml:space="preserve"><value>已自动修正到 ZZMI 根目录：{0}</value></data>
+  <data name="CoreZzmiPathValid" xml:space="preserve"><value>所选文件夹是有效的 ZZMI 根目录。</value></data>
+  <data name="CoreZzmiRootNotFound" xml:space="preserve"><value>没有找到 ZZMI 根目录。请选择同时包含 Mods、ShaderFixes 和 ZZMI 加载器文件的文件夹。</value></data>
+  <data name="CoreModFolderNotSelected" xml:space="preserve"><value>尚未选择 Mod 文件夹。</value></data>
+  <data name="CoreModPathInvalid" xml:space="preserve"><value>Mod 路径格式无效，请检查路径后重试。</value></data>
+  <data name="CoreModSelectionIsZzmiRoot" xml:space="preserve"><value>所选文件夹是 ZZMI 根目录，不是单个 Mod。请选择具体的 Mod 文件夹。</value></data>
+  <data name="CoreModSelectionIsModsRoot" xml:space="preserve"><value>所选文件夹是整个 Mods 目录，不是单个 Mod。请选择其中一个具体的 Mod 文件夹。</value></data>
+  <data name="CoreModSelectionIsRuntime" xml:space="preserve"><value>JiggleForgeShaderFix 是全局运行环境，不能作为 Mod 项目打开。</value></data>
+  <data name="CoreModSelectionIsManagerContainer" xml:space="preserve"><value>所选文件夹是 Mod 管理器容器。请选择其中具体的 Mod 文件夹。</value></data>
+  <data name="CoreSeveralExistingProjects" xml:space="preserve"><value>所选文件夹包含 {0} 个现有 JiggleForge 项目。请选择一个具体的 Mod 文件夹。</value></data>
+  <data name="CoreNoModConfigurationFound" xml:space="preserve"><value>所选文件夹中没有找到 Mod INI 或 JiggleForge 配置。</value></data>
+  <data name="CoreModRootCorrected" xml:space="preserve"><value>已自动定位到 Mod 根目录：{0}</value></data>
+  <data name="CoreModRootValid" xml:space="preserve"><value>所选文件夹是有效的 Mod 根目录。</value></data>
+  <data name="CoreProjectFolderMissing" xml:space="preserve"><value>所选 Mod 文件夹不存在：{0}</value></data>
+  <data name="CoreProjectPatchMarkerMissing" xml:space="preserve"><value>存在 JiggleForge.txt，但原 Mod INI 中缺少运行补丁标记，需要修复运行文件。</value></data>
+  <data name="CoreProjectDrawCountMismatch" xml:space="preserve"><value>配置包含 {0} 个 Draw，但运行 INI 中包含 {1} 个 Draw 标记，需要修复运行文件。</value></data>
+  <data name="CoreProjectMaskBindingsMissing" xml:space="preserve"><value>缺少运行时 Mask 绑定，可以根据 JiggleForge.txt 重新生成。</value></data>
+  <data name="CoreProjectInspectorFilesMissing" xml:space="preserve"><value>缺少 Draw 检测器运行文件，可以根据 JiggleForge.txt 重新生成。</value></data>
+  <data name="CoreProjectReady" xml:space="preserve"><value>现有 JiggleForge 项目已就绪。</value></data>
+  <data name="CoreProjectConfigurationInvalid" xml:space="preserve"><value>无法读取 JiggleForge 项目配置。配置文件可能已损坏或包含不支持的内容。</value></data>
+  <data name="CoreProjectLegacyManifestFound" xml:space="preserve"><value>发现旧版 GraphManifest.json，可以把其中的依赖图、Mask 和 Draw 名称迁移到 JiggleForge.txt。</value></data>
+  <data name="CoreProjectConfigurationMissing" xml:space="preserve"><value>原 Mod 中存在 JiggleForge 运行标记，但缺少 JiggleForge.txt，需要重建配置。</value></data>
+  <data name="CoreProjectDrawCommandsMissing" xml:space="preserve"><value>没有找到受支持的数值型或 auto DrawIndexed 命令。</value></data>
+  <data name="CoreProjectFirstImport" xml:space="preserve"><value>首次导入：找到 {0} 个受支持的 DrawIndexed 命令。</value></data>
+  <data name="ErrorHttpStatus" xml:space="preserve"><value>网络请求失败（HTTP {0}）。</value></data>
+  <data name="ErrorNetwork" xml:space="preserve"><value>网络请求失败，请检查网络连接后重试。</value></data>
+  <data name="ErrorAccessDenied" xml:space="preserve"><value>没有访问权限。请检查文件权限，或根据提示以管理员身份运行。</value></data>
+  <data name="ErrorFileMissing" xml:space="preserve"><value>找不到所需文件：{0}</value></data>
+  <data name="ErrorDirectoryMissing" xml:space="preserve"><value>找不到所需文件夹，它可能已被移动或删除。</value></data>
+  <data name="ErrorInvalidData" xml:space="preserve"><value>数据或配置格式无效。请检查配置文件，或重新生成相关文件。</value></data>
+  <data name="ErrorInvalidInput" xml:space="preserve"><value>输入的内容或参数无效，请检查后重试。</value></data>
+  <data name="ErrorFileOperation" xml:space="preserve"><value>文件读写失败。请检查文件是否被占用以及目录权限。</value></data>
+  <data name="ErrorOperationFailed" xml:space="preserve"><value>当前操作无法完成，请检查运行环境和项目状态。</value></data>
+  <data name="ErrorUnexpected" xml:space="preserve"><value>发生了未预期的错误，请重试或通过设置页中的联系方式反馈。</value></data>
+  <data name="CoreBackupInvalid" xml:space="preserve"><value>备份压缩包无效、已损坏或包含不安全的文件路径。</value></data>
+  <data name="CoreIntegrityManifestMissing" xml:space="preserve"><value>当前安装不包含完整性清单。请安装带更新功能的新版本后再校验。</value></data>
+  <data name="CoreIntegrityManifestInvalidLine" xml:space="preserve"><value>完整性清单中存在无效行：{0}</value></data>
+  <data name="CoreIntegrityUnsafePath" xml:space="preserve"><value>完整性清单包含不安全的路径：{0}</value></data>
+  <data name="CoreIntegrityFileMissing" xml:space="preserve"><value>缺少文件：{0}</value></data>
+  <data name="CoreIntegrityFileHashMismatch" xml:space="preserve"><value>文件校验失败：{0}</value></data>
+  <data name="CoreIntegrityManifestEmpty" xml:space="preserve"><value>完整性清单没有包含任何文件。</value></data>
+  <data name="ListSeparator" xml:space="preserve"><value>；</value></data>
+  <data name="DrawCountShort" xml:space="preserve"><value>{0} 个 Draw</value></data>
 </root>

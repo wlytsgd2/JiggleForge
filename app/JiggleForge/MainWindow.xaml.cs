@@ -26,6 +26,8 @@ public sealed partial class MainWindow : Window
     private readonly ModLibraryService modLibraryService;
     private readonly ModRuntimeCompiler runtimeCompiler = new();
     private readonly ModBackupService backupService = new();
+    private readonly ModProjectHistoryService projectHistoryService = new(
+        ApplicationSettingsDirectory);
     private readonly RuntimeEnvironmentService runtimeEnvironmentService = new(
         Path.Combine(AppContext.BaseDirectory, "RuntimePayload"));
     private readonly ObservableCollection<DrawEditorRow> drawRows = [];
@@ -88,7 +90,6 @@ public sealed partial class MainWindow : Window
     private const string DefaultPhysicsScopeKey = "";
     private string activePhysicsScopeKey = DefaultPhysicsScopeKey;
     private bool physicsScopeChanging;
-    private CancellationTokenSource? modLibraryScanCancellation;
 
     public MainWindow()
     {
@@ -164,7 +165,9 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            ShowMessage(AppLanguageService.Format("LanguageSwitchFailed", exception.Message), InfoBarSeverity.Error);
+            ShowMessage(
+                AppLanguageService.Format("LanguageSwitchFailed", AppLanguageService.LocalizeException(exception)),
+                InfoBarSeverity.Error);
         }
     }
 
@@ -189,7 +192,9 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            ShowMessage(AppLanguageService.Format("LanguageSwitchFailed", exception.Message), InfoBarSeverity.Error);
+            ShowMessage(
+                AppLanguageService.Format("LanguageSwitchFailed", AppLanguageService.LocalizeException(exception)),
+                InfoBarSeverity.Error);
         }
     }
 

@@ -55,7 +55,9 @@ public sealed partial class MainWindow : Window
         if (!resolution.IsValid)
         {
             RuntimePathTextBox.Text = folder.Path;
-            RuntimePathValidationText.Text = AppLanguageService.Format("InvalidPath", resolution.Message);
+            RuntimePathValidationText.Text = AppLanguageService.Format(
+                "InvalidPath",
+                AppLanguageService.Localize(resolution.Message));
             ShowMessage(L("NoValidZzmiRoot"), InfoBarSeverity.Warning);
             return;
         }
@@ -150,7 +152,7 @@ public sealed partial class MainWindow : Window
                                           InvalidDataException or ArgumentException)
         {
             DefaultPhysicsSaveStatusText.Text = L("SaveFailedSeeError");
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
         }
         finally
         {
@@ -218,7 +220,7 @@ public sealed partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
                                           InvalidOperationException or ArgumentException)
         {
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
             await RefreshRuntimeStatusAsync(showErrors: false);
             return false;
         }
@@ -241,7 +243,7 @@ public sealed partial class MainWindow : Window
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
                                           InvalidOperationException or ArgumentException)
         {
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
             await RefreshRuntimeStatusAsync(showErrors: false);
             return false;
         }
@@ -260,7 +262,9 @@ public sealed partial class MainWindow : Window
             if (!resolution.IsValid)
             {
                 runtimeStatus = null;
-                RuntimePathValidationText.Text = AppLanguageService.Format("InvalidPath", resolution.Message);
+                RuntimePathValidationText.Text = AppLanguageService.Format(
+                    "InvalidPath",
+                    AppLanguageService.Localize(resolution.Message));
                 RuntimeOverallStatusText.Text = L("ValidZzmiNotFound");
                 RuntimeDetailText.Text = L("ChooseZzmiRootDetails");
                 RuntimeComponentStatusText.Text = L("Unknown");
@@ -268,7 +272,11 @@ public sealed partial class MainWindow : Window
                 WheelBridgeStatusText.Text = RuntimeEnvironmentService.IsWheelBridgeRunning() ? L("Running") : L("NotRunning");
                 if (showErrors)
                 {
-                    ShowMessage(AppLanguageService.Format("InvalidZzmiPath", resolution.Message), InfoBarSeverity.Warning);
+                    ShowMessage(
+                        AppLanguageService.Format(
+                            "InvalidZzmiPath",
+                            AppLanguageService.Localize(resolution.Message)),
+                        InfoBarSeverity.Warning);
                 }
                 return;
             }
@@ -286,13 +294,13 @@ public sealed partial class MainWindow : Window
         {
             runtimeStatus = null;
             RuntimeOverallStatusText.Text = L("CannotCheckRuntime");
-            RuntimeDetailText.Text = exception.Message;
+            RuntimeDetailText.Text = AppLanguageService.LocalizeException(exception);
             RuntimeComponentStatusText.Text = L("Unknown");
             ShaderFixStatusText.Text = L("Unknown");
             WheelBridgeStatusText.Text = RuntimeEnvironmentService.IsWheelBridgeRunning() ? L("Running") : L("NotRunning");
             if (showErrors)
             {
-                ShowMessage(exception.Message, InfoBarSeverity.Error);
+                ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
             }
         }
         finally
@@ -502,8 +510,14 @@ public sealed partial class MainWindow : Window
         if (!resolution.IsValid)
         {
             runtimePath = string.Empty;
-            RuntimePathValidationText.Text = AppLanguageService.Format("InvalidPath", resolution.Message);
-            ShowMessage(AppLanguageService.Format("InvalidZzmiPath", resolution.Message), InfoBarSeverity.Error);
+            RuntimePathValidationText.Text = AppLanguageService.Format(
+                "InvalidPath",
+                AppLanguageService.Localize(resolution.Message));
+            ShowMessage(
+                AppLanguageService.Format(
+                    "InvalidZzmiPath",
+                    AppLanguageService.Localize(resolution.Message)),
+                InfoBarSeverity.Error);
             return false;
         }
 

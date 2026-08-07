@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Net;
+using JiggleForge.Core;
 using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace JiggleForge;
@@ -58,6 +60,24 @@ internal static class AppLanguageService
 
     internal static string Format(string key, params object?[] arguments) =>
         string.Format(System.Globalization.CultureInfo.CurrentCulture, Get(key), arguments);
+
+    internal static string Localize(UserMessage message) =>
+        Format(message.Key, message.Arguments);
+
+    internal static string LocalizeException(Exception exception) => exception switch
+    {
+        HttpRequestException request when request.StatusCode.HasValue =>
+            Format("ErrorHttpStatus", (int)request.StatusCode.Value),
+        HttpRequestException => Get("ErrorNetwork"),
+        UnauthorizedAccessException => Get("ErrorAccessDenied"),
+        FileNotFoundException missing => Format("ErrorFileMissing", missing.FileName ?? Get("Unknown")),
+        DirectoryNotFoundException => Get("ErrorDirectoryMissing"),
+        System.Text.Json.JsonException or InvalidDataException => Get("ErrorInvalidData"),
+        FormatException or ArgumentException => Get("ErrorInvalidInput"),
+        IOException => Get("ErrorFileOperation"),
+        InvalidOperationException => Get("ErrorOperationFailed"),
+        _ => Get("ErrorUnexpected"),
+    };
 
     internal static void RestartApplication()
     {

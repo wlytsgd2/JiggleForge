@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.12 — 2026-08-07
+
+### 简体中文
+
+- 将 Mod 列表改为“已适配历史记录 + 当前 ZZMI 中带适配标记的 Mod”，不再把管理器容器、合集目录或普通未适配 Mod 误认为项目。
+- 历史记录保存在用户的本地应用数据中，应用更新和移动不会清除；丢失记录时仍可从当前 ZZMI 重新发现已适配项目。
+- 改进多 INI、包装目录和错误拖入目录的识别，并验证原始备份能够完整恢复 JiggleForge 实际修改的多个 INI。
+- 将项目检查、路径校验、备份、运行环境、异常和完整性校验提示统一迁移到中英文资源系统。
+- 加入本地化自动测试；中文或英文资源缺失、代码引用无对应翻译时，构建测试会失败。
+- 为独立更新器和滚轮输入桥接器加入中英文故障提示。
+
+### English
+
+- Replaced broad Mod discovery with adapted-project history plus marker-based discovery under the current ZZMI, avoiding manager containers, collections, and ordinary unadapted Mods.
+- Stored project history in per-user local application data so application updates and relocation preserve it, while adapted projects can still be rediscovered from the current ZZMI.
+- Improved handling of multi-INI Mods, wrapper folders, and incorrectly selected folders, with tests confirming that original backups restore every INI JiggleForge changed.
+- Migrated project inspection, path validation, backup, runtime, exception, and integrity-verification messages to the unified Chinese and English resource system.
+- Added localization tests that fail when either language or a referenced translation key is missing.
+- Added bilingual failure messages to the standalone updater and wheel-input bridge.
+
 ## 0.1.11 — 2026-08-07
 
 - Added complete Simplified Chinese and English application interfaces.

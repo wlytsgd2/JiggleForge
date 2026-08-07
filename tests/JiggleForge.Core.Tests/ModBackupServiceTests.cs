@@ -48,7 +48,7 @@ public sealed class ModBackupServiceTests
         Assert.IsTrue(result.Created);
         Assert.AreEqual(4, result.FileCount);
         ModBackupInspection inspection = service.Inspect(root!);
-        Assert.IsTrue(inspection.IsValid, inspection.Error);
+        Assert.IsTrue(inspection.IsValid, inspection.Error?.Key);
         Assert.IsTrue(File.Exists(result.BackupPath));
 
         File.WriteAllBytes(sourcePath, Encoding.UTF8.GetBytes("patched source"));
@@ -88,6 +88,39 @@ public sealed class ModBackupServiceTests
     }
 
     [TestMethod]
+    public void BackupRestoresEveryTouchedIniWhenAWrapperFolderWasSelected()
+    {
+        string firstPath = Path.Combine(root!, "First", "a.ini");
+        string secondPath = Path.Combine(root!, "Second", "b.ini");
+        Directory.CreateDirectory(Path.GetDirectoryName(firstPath)!);
+        Directory.CreateDirectory(Path.GetDirectoryName(secondPath)!);
+        File.WriteAllText(firstPath, "first original", Encoding.UTF8);
+        File.WriteAllText(secondPath, "second original", Encoding.UTF8);
+
+        JiggleProjectConfig config = CreateConfig("First/a.ini");
+        config.Draws.Add(new JiggleDrawConfig
+        {
+            Id = "Draw0002",
+            SourceFile = "Second/b.ini",
+            SourceSection = "CommandListBody",
+            Command = "drawindexed = auto",
+            Kind = JiggleDrawKind.Auto,
+            StateIndex = 2,
+            ObjectId = 2,
+        });
+
+        ModBackupService service = new();
+        service.EnsureOriginalBackup(root!, config);
+        File.WriteAllText(firstPath, "first patched", Encoding.UTF8);
+        File.WriteAllText(secondPath, "second patched", Encoding.UTF8);
+
+        service.Restore(root!);
+
+        Assert.AreEqual("first original", File.ReadAllText(firstPath, Encoding.UTF8));
+        Assert.AreEqual("second original", File.ReadAllText(secondPath, Encoding.UTF8));
+    }
+
+    [TestMethod]
     public void InvalidManifestIsRejected()
     {
         string backupPath = Path.Combine(root!, ModBackupService.BackupFileName);
@@ -102,7 +135,7 @@ public sealed class ModBackupServiceTests
 
         Assert.IsTrue(inspection.Exists);
         Assert.IsFalse(inspection.IsValid);
-        StringAssert.Contains(inspection.Error!, "非法");
+        Assert.AreEqual("CoreBackupInvalid", inspection.Error!.Key);
     }
 
     private static JiggleProjectConfig CreateConfig(string sourceFile)

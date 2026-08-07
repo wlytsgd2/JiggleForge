@@ -5,7 +5,7 @@ public sealed record ZzmiPathResolution(
     string ResolvedPath,
     bool IsValid,
     bool WasCorrected,
-    string Message);
+    UserMessage Message);
 
 public static class ZzmiPathResolver
 {
@@ -20,7 +20,7 @@ public static class ZzmiPathResolver
     {
         if (string.IsNullOrWhiteSpace(requestedPath))
         {
-            return Invalid(string.Empty, "ZZMI path is empty.");
+            return Invalid(string.Empty, UserMessage.Of("CoreZzmiPathEmpty"));
         }
 
         string requested;
@@ -30,7 +30,7 @@ public static class ZzmiPathResolver
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            return Invalid(requestedPath, $"ZZMI path is invalid: {exception.Message}");
+            return Invalid(requestedPath, UserMessage.Of("CoreZzmiPathInvalid"));
         }
 
         if (File.Exists(requested))
@@ -40,7 +40,7 @@ public static class ZzmiPathResolver
 
         if (!Directory.Exists(requested))
         {
-            return Invalid(requested, $"The selected folder does not exist: {requested}");
+            return Invalid(requested, UserMessage.Of("CoreSelectedFolderMissing", requested));
         }
 
         HashSet<string> visited = new(StringComparer.OrdinalIgnoreCase);
@@ -59,13 +59,11 @@ public static class ZzmiPathResolver
                 IsValid: true,
                 WasCorrected: corrected,
                 corrected
-                    ? $"The selected path was corrected to the ZZMI root: {normalized}"
-                    : "The selected folder is a valid ZZMI root.");
+                    ? UserMessage.Of("CoreZzmiPathCorrected", normalized)
+                    : UserMessage.Of("CoreZzmiPathValid"));
         }
 
-        return Invalid(
-            requested,
-            "No ZZMI root was found. Select the folder that contains Mods, ShaderFixes and the ZZMI loader files.");
+        return Invalid(requested, UserMessage.Of("CoreZzmiRootNotFound"));
     }
 
     public static bool IsZzmiRoot(string path)
@@ -99,6 +97,6 @@ public static class ZzmiPathResolver
         }
     }
 
-    private static ZzmiPathResolution Invalid(string requestedPath, string message) =>
+    private static ZzmiPathResolution Invalid(string requestedPath, UserMessage message) =>
         new(requestedPath, requestedPath, IsValid: false, WasCorrected: false, message);
 }

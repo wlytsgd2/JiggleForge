@@ -73,9 +73,9 @@
   <data name="DropCardTitle.Text" xml:space="preserve"><value>Drop a Mod folder here</value></data>
   <data name="DropCardSubtitle.Text" xml:space="preserve"><value>Or select a folder manually</value></data>
   <data name="ChooseModFolderButton.Content" xml:space="preserve"><value>Choose folder</value></data>
-  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>Mods in the current ZZMI</value></data>
-  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>Refresh Mod list</value></data>
-  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>Waiting for ZZMI path validation…</value></data>
+  <data name="ModLibraryTitle.Text" xml:space="preserve"><value>Adapted Mods</value></data>
+  <data name="RefreshModLibraryButton.Content" xml:space="preserve"><value>Refresh project history</value></data>
+  <data name="ModLibraryStatusText.Text" xml:space="preserve"><value>Project history has not been loaded yet.</value></data>
   <data name="RecognizedDrawsLabel.Text" xml:space="preserve"><value>Recognized Draws</value></data>
   <data name="SchemaVersionLabel.Text" xml:space="preserve"><value>Configuration version</value></data>
   <data name="CreateConfigButton.Content" xml:space="preserve"><value>Adapt for the first time</value></data>
@@ -312,4 +312,56 @@
   <data name="UnsupportedQuoteInPath" xml:space="preserve"><value>The path contains an unsupported double-quote character.</value></data>
   <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>Controls all original parts not replaced by the current Mod.</value></data>
   <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>Open Settings and update JiggleForge</value></data>
+  <data name="LoadingModHistory" xml:space="preserve"><value>Loading adapted projects…</value></data>
+  <data name="ModHistoryDescription" xml:space="preserve"><value>Shows project history and searches the current ZZMI only for Mods with JiggleForge adaptation markers. Ordinary Mods are not scanned or listed.</value></data>
+  <data name="NoAdaptedModsRecorded" xml:space="preserve"><value>No adapted Mods have been recorded yet. A Mod appears here after it is opened and adapted once.</value></data>
+  <data name="AdaptedModsRecorded" xml:space="preserve"><value>{0} adapted project(s) recorded. Select one to open it directly.</value></data>
+  <data name="ModHistoryLoadFailed" xml:space="preserve"><value>Could not load project history: {0}</value></data>
+  <data name="AdaptedModSearchFailed" xml:space="preserve"><value>Could not search for adapted Mods: {0}</value></data>
+  <data name="CoreZzmiPathEmpty" xml:space="preserve"><value>The ZZMI path is empty.</value></data>
+  <data name="CoreZzmiPathInvalid" xml:space="preserve"><value>The ZZMI path is invalid. Check the path and try again.</value></data>
+  <data name="CoreSelectedFolderMissing" xml:space="preserve"><value>The selected folder does not exist: {0}</value></data>
+  <data name="CoreZzmiPathCorrected" xml:space="preserve"><value>The path was corrected to the ZZMI root: {0}</value></data>
+  <data name="CoreZzmiPathValid" xml:space="preserve"><value>The selected folder is a valid ZZMI root.</value></data>
+  <data name="CoreZzmiRootNotFound" xml:space="preserve"><value>No ZZMI root was found. Select the folder containing Mods, ShaderFixes, and the ZZMI loader files.</value></data>
+  <data name="CoreModFolderNotSelected" xml:space="preserve"><value>No Mod folder was selected.</value></data>
+  <data name="CoreModPathInvalid" xml:space="preserve"><value>The Mod path is invalid. Check the path and try again.</value></data>
+  <data name="CoreModSelectionIsZzmiRoot" xml:space="preserve"><value>The selected folder is the ZZMI root, not a single Mod. Select a concrete Mod folder.</value></data>
+  <data name="CoreModSelectionIsModsRoot" xml:space="preserve"><value>The selected folder is the complete Mods directory, not a single Mod. Select one concrete Mod folder.</value></data>
+  <data name="CoreModSelectionIsRuntime" xml:space="preserve"><value>JiggleForgeShaderFix is the global runtime and cannot be opened as a Mod project.</value></data>
+  <data name="CoreModSelectionIsManagerContainer" xml:space="preserve"><value>The selected folder is a Mod-manager container. Select the concrete Mod folder inside it.</value></data>
+  <data name="CoreSeveralExistingProjects" xml:space="preserve"><value>The selected folder contains {0} existing JiggleForge projects. Select one concrete Mod folder.</value></data>
+  <data name="CoreNoModConfigurationFound" xml:space="preserve"><value>No Mod INI or JiggleForge configuration was found in the selected folder.</value></data>
+  <data name="CoreModRootCorrected" xml:space="preserve"><value>The Mod root was located automatically: {0}</value></data>
+  <data name="CoreModRootValid" xml:space="preserve"><value>The selected folder is a valid Mod root.</value></data>
+  <data name="CoreProjectFolderMissing" xml:space="preserve"><value>The selected Mod folder does not exist: {0}</value></data>
+  <data name="CoreProjectPatchMarkerMissing" xml:space="preserve"><value>JiggleForge.txt exists, but the source Mod INI has no runtime patch marker. Runtime files must be repaired.</value></data>
+  <data name="CoreProjectDrawCountMismatch" xml:space="preserve"><value>The configuration contains {0} Draw(s), but runtime INI files contain {1} Draw marker(s). Runtime files must be repaired.</value></data>
+  <data name="CoreProjectMaskBindingsMissing" xml:space="preserve"><value>Runtime Mask bindings are missing and can be regenerated from JiggleForge.txt.</value></data>
+  <data name="CoreProjectInspectorFilesMissing" xml:space="preserve"><value>Draw Inspector runtime files are missing and can be regenerated from JiggleForge.txt.</value></data>
+  <data name="CoreProjectReady" xml:space="preserve"><value>The existing JiggleForge project is ready.</value></data>
+  <data name="CoreProjectConfigurationInvalid" xml:space="preserve"><value>Could not read the JiggleForge project configuration. The file may be damaged or contain unsupported content.</value></data>
+  <data name="CoreProjectLegacyManifestFound" xml:space="preserve"><value>A legacy GraphManifest.json was found. Its graph, Masks, and Draw names can be migrated into JiggleForge.txt.</value></data>
+  <data name="CoreProjectConfigurationMissing" xml:space="preserve"><value>JiggleForge runtime markers exist in the source Mod, but JiggleForge.txt is missing and must be reconstructed.</value></data>
+  <data name="CoreProjectDrawCommandsMissing" xml:space="preserve"><value>No supported numeric or auto DrawIndexed commands were found.</value></data>
+  <data name="CoreProjectFirstImport" xml:space="preserve"><value>First import: {0} supported DrawIndexed command(s) found.</value></data>
+  <data name="ErrorHttpStatus" xml:space="preserve"><value>The network request failed (HTTP {0}).</value></data>
+  <data name="ErrorNetwork" xml:space="preserve"><value>The network request failed. Check your connection and try again.</value></data>
+  <data name="ErrorAccessDenied" xml:space="preserve"><value>Access was denied. Check file permissions or run as administrator when prompted.</value></data>
+  <data name="ErrorFileMissing" xml:space="preserve"><value>A required file was not found: {0}</value></data>
+  <data name="ErrorDirectoryMissing" xml:space="preserve"><value>A required folder was not found. It may have been moved or deleted.</value></data>
+  <data name="ErrorInvalidData" xml:space="preserve"><value>The data or configuration format is invalid. Check the configuration or regenerate the related files.</value></data>
+  <data name="ErrorInvalidInput" xml:space="preserve"><value>The input or parameter is invalid. Check it and try again.</value></data>
+  <data name="ErrorFileOperation" xml:space="preserve"><value>A file operation failed. Check whether files are in use and whether the folder is writable.</value></data>
+  <data name="ErrorOperationFailed" xml:space="preserve"><value>The operation could not be completed. Check the runtime and project state.</value></data>
+  <data name="ErrorUnexpected" xml:space="preserve"><value>An unexpected error occurred. Try again or use the contact information in Settings to report it.</value></data>
+  <data name="CoreBackupInvalid" xml:space="preserve"><value>The backup archive is invalid, damaged, or contains an unsafe file path.</value></data>
+  <data name="CoreIntegrityManifestMissing" xml:space="preserve"><value>This installation does not contain an integrity manifest. Install a newer version with update support before verifying it.</value></data>
+  <data name="CoreIntegrityManifestInvalidLine" xml:space="preserve"><value>The integrity manifest contains an invalid line: {0}</value></data>
+  <data name="CoreIntegrityUnsafePath" xml:space="preserve"><value>The integrity manifest contains an unsafe path: {0}</value></data>
+  <data name="CoreIntegrityFileMissing" xml:space="preserve"><value>Missing file: {0}</value></data>
+  <data name="CoreIntegrityFileHashMismatch" xml:space="preserve"><value>File verification failed: {0}</value></data>
+  <data name="CoreIntegrityManifestEmpty" xml:space="preserve"><value>The integrity manifest does not contain any files.</value></data>
+  <data name="ListSeparator" xml:space="preserve"><value>; </value></data>
+  <data name="DrawCountShort" xml:space="preserve"><value>{0} Draws</value></data>
 </root>

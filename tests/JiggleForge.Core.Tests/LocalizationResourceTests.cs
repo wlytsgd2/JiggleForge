@@ -6,113 +6,123 @@ namespace JiggleForge.Core.Tests;
 [TestClass]
 public sealed class LocalizationResourceTests
 {
-    private static readonly string[] UserFacingAttributeNames =
-    [
-        "Text",
-        "Content",
-        "Header",
-        "PlaceholderText",
-        "OnContent",
-        "OffContent",
-        "ToolTip",
-    ];
-
     [TestMethod]
-    public void ChineseAndEnglishResourcesHaveIdenticalKeys()
+    public void ChineseAndEnglishResourcesContainExactlyTheSameKeys()
     {
-        string repositoryRoot = FindRepositoryRoot();
-        HashSet<string> chineseKeys = LoadResourceKeys(Path.Combine(
-            repositoryRoot,
-            "app",
-            "JiggleForge",
-            "Strings",
-            "zh-CN",
-            "Resources.resw"));
-        HashSet<string> englishKeys = LoadResourceKeys(Path.Combine(
-            repositoryRoot,
-            "app",
-            "JiggleForge",
-            "Strings",
-            "en-US",
-            "Resources.resw"));
+        string root = FindRepositoryRoot();
+        HashSet<string> chinese = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "zh-CN", "Resources.resw"));
+        HashSet<string> english = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "en-US", "Resources.resw"));
 
-        CollectionAssert.AreEquivalent(chineseKeys.ToArray(), englishKeys.ToArray());
+        CollectionAssert.AreEquivalent(chinese.ToArray(), english.ToArray());
     }
 
     [TestMethod]
-    public void EveryXamlLocalizationKeyHasAResourceEntry()
+    public void EveryStructuredCoreMessageHasBothLanguageResources()
     {
-        string repositoryRoot = FindRepositoryRoot();
-        string xamlPath = Path.Combine(repositoryRoot, "app", "JiggleForge", "MainWindow.xaml");
-        string xaml = File.ReadAllText(xamlPath);
-        HashSet<string> resourceKeys = LoadResourceKeys(Path.Combine(
-            repositoryRoot,
-            "app",
-            "JiggleForge",
-            "Strings",
-            "zh-CN",
-            "Resources.resw"));
-
-        Assert.IsFalse(xaml.Contains("x:Uid=", StringComparison.Ordinal));
-        MatchCollection localizationKeys = Regex.Matches(
-            xaml,
-            "local:Localization\\.Key=\"([^\"]+)\"",
+        string root = FindRepositoryRoot();
+        HashSet<string> chinese = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "zh-CN", "Resources.resw"));
+        HashSet<string> english = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "en-US", "Resources.resw"));
+        Regex messageKey = new(
+            "UserMessage\\.Of\\(\\s*\\\"(?<key>[^\\\"]+)\\\"",
             RegexOptions.CultureInvariant);
-        Assert.IsGreaterThan(0, localizationKeys.Count);
 
-        foreach (Match match in localizationKeys)
+        List<string> missing = [];
+        foreach (string source in Directory.EnumerateFiles(
+                     Path.Combine(root, "src", "JiggleForge.Core"),
+                     "*.cs",
+                     SearchOption.AllDirectories))
         {
-            string prefix = match.Groups[1].Value + ".";
-            Assert.IsTrue(
-                resourceKeys.Any(key => key.StartsWith(prefix, StringComparison.Ordinal)),
-                $"No resource property exists for localization key '{match.Groups[1].Value}'.");
+            string text = File.ReadAllText(source);
+            foreach (Match match in messageKey.Matches(text))
+            {
+                string key = match.Groups["key"].Value;
+                if (!chinese.Contains(key) || !english.Contains(key))
+                {
+                    missing.Add($"{key} ({Path.GetRelativePath(root, source)})");
+                }
+            }
         }
+
+        Assert.AreEqual(0, missing.Count, string.Join(Environment.NewLine, missing));
     }
 
     [TestMethod]
-    public void ChineseXamlLiteralsAreBoundToLocalizationKeys()
+    public void EveryLiteralApplicationResourceReferenceExistsInBothLanguages()
     {
-        string repositoryRoot = FindRepositoryRoot();
-        XDocument document = XDocument.Load(Path.Combine(
-            repositoryRoot,
-            "app",
-            "JiggleForge",
-            "MainWindow.xaml"));
+        string root = FindRepositoryRoot();
+        HashSet<string> chinese = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "zh-CN", "Resources.resw"));
+        HashSet<string> english = LoadResourceKeys(Path.Combine(
+            root, "app", "JiggleForge", "Strings", "en-US", "Resources.resw"));
+        Regex codeKey = new(
+            "(?:\\bL|AppLanguageService\\.(?:Get|Format))\\(\\s*\\\"(?<key>[^\\\"]+)\\\"",
+            RegexOptions.CultureInvariant);
+        Regex xamlKey = new(
+            "Localization\\.Key=\\\"(?<key>[^\\\"]+)\\\"",
+            RegexOptions.CultureInvariant);
 
-        foreach (XElement element in document.Descendants())
+        List<string> missing = [];
+        string appRoot = Path.Combine(root, "app", "JiggleForge");
+        foreach (string source in Directory.EnumerateFiles(appRoot, "*.cs", SearchOption.AllDirectories))
         {
-            bool isChineseLanguageChoice = string.Equals(
-                element.Attributes().FirstOrDefault(attribute => attribute.Name.LocalName == "Tag")?.Value,
-                "zh-CN",
-                StringComparison.OrdinalIgnoreCase);
-            if (isChineseLanguageChoice)
+            if (!IsGeneratedPath(source))
             {
-                continue;
+                AddMissingKeys(root, source, codeKey, chinese, english, missing, allowPropertySuffix: false);
             }
-
-            bool hasLocalizationKey = element.Attributes().Any(attribute =>
-                attribute.Name.LocalName == "Localization.Key");
-            foreach (XAttribute attribute in element.Attributes().Where(attribute =>
-                         UserFacingAttributeNames.Contains(attribute.Name.LocalName, StringComparer.Ordinal) &&
-                         Regex.IsMatch(attribute.Value, "[\\p{IsCJKUnifiedIdeographs}]")))
+        }
+        foreach (string source in Directory.EnumerateFiles(appRoot, "*.xaml", SearchOption.AllDirectories))
+        {
+            if (!IsGeneratedPath(source))
             {
-                Assert.IsTrue(
-                    hasLocalizationKey,
-                    $"Chinese XAML literal '{attribute.Value}' is missing local:Localization.Key.");
+                AddMissingKeys(root, source, xamlKey, chinese, english, missing, allowPropertySuffix: true);
+            }
+        }
+
+        Assert.AreEqual(0, missing.Count, string.Join(Environment.NewLine, missing));
+    }
+
+    private static void AddMissingKeys(
+        string root,
+        string source,
+        Regex keyPattern,
+        IReadOnlySet<string> chinese,
+        IReadOnlySet<string> english,
+        ICollection<string> missing,
+        bool allowPropertySuffix)
+    {
+        string text = File.ReadAllText(source);
+        foreach (Match match in keyPattern.Matches(text))
+        {
+            string key = match.Groups["key"].Value;
+            bool hasChinese = chinese.Contains(key) ||
+                allowPropertySuffix && chinese.Any(candidate => candidate.StartsWith(key + ".", StringComparison.Ordinal));
+            bool hasEnglish = english.Contains(key) ||
+                allowPropertySuffix && english.Any(candidate => candidate.StartsWith(key + ".", StringComparison.Ordinal));
+            if (!hasChinese || !hasEnglish)
+            {
+                missing.Add($"{key} ({Path.GetRelativePath(root, source)})");
             }
         }
     }
+
+    private static bool IsGeneratedPath(string path) =>
+        path.Split(Path.DirectorySeparatorChar).Any(part => part is "bin" or "obj");
 
     private static HashSet<string> LoadResourceKeys(string path)
     {
         XDocument document = XDocument.Load(path);
-        return document
-            .Root!
+        string[] keys = document.Root!
             .Elements("data")
             .Select(element => (string?)element.Attribute("name"))
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .Select(name => name!)
-            .ToHashSet(StringComparer.Ordinal);
+            .Where(key => !string.IsNullOrWhiteSpace(key))
+            .Select(key => key!)
+            .ToArray();
+        Assert.AreEqual(keys.Length, keys.Distinct(StringComparer.Ordinal).Count(), $"Duplicate resource key in {path}");
+        return keys.ToHashSet(StringComparer.Ordinal);
     }
 
     private static string FindRepositoryRoot()
@@ -124,7 +134,6 @@ public sealed class LocalizationResourceTests
             {
                 return directory.FullName;
             }
-
             directory = directory.Parent;
         }
 

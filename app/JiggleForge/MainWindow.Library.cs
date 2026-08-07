@@ -13,68 +13,70 @@ public sealed partial class MainWindow : Window
 
     private void ModLibraryList_ItemClick(object sender, ItemClickEventArgs e)
     {
-        if (e.ClickedItem is not ModLibraryRow row)
+        if (e.ClickedItem is ModLibraryRow row)
         {
-            return;
+            OpenProject(row.ModPath);
         }
-
-        OpenProject(row.ModPath);
     }
 
-    private async Task RefreshModLibraryAsync(bool showErrors = false)
+    private Task RefreshModLibraryAsync(bool showErrors = false)
     {
-        modLibraryScanCancellation?.Cancel();
-        modLibraryScanCancellation?.Dispose();
-        modLibraryScanCancellation = new CancellationTokenSource();
-        CancellationToken cancellationToken = modLibraryScanCancellation.Token;
-
-        ZzmiPathResolution resolution = ZzmiPathResolver.Resolve(RuntimePathTextBox.Text);
-        if (!resolution.IsValid)
-        {
-            modLibraryRows.Clear();
-            ModLibraryStatusText.Text = L("SelectValidZzmiFirst");
-            ModLibraryRootText.Text = resolution.Message;
-            ModLibraryBusyRing.IsActive = false;
-            if (showErrors)
-            {
-                ShowMessage(AppLanguageService.Format("CannotScanMods", resolution.Message), InfoBarSeverity.Warning);
-            }
-            return;
-        }
-
-        ApplyResolvedRuntimePath(resolution, showCorrectionMessage: showErrors);
         ModLibraryBusyRing.IsActive = true;
-        ModLibraryStatusText.Text = L("ScanningMods");
-        ModLibraryRootText.Text = Path.Combine(resolution.ResolvedPath, "Mods");
+        ModLibraryStatusText.Text = L("LoadingModHistory");
+        ModLibraryRootText.Text = L("ModHistoryDescription");
         try
         {
-            IReadOnlyList<ModLibraryEntry> entries = await Task.Run(
-                () => modLibraryService.ScanZzmiRoot(resolution.ResolvedPath, cancellationToken),
-                cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-
             modLibraryRows.Clear();
-            foreach (ModLibraryEntry entry in entries)
+            List<string> candidatePaths = projectHistoryService.Load().ToList();
+            string? discoveryWarning = null;
+            ZzmiPathResolution zzmi = ZzmiPathResolver.Resolve(RuntimePathTextBox.Text);
+            if (zzmi.IsValid && zzmi.ResolvedPath is not null)
             {
-                modLibraryRows.Add(new ModLibraryRow(
-                    entry.ModPath,
-                    entry.DisplayName,
-                    StateLabel(entry.State),
-                    entry.DrawCount,
-                    entry.Messages.FirstOrDefault() ?? string.Empty));
+                try
+                {
+                    candidatePaths.AddRange(modLibraryService.FindAdaptedProjectRoots(zzmi.ResolvedPath));
+                }
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
+                {
+                    discoveryWarning = AppLanguageService.LocalizeException(exception);
+                }
             }
 
-            ModLibraryStatusText.Text = entries.Count == 0
-                ? L("NoModsDetected")
-                : AppLanguageService.Format("ModsDetected", entries.Count);
-        }
-        catch (OperationCanceledException)
-        {
+            List<string> retainedPaths = [];
+            foreach (string path in candidatePaths.Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!Directory.Exists(path))
+                {
+                    continue;
+                }
+
+                ModProjectInspection inspection = projectService.Inspect(path);
+                if (inspection.State == ModImportState.FirstImport)
+                {
+                    continue;
+                }
+
+                retainedPaths.Add(inspection.ModPath);
+                AddOrReplaceHistoryRow(inspection, mostRecent: false);
+            }
+            projectHistoryService.Replace(retainedPaths);
+
+            ModLibraryStatusText.Text = modLibraryRows.Count == 0
+                ? L("NoAdaptedModsRecorded")
+                : AppLanguageService.Format("AdaptedModsRecorded", modLibraryRows.Count);
+            if (showErrors && discoveryWarning is not null)
+            {
+                ShowMessage(
+                    AppLanguageService.Format("AdaptedModSearchFailed", discoveryWarning),
+                    InfoBarSeverity.Warning);
+            }
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException)
         {
             modLibraryRows.Clear();
-            ModLibraryStatusText.Text = AppLanguageService.Format("ModScanFailed", exception.Message);
+            ModLibraryStatusText.Text = AppLanguageService.Format(
+                "ModHistoryLoadFailed",
+                AppLanguageService.LocalizeException(exception));
             if (showErrors)
             {
                 ShowMessage(ModLibraryStatusText.Text, InfoBarSeverity.Error);
@@ -82,10 +84,60 @@ public sealed partial class MainWindow : Window
         }
         finally
         {
-            if (!cancellationToken.IsCancellationRequested)
-            {
-                ModLibraryBusyRing.IsActive = false;
-            }
+            ModLibraryBusyRing.IsActive = false;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void UpdateProjectHistory(ModProjectInspection inspection)
+    {
+        if (inspection.State == ModImportState.FirstImport)
+        {
+            projectHistoryService.Remove(inspection.ModPath);
+            RemoveHistoryRow(inspection.ModPath);
+            return;
+        }
+
+        ModBackupInspection backup = backupService.Inspect(inspection.ModPath);
+        if (inspection.State == ModImportState.Invalid && !backup.Exists)
+        {
+            return;
+        }
+
+        projectHistoryService.Add(inspection.ModPath);
+        AddOrReplaceHistoryRow(inspection);
+    }
+
+    private void AddOrReplaceHistoryRow(ModProjectInspection inspection, bool mostRecent = true)
+    {
+        RemoveHistoryRow(inspection.ModPath);
+        int drawCount = inspection.Configuration?.Draws.Count ?? inspection.DiscoveredDraws.Count;
+        ModLibraryRow row = new(
+            inspection.ModPath,
+            Path.GetFileName(inspection.ModPath),
+            StateLabel(inspection.State),
+            drawCount,
+            inspection.Messages.Count == 0
+                ? string.Empty
+                : AppLanguageService.Localize(inspection.Messages[0]));
+        if (mostRecent)
+        {
+            modLibraryRows.Insert(0, row);
+        }
+        else
+        {
+            modLibraryRows.Add(row);
+        }
+    }
+
+    private void RemoveHistoryRow(string path)
+    {
+        ModLibraryRow? existing = modLibraryRows.FirstOrDefault(row =>
+            string.Equals(row.ModPath, path, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            modLibraryRows.Remove(existing);
         }
     }
 
@@ -94,19 +146,10 @@ public sealed partial class MainWindow : Window
         ModFolderResolution resolution = modLibraryService.ResolveSelection(selectedPath);
         if (!resolution.IsValid || resolution.ResolvedPath is null)
         {
-            string detail = resolution.Candidates.Count > 1
-                ? AppLanguageService.Format("ZzmiCandidatesFound", resolution.Message, string.Join(AppLanguageService.CurrentLanguage == AppLanguageService.English ? ", " : "、", resolution.Candidates.Select(Path.GetFileName)))
-                : resolution.Message;
-            ShowMessage(detail, InfoBarSeverity.Warning);
+            ShowMessage(AppLanguageService.Localize(resolution.Message), InfoBarSeverity.Warning);
             return;
         }
 
-        if (resolution.WasCorrected)
-        {
-            ShowMessage(
-                AppLanguageService.Format("AutoLocatedModRoot", resolution.ResolvedPath),
-                InfoBarSeverity.Informational);
-        }
         OpenProject(resolution.ResolvedPath);
     }
 }
@@ -118,5 +161,5 @@ public sealed record ModLibraryRow(
     int DrawCount,
     string Detail)
 {
-    public string DrawCountText => $"{DrawCount} Draw";
+    public string DrawCountText => AppLanguageService.Format("DrawCountShort", DrawCount);
 }

@@ -10,7 +10,7 @@ public sealed record ModBackupInspection(
     bool Exists,
     bool IsValid,
     IReadOnlyList<string> Files,
-    string? Error);
+    UserMessage? Error);
 
 public sealed record ModBackupResult(
     string BackupPath,
@@ -50,7 +50,7 @@ public sealed class ModBackupService
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or JsonException or UnauthorizedAccessException)
         {
-            return new(root, backupPath, true, false, [], exception.Message);
+            return new(root, backupPath, true, false, [], UserMessage.Of("CoreBackupInvalid"));
         }
     }
 

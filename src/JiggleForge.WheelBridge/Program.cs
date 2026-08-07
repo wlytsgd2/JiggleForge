@@ -27,7 +27,7 @@ internal static class Program
         catch (Exception exception)
         {
             MessageBox.Show(
-                "WheelBridge failed to start:\r\n" + exception.Message,
+                "滚轮输入桥接器启动失败。\r\nWheelBridge failed to start.\r\n\r\n" + exception.Message,
                 "JiggleForge WheelBridge",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);

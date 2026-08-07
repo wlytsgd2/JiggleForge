@@ -185,10 +185,10 @@ public sealed class ApplicationUpdateService
                 false,
                 0,
                 0,
-                ["当前安装不包含完整性清单。请安装带更新功能的新版本后再校验。"]);
+                [UserMessage.Of("CoreIntegrityManifestMissing")]);
         }
 
-        List<string> errors = [];
+        List<UserMessage> errors = [];
         int expectedCount = 0;
         int verifiedCount = 0;
         foreach (string rawLine in File.ReadLines(manifestPath))
@@ -205,7 +205,7 @@ public sealed class ApplicationUpdateService
                 RegexOptions.CultureInvariant);
             if (!match.Success)
             {
-                errors.Add($"完整性清单中存在无效行：{line}");
+                errors.Add(UserMessage.Of("CoreIntegrityManifestInvalidLine", line));
                 continue;
             }
 
@@ -216,22 +216,22 @@ public sealed class ApplicationUpdateService
             {
                 fullPath = ResolveContainedPath(InstallationDirectory, relativePath);
             }
-            catch (InvalidDataException exception)
+            catch (InvalidDataException)
             {
-                errors.Add(exception.Message);
+                errors.Add(UserMessage.Of("CoreIntegrityUnsafePath", relativePath));
                 continue;
             }
 
             if (!File.Exists(fullPath))
             {
-                errors.Add($"缺少文件：{relativePath}");
+                errors.Add(UserMessage.Of("CoreIntegrityFileMissing", relativePath));
                 continue;
             }
 
             string actual = ComputeSha256(fullPath);
             if (!string.Equals(actual, match.Groups[1].Value, StringComparison.OrdinalIgnoreCase))
             {
-                errors.Add($"文件校验失败：{relativePath}");
+                errors.Add(UserMessage.Of("CoreIntegrityFileHashMismatch", relativePath));
                 continue;
             }
 
@@ -240,7 +240,7 @@ public sealed class ApplicationUpdateService
 
         if (expectedCount == 0)
         {
-            errors.Add("完整性清单没有包含任何文件。");
+            errors.Add(UserMessage.Of("CoreIntegrityManifestEmpty"));
         }
 
         return new ApplicationIntegrityResult(true, expectedCount, verifiedCount, errors);
@@ -374,7 +374,7 @@ public sealed record ApplicationIntegrityResult(
     bool ManifestFound,
     int ExpectedFileCount,
     int VerifiedFileCount,
-    IReadOnlyList<string> Errors)
+    IReadOnlyList<UserMessage> Errors)
 {
     public bool IsValid => ManifestFound && ExpectedFileCount > 0 && Errors.Count == 0;
 }

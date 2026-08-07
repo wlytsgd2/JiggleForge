@@ -7,7 +7,7 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 ## 功能
 
 - 安装、更新、检查和卸载全局 JiggleForge 运行时。
-- 自动扫描当前 ZZMI `Mods` 目录，在应用内列出并直接打开识别到的 Mod。
+- 不扫描普通 Mod；应用会记录实际打开并成功适配过的项目，并在当前 ZZMI 中只检索带有 JiggleForge 标记的 Mod，之后可以从首页直接重新打开。
 - 扫描 Mod 中的 DrawIndexed 命令，并直接在原 Mod 文件夹内完成适配。
 - 为每个 Draw 分配稳定身份，可以修改别名或关闭该 Draw 的变形。
 - 支持 Draw 分组和有向依赖关系，让相关部位共同变形。
@@ -32,7 +32,7 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 替换 Mod 的 Windows 桌�
 1. 从 [Releases](https://github.com/wlytsgd2/JiggleForge/releases) 下载并解压最新自包含版本。
 2. 启动 `JiggleForge.exe`，先选择显示语言，再按首次使用向导完成设置。
 3. 打开“设置”，选择包含 `Mods` 和 `ShaderFixes` 的 ZZMI 根目录，然后安装或更新运行时。
-4. 从首页自动识别的 Mod 列表中选择一项；ZZMI 以外的 Mod 仍可拖入或手动打开。
+4. 把一个具体的 Mod 文件夹拖入首页，或手动选择文件夹。适配成功后，该项目会保存在首页记录中供以后直接打开。
 5. 检查 Draw、分组、Mask、依赖关系和物理参数，然后点击“应用配置”。
 6. 回到游戏按 `F10`。
 7. 按住配置好的拖动键可以拖动模型；快速点按会沿三角形法线产生拍打效果。需要滚轮控制深度时，在“设置”页面启动 WheelBridge。

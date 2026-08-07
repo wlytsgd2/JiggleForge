@@ -5,7 +5,7 @@ public sealed record ModLibraryEntry(
     string DisplayName,
     ModImportState State,
     int DrawCount,
-    IReadOnlyList<string> Messages);
+    IReadOnlyList<UserMessage> Messages);
 
 public sealed record ModFolderResolution(
     string RequestedPath,
@@ -13,7 +13,7 @@ public sealed record ModFolderResolution(
     IReadOnlyList<string> Candidates,
     bool IsValid,
     bool WasCorrected,
-    string Message);
+    UserMessage Message);
 
 public sealed class ModLibraryService
 {
@@ -71,11 +71,43 @@ public sealed class ModLibraryService
             .ToArray();
     }
 
+    /// <summary>
+    /// Finds only folders that contain an explicit JiggleForge adaptation
+    /// marker. Ordinary Mods are not parsed or returned.
+    /// </summary>
+    public IReadOnlyList<string> FindAdaptedProjectRoots(
+        string zzmiRoot,
+        CancellationToken cancellationToken = default)
+    {
+        string modsRoot = Path.Combine(Path.GetFullPath(zzmiRoot), "Mods");
+        if (!Directory.Exists(modsRoot))
+        {
+            return [];
+        }
+
+        List<string> roots = [];
+        foreach (string child in EnumerateDirectoriesSafely(modsRoot))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.Equals(Path.GetFileName(child), RuntimeFolderName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            roots.AddRange(FindAdaptedProjectRootsInBranch(child, cancellationToken));
+        }
+
+        return roots
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
     public ModFolderResolution ResolveSelection(string selectedPath)
     {
         if (string.IsNullOrWhiteSpace(selectedPath))
         {
-            return InvalidSelection(string.Empty, "No Mod folder was selected.");
+            return InvalidSelection(string.Empty, UserMessage.Of("CoreModFolderNotSelected"));
         }
 
         string requested;
@@ -85,7 +117,7 @@ public sealed class ModLibraryService
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
         {
-            return InvalidSelection(selectedPath, $"The selected path is invalid: {exception.Message}");
+            return InvalidSelection(selectedPath, UserMessage.Of("CoreModPathInvalid"));
         }
 
         if (File.Exists(requested))
@@ -94,14 +126,14 @@ public sealed class ModLibraryService
         }
         if (!Directory.Exists(requested))
         {
-            return InvalidSelection(requested, $"The selected folder does not exist: {requested}");
+            return InvalidSelection(requested, UserMessage.Of("CoreSelectedFolderMissing", requested));
         }
 
         if (ZzmiPathResolver.IsZzmiRoot(requested))
         {
             return InvalidSelection(
                 requested,
-                "The selected folder is the ZZMI root, not a single Mod. Choose a Mod from the library.");
+                UserMessage.Of("CoreModSelectionIsZzmiRoot"));
         }
 
         DirectoryInfo? requestedParent = Directory.GetParent(requested);
@@ -121,12 +153,47 @@ public sealed class ModLibraryService
                 mods,
                 IsValid: false,
                 WasCorrected: false,
-                "The selected folder is the complete Mods library, not a single Mod. Choose one Mod from the library.");
+                UserMessage.Of("CoreModSelectionIsModsRoot"));
         }
 
         if (string.Equals(Path.GetFileName(requested), RuntimeFolderName, StringComparison.OrdinalIgnoreCase))
         {
-            return InvalidSelection(requested, "JiggleForgeShaderFix is the global runtime and cannot be opened as a Mod project.");
+            return InvalidSelection(requested, UserMessage.Of("CoreModSelectionIsRuntime"));
+        }
+
+        string requestedName = Path.GetFileName(requested);
+        if (string.Equals(requestedName, "_MANAGED_", StringComparison.OrdinalIgnoreCase) ||
+            System.Text.RegularExpressions.Regex.IsMatch(
+                requestedName,
+                @"^group_\d+$",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase |
+                System.Text.RegularExpressions.RegexOptions.CultureInvariant))
+        {
+            return InvalidSelection(
+                requested,
+                UserMessage.Of("CoreModSelectionIsManagerContainer"));
+        }
+
+        IReadOnlyList<string> persistentRoots = FindPersistentProjectRoots(requested)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (persistentRoots.Count == 1)
+        {
+            bool corrected = !string.Equals(
+                requested,
+                persistentRoots[0],
+                StringComparison.OrdinalIgnoreCase);
+            return ValidSelection(requested, persistentRoots[0], corrected);
+        }
+        if (persistentRoots.Count > 1)
+        {
+            return new ModFolderResolution(
+                requested,
+                null,
+                persistentRoots,
+                IsValid: false,
+                WasCorrected: false,
+                UserMessage.Of("CoreSeveralExistingProjects", persistentRoots.Count));
         }
 
         if (HasProjectRootSignal(requested))
@@ -137,22 +204,15 @@ public sealed class ModLibraryService
         IReadOnlyList<string> candidates = FindProjectRoots(requested, CancellationToken.None)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
-        if (candidates.Count == 1)
+        if (candidates.Count > 0)
         {
-            return ValidSelection(requested, candidates[0], corrected: true);
-        }
-        if (candidates.Count > 1)
-        {
-            return new ModFolderResolution(
-                requested,
-                null,
-                candidates,
-                IsValid: false,
-                WasCorrected: false,
-                $"The selected folder contains {candidates.Count} separate Mods. Select one Mod folder instead.");
+            // An explicitly selected folder is authoritative. A single Mod may
+            // legitimately organize its INI files into several child folders;
+            // those folders must not be mistaken for separate projects.
+            return ValidSelection(requested, requested, corrected: false);
         }
 
-        return InvalidSelection(requested, "No Mod INI or JiggleForge configuration was found in the selected folder.");
+        return InvalidSelection(requested, UserMessage.Of("CoreNoModConfigurationFound"));
     }
 
     private static IReadOnlyList<string> FindProjectRoots(
@@ -174,9 +234,58 @@ public sealed class ModLibraryService
         return roots;
     }
 
+    private static IReadOnlyList<string> FindAdaptedProjectRootsInBranch(
+        string branchRoot,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (HasActiveAdaptationMarker(branchRoot))
+        {
+            return [Path.GetFullPath(branchRoot)];
+        }
+
+        List<string> roots = [];
+        foreach (string child in EnumerateDirectoriesSafely(branchRoot))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            roots.AddRange(FindAdaptedProjectRootsInBranch(child, cancellationToken));
+        }
+        return roots;
+    }
+
+    private static bool HasActiveAdaptationMarker(string path) =>
+        File.Exists(Path.Combine(path, JiggleProjectConfig.DefaultFileName)) ||
+        Directory.Exists(Path.Combine(path, "_JiggleForgeRuntime")) ||
+        File.Exists(Path.Combine(path, "_JiggleForge", "GraphManifest.json"));
+
+    private static IReadOnlyList<string> FindPersistentProjectRoots(string branchRoot)
+    {
+        if (HasPersistentProjectMarker(branchRoot))
+        {
+            return [Path.GetFullPath(branchRoot)];
+        }
+
+        List<string> roots = [];
+        foreach (string child in EnumerateDirectoriesSafely(branchRoot))
+        {
+            roots.AddRange(FindPersistentProjectRoots(child));
+        }
+        return roots;
+    }
+
+    private static bool HasPersistentProjectMarker(string path) =>
+        File.Exists(Path.Combine(path, ModBackupService.BackupFileName)) ||
+        File.Exists(Path.Combine(path, JiggleProjectConfig.DefaultFileName));
+
     private static bool HasProjectRootSignal(string path)
     {
-        if (File.Exists(Path.Combine(path, JiggleProjectConfig.DefaultFileName)))
+        // Older JiggleForge versions could adapt a wrapper folder whose actual
+        // INI files live in several child folders.  The backup is written to
+        // that wrapper and is therefore the strongest available root marker.
+        // Check it before descending, otherwise one adapted Mod is exposed as
+        // several unrelated library entries and none of them can restore the
+        // backup stored on the wrapper.
+        if (HasPersistentProjectMarker(path))
         {
             return true;
         }
@@ -232,9 +341,9 @@ public sealed class ModLibraryService
             IsValid: true,
             WasCorrected: corrected,
             corrected
-                ? $"The selected folder was resolved to the Mod root: {resolved}"
-                : "The selected folder is a Mod root.");
+                ? UserMessage.Of("CoreModRootCorrected", resolved)
+                : UserMessage.Of("CoreModRootValid"));
 
-    private static ModFolderResolution InvalidSelection(string requested, string message) =>
+    private static ModFolderResolution InvalidSelection(string requested, UserMessage message) =>
         new(requested, null, [], IsValid: false, WasCorrected: false, message);
 }

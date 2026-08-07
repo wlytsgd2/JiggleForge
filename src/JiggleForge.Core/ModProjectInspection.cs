@@ -20,5 +20,5 @@ public sealed class ModProjectInspection
 
     public IReadOnlyList<JiggleDrawConfig> DiscoveredDraws { get; init; } = [];
 
-    public IReadOnlyList<string> Messages { get; init; } = [];
+    public IReadOnlyList<UserMessage> Messages { get; init; } = [];
 }

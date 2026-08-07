@@ -71,6 +71,7 @@ public sealed partial class MainWindow : Window
 
         currentInspection = projectService.Inspect(path);
         currentConfiguration = currentInspection.Configuration;
+        UpdateProjectHistory(currentInspection);
         ProjectCard.Visibility = Visibility.Visible;
         ProjectNameText.Text = Path.GetFileName(currentInspection.ModPath);
         ProjectPathText.Text = currentInspection.ModPath;
@@ -78,7 +79,9 @@ public sealed partial class MainWindow : Window
         int drawCount = currentConfiguration?.Draws.Count ?? currentInspection.DiscoveredDraws.Count;
         DrawCountText.Text = drawCount.ToString(System.Globalization.CultureInfo.InvariantCulture);
         SchemaText.Text = currentConfiguration?.SchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "—";
-        DetailsText.Text = string.Join(Environment.NewLine, currentInspection.Messages);
+        DetailsText.Text = string.Join(
+            Environment.NewLine,
+            currentInspection.Messages.Select(AppLanguageService.Localize));
         UpdateBackupStatus();
         CreateConfigButton.Visibility = currentInspection.State == ModImportState.FirstImport
             ? Visibility.Visible
@@ -112,7 +115,11 @@ public sealed partial class MainWindow : Window
             ModImportState.FirstImport => InfoBarSeverity.Informational,
             _ => InfoBarSeverity.Warning,
         };
-        ShowMessage(currentInspection.Messages.FirstOrDefault() ?? StateLabel(currentInspection.State), severity);
+        ShowMessage(
+            currentInspection.Messages.Count == 0
+                ? StateLabel(currentInspection.State)
+                : AppLanguageService.Localize(currentInspection.Messages[0]),
+            severity);
     }
 
     private void LoadEditor(JiggleProjectConfig config)
@@ -198,7 +205,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
         }
     }
 
@@ -234,7 +241,9 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ShowMessage(AppLanguageService.Format("RestoreFailed", exception.Message), InfoBarSeverity.Error);
+            ShowMessage(
+                AppLanguageService.Format("RestoreFailed", AppLanguageService.LocalizeException(exception)),
+                InfoBarSeverity.Error);
         }
     }
 
@@ -254,7 +263,9 @@ public sealed partial class MainWindow : Window
         }
         else if (backup.Exists)
         {
-            BackupStatusText.Text = AppLanguageService.Format("BackupInvalid", backup.Error);
+            BackupStatusText.Text = AppLanguageService.Format(
+                "BackupInvalid",
+                backup.Error is null ? string.Empty : AppLanguageService.Localize(backup.Error));
             BackupStatusText.Foreground = new SolidColorBrush(Colors.DarkRed);
         }
         else
@@ -282,7 +293,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
         }
     }
 
@@ -304,7 +315,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or FormatException)
         {
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
         }
     }
 
@@ -335,7 +346,7 @@ public sealed partial class MainWindow : Window
             currentConfiguration.Inspector.Enabled = previous;
             InspectorToggleButton.IsChecked = previous;
             UpdateInspectorButtonText();
-            ShowMessage(exception.Message, InfoBarSeverity.Error);
+            ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error);
         }
     }
 

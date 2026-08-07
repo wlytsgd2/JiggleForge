@@ -44,8 +44,10 @@ internal static class Program
             Log("Update failed: " + exception);
             MessageBox.Show(
                 "JiggleForge 更新失败，原有程序文件已尽可能恢复。\r\n\r\n" + exception.Message +
-                "\r\n\r\n日志：" + LogPath,
-                "JiggleForge 更新失败",
+                "\r\n\r\n日志：" + LogPath +
+                "\r\n\r\nJiggleForge update failed. Existing files were restored where possible." +
+                "\r\n\r\nLog: " + LogPath,
+                "JiggleForge 更新失败 / Update failed",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             Environment.ExitCode = 1;

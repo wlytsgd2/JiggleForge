@@ -14,7 +14,7 @@ public sealed partial class ModProjectService
         string root = Path.GetFullPath(modPath.Trim().Trim('"'));
         if (!Directory.Exists(root))
         {
-            return Invalid(root, "The selected Mod folder does not exist.");
+            return Invalid(root, UserMessage.Of("CoreProjectFolderMissing", root));
         }
 
         string configPath = Path.Combine(root, JiggleProjectConfig.DefaultFileName);
@@ -33,7 +33,7 @@ public sealed partial class ModProjectService
                         ModPath = root,
                         State = ModImportState.RuntimeRepairRequired,
                         Configuration = config,
-                        Messages = ["JiggleForge.txt exists, but the runtime patch marker is missing."],
+                        Messages = [UserMessage.Of("CoreProjectPatchMarkerMissing")],
                     };
                 }
 
@@ -44,7 +44,7 @@ public sealed partial class ModProjectService
                         ModPath = root,
                         State = ModImportState.RuntimeRepairRequired,
                         Configuration = config,
-                        Messages = [$"Configuration contains {config.Draws.Count} draws, but runtime INI files contain {scan.MarkerDrawCount}."],
+                        Messages = [UserMessage.Of("CoreProjectDrawCountMismatch", config.Draws.Count, scan.MarkerDrawCount)],
                     };
                 }
 
@@ -56,7 +56,7 @@ public sealed partial class ModProjectService
                         ModPath = root,
                         State = ModImportState.RuntimeRepairRequired,
                         Configuration = config,
-                        Messages = ["Runtime mask bindings are missing and can be regenerated from JiggleForge.txt."],
+                        Messages = [UserMessage.Of("CoreProjectMaskBindingsMissing")],
                     };
                 }
 
@@ -69,7 +69,7 @@ public sealed partial class ModProjectService
                         ModPath = root,
                         State = ModImportState.RuntimeRepairRequired,
                         Configuration = config,
-                        Messages = ["Draw Inspector runtime files are missing and can be regenerated from JiggleForge.txt."],
+                        Messages = [UserMessage.Of("CoreProjectInspectorFilesMissing")],
                     };
                 }
 
@@ -78,12 +78,12 @@ public sealed partial class ModProjectService
                     ModPath = root,
                     State = ModImportState.Ready,
                     Configuration = config,
-                    Messages = ["Existing JiggleForge project is ready."],
+                    Messages = [UserMessage.Of("CoreProjectReady")],
                 };
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
             {
-                return Invalid(root, exception.Message);
+                return Invalid(root, UserMessage.Of("CoreProjectConfigurationInvalid"));
             }
         }
 
@@ -94,7 +94,7 @@ public sealed partial class ModProjectService
                 ModPath = root,
                 State = ModImportState.LegacyMigrationRequired,
                 DiscoveredDraws = scan.Draws,
-                Messages = ["A legacy GraphManifest.json was found. Its Graph, Mask and Draw names can be migrated into JiggleForge.txt."],
+                Messages = [UserMessage.Of("CoreProjectLegacyManifestFound")],
             };
         }
 
@@ -105,13 +105,13 @@ public sealed partial class ModProjectService
                 ModPath = root,
                 State = ModImportState.PatchedConfigurationMissing,
                 DiscoveredDraws = scan.Draws,
-                Messages = ["JiggleForge runtime markers exist, but JiggleForge.txt is missing and must be reconstructed."],
+                Messages = [UserMessage.Of("CoreProjectConfigurationMissing")],
             };
         }
 
         if (scan.Draws.Count == 0)
         {
-            return Invalid(root, "No supported numeric or auto DrawIndexed commands were found.");
+            return Invalid(root, UserMessage.Of("CoreProjectDrawCommandsMissing"));
         }
 
         return new ModProjectInspection
@@ -119,7 +119,7 @@ public sealed partial class ModProjectService
             ModPath = root,
             State = ModImportState.FirstImport,
             DiscoveredDraws = scan.Draws,
-            Messages = [$"First import: {scan.Draws.Count} supported DrawIndexed commands were found."],
+            Messages = [UserMessage.Of("CoreProjectFirstImport", scan.Draws.Count)],
         };
     }
 
@@ -281,7 +281,7 @@ public sealed partial class ModProjectService
         return string.Join(" > ", stack);
     }
 
-    private static ModProjectInspection Invalid(string root, string message) => new()
+    private static ModProjectInspection Invalid(string root, UserMessage message) => new()
     {
         ModPath = root,
         State = ModImportState.Invalid,

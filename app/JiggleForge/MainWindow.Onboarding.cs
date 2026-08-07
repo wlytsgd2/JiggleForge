@@ -303,7 +303,9 @@ public sealed partial class MainWindow
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             EndOnboardingTour();
-            ShowMessage(AppLanguageService.Format("TourSaveFailed", exception.Message), InfoBarSeverity.Warning);
+            ShowMessage(
+                AppLanguageService.Format("TourSaveFailed", AppLanguageService.LocalizeException(exception)),
+                InfoBarSeverity.Warning);
         }
     }
 
