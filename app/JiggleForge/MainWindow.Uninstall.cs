@@ -36,8 +36,6 @@ public sealed partial class MainWindow
         ShowMessage(L("ApplicationUninstallPreparing"), InfoBarSeverity.Informational);
         try
         {
-            ValidateSelfUninstallPrerequisites();
-
             if (RuntimeEnvironmentService.IsWheelBridgeRunning())
             {
                 bool stopped = await RunWheelOperationOnUiThreadAsync(
@@ -65,7 +63,8 @@ public sealed partial class MainWindow
                     runtimeEnvironmentService.UninstallKeepingCompatibility(runtimePath, stopWheelBridge: false));
             }
 
-            LaunchApplicationUninstaller();
+            await ShowManualApplicationRemovalDialogAsync();
+            OpenApplicationFolder();
             Close();
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or
@@ -207,48 +206,31 @@ public sealed partial class MainWindow
         }
     }
 
-    private static void ValidateSelfUninstallPrerequisites()
+    private async Task ShowManualApplicationRemovalDialogAsync()
     {
-        string updaterPath = Path.Combine(AppContext.BaseDirectory, "JiggleForge.Updater.exe");
-        string manifestPath = Path.Combine(AppContext.BaseDirectory, ApplicationUpdateService.IntegrityManifestFileName);
-        if (!File.Exists(updaterPath))
+        ContentDialog dialog = new()
         {
-            throw new ApplicationUninstallException(L("UpdaterMissing"));
-        }
-        if (!File.Exists(manifestPath))
-        {
-            throw new ApplicationUninstallException(L("ApplicationUninstallManifestMissing"));
-        }
+            Title = L("ApplicationRemovalReadyTitle"),
+            Content = new TextBlock
+            {
+                Text = L("ApplicationRemovalReadyDescription"),
+                TextWrapping = TextWrapping.Wrap,
+            },
+            PrimaryButtonText = L("ApplicationRemovalOpenFolderAction"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = RootGrid.XamlRoot,
+        };
+        await dialog.ShowAsync();
     }
 
-    private static void LaunchApplicationUninstaller()
+    private static void OpenApplicationFolder()
     {
-        string sourceUpdater = Path.Combine(AppContext.BaseDirectory, "JiggleForge.Updater.exe");
-        string uninstallerDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "JiggleForge",
-            "Uninstaller");
-        Directory.CreateDirectory(uninstallerDirectory);
-        string uninstallerPath = Path.Combine(uninstallerDirectory, "JiggleForge.Updater.exe");
-        File.Copy(sourceUpdater, uninstallerPath, overwrite: true);
-
         string targetDirectory = Path.GetFullPath(AppContext.BaseDirectory)
             .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        string arguments = string.Join(' ',
-            "--operation", "uninstall",
-            "--parent", Environment.ProcessId.ToString(),
-            "--target", QuoteArgument(targetDirectory),
-            "--language", AppLanguageService.CurrentLanguage);
-        ProcessStartInfo startInfo = new(uninstallerPath, arguments)
+        ProcessStartInfo startInfo = new("explorer.exe", targetDirectory)
         {
             UseShellExecute = true,
-            WorkingDirectory = uninstallerDirectory,
         };
-        if (!CanWriteInstallationDirectory(targetDirectory))
-        {
-            startInfo.Verb = "runas";
-        }
-
-        _ = Process.Start(startInfo) ?? throw new ApplicationUninstallException(L("ApplicationUninstallCannotStart"));
+        _ = Process.Start(startInfo) ?? throw new ApplicationUninstallException(L("ApplicationRemovalCannotOpenFolder"));
     }
 }

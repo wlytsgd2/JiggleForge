@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.14 — 2026-08-07
+
+### 简体中文
+
+- 移除会复制到临时目录、提权并在主程序退出后批量删除应用文件的自删除卸载链，降低 Defender 启发式误报风险。
+- “准备卸载”仍可停止滚轮、卸载运行环境，并选择保留兼容层或恢复全部适配 Mod；最后打开应用目录，由用户手动删除文件夹。
+- 独立更新器恢复为只负责校验和安装应用更新，不再承担应用自删除功能。
+
+### English
+
+- Removed the self-deleting uninstall chain that copied an executable to a temporary directory, elevated it, and deleted application files after the main process exited, reducing Defender heuristic false-positive risk.
+- “Prepare removal” still stops WheelBridge, removes the runtime, and either keeps the compatibility layer or restores adapted Mods; it then opens the application directory for manual deletion.
+- Restored the standalone updater to update-only responsibilities; it no longer deletes the application itself.
+
 ## 0.1.13 — 2026-08-07
 
 ### 简体中文

@@ -364,24 +364,26 @@
   <data name="CoreIntegrityManifestEmpty" xml:space="preserve"><value>完整性清单没有包含任何文件。</value></data>
   <data name="ListSeparator" xml:space="preserve"><value>；</value></data>
   <data name="DrawCountShort" xml:space="preserve"><value>{0} 个 Draw</value></data>
-  <data name="ApplicationUninstallTitle.Text" xml:space="preserve"><value>卸载 JiggleForge</value></data>
-  <data name="ApplicationUninstallDescription.Text" xml:space="preserve"><value>卸载应用、运行环境，并选择是否恢复已经适配的 Mod。</value></data>
-  <data name="UninstallApplicationButton.Content" xml:space="preserve"><value>卸载应用…</value></data>
+  <data name="ApplicationUninstallTitle.Text" xml:space="preserve"><value>准备卸载 JiggleForge</value></data>
+  <data name="ApplicationUninstallDescription.Text" xml:space="preserve"><value>安全移除运行环境，并选择是否恢复已经适配的 Mod；最后由你手动删除应用文件夹。</value></data>
+  <data name="UninstallApplicationButton.Content" xml:space="preserve"><value>准备卸载…</value></data>
   <data name="ApplicationUninstallDialogTitle" xml:space="preserve"><value>选择卸载方式</value></data>
-  <data name="ApplicationUninstallDialogIntro" xml:space="preserve"><value>两种方式都会停止滚轮、卸载全局变形运行环境，并在完成后删除 JiggleForge 应用文件。请选择如何处理已经适配的 Mod。</value></data>
+  <data name="ApplicationUninstallDialogIntro" xml:space="preserve"><value>两种方式都会停止滚轮并卸载全局变形运行环境。为避免安全软件误判，JiggleForge 不会自动删除自身；处理完成后会打开应用目录，请手动删除整个文件夹。请选择如何处理已经适配的 Mod。</value></data>
   <data name="ApplicationUninstallKeepTitle" xml:space="preserve"><value>保留兼容层</value></data>
   <data name="ApplicationUninstallKeepDescription" xml:space="preserve"><value>保留各 Mod 的 JiggleForge 配置和原始备份，并安装一个不执行绘制或计算的轻量兼容层。Mod 会正常显示但不能变形；以后重新安装 JiggleForge 运行环境即可继续使用。</value></data>
-  <data name="ApplicationUninstallFullTitle" xml:space="preserve"><value>完全卸载并恢复 Mod</value></data>
+  <data name="ApplicationUninstallFullTitle" xml:space="preserve"><value>恢复 Mod 并准备卸载</value></data>
   <data name="ApplicationUninstallFullDescription" xml:space="preserve"><value>逐个校验 JiggleForge.original.zip，并把应用记录或在当前 ZZMI 中找到的适配 Mod 恢复为适配前状态。只要有现存 Mod 缺少有效备份，卸载就会停止并显示具体路径。</value></data>
   <data name="ApplicationUninstallKeepAction" xml:space="preserve"><value>保留兼容层</value></data>
-  <data name="ApplicationUninstallFullAction" xml:space="preserve"><value>完全卸载</value></data>
+  <data name="ApplicationUninstallFullAction" xml:space="preserve"><value>恢复 Mod</value></data>
   <data name="ApplicationUninstallPreparing" xml:space="preserve"><value>正在准备卸载 JiggleForge…</value></data>
   <data name="ApplicationUninstallRestoringMods" xml:space="preserve"><value>正在恢复 {0} 个已适配 Mod，请不要关闭应用。</value></data>
   <data name="ApplicationUninstallBackupInvalid" xml:space="preserve"><value>无法完全卸载：以下 Mod 缺少有效的 JiggleForge.original.zip 备份：{0}</value></data>
   <data name="ApplicationUninstallRestoreFailureItem" xml:space="preserve"><value>{0}：{1}</value></data>
   <data name="ApplicationUninstallRestoreFailures" xml:space="preserve"><value>以下 Mod 恢复失败，应用文件尚未删除：&#xA;{0}</value></data>
-  <data name="ApplicationUninstallManifestMissing" xml:space="preserve"><value>应用目录缺少完整性清单，无法安全地自删除。请先更新或重新安装当前版本。</value></data>
-  <data name="ApplicationUninstallCannotStart" xml:space="preserve"><value>无法启动 JiggleForge 卸载程序。</value></data>
+  <data name="ApplicationRemovalReadyTitle" xml:space="preserve"><value>应用已准备好移除</value></data>
+  <data name="ApplicationRemovalReadyDescription" xml:space="preserve"><value>运行环境和所选 Mod 已处理完成。点击下面的按钮会打开 JiggleForge 所在目录并关闭应用；随后请手动删除整个应用文件夹。</value></data>
+  <data name="ApplicationRemovalOpenFolderAction" xml:space="preserve"><value>打开目录并退出</value></data>
+  <data name="ApplicationRemovalCannotOpenFolder" xml:space="preserve"><value>无法打开 JiggleForge 应用目录。</value></data>
   <data name="ApplicationUninstallFailed" xml:space="preserve"><value>卸载未完成：{0}</value></data>
   <data name="RuntimeToggleKeyTitle.Text" xml:space="preserve"><value>游戏内总开关</value></data>
   <data name="ApplyRuntimeToggleKeyButton.Content" xml:space="preserve"><value>应用开关键</value></data>

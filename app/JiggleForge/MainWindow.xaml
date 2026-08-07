@@ -1162,16 +1162,16 @@
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="10">
                                         <TextBlock local:Localization.Key="ApplicationUninstallTitle"
-                                                   Text="卸载 JiggleForge"
+                                                   Text="准备卸载 JiggleForge"
                                                    FontSize="18"
                                                    FontWeight="SemiBold" />
                                         <TextBlock local:Localization.Key="ApplicationUninstallDescription"
-                                                   Text="卸载应用、运行环境，并选择是否恢复已经适配的 Mod。"
+                                                   Text="安全移除运行环境，并选择是否恢复已经适配的 Mod；最后手动删除应用文件夹。"
                                                    TextWrapping="Wrap"
                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                                         <Button x:Name="UninstallApplicationButton"
                                                 local:Localization.Key="UninstallApplicationButton"
-                                                Content="卸载应用…"
+                                                Content="准备卸载…"
                                                 HorizontalAlignment="Left"
                                                 Click="UninstallApplication_Click" />
                                     </StackPanel>

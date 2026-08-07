@@ -364,24 +364,26 @@
   <data name="CoreIntegrityManifestEmpty" xml:space="preserve"><value>The integrity manifest does not contain any files.</value></data>
   <data name="ListSeparator" xml:space="preserve"><value>; </value></data>
   <data name="DrawCountShort" xml:space="preserve"><value>{0} Draws</value></data>
-  <data name="ApplicationUninstallTitle.Text" xml:space="preserve"><value>Uninstall JiggleForge</value></data>
-  <data name="ApplicationUninstallDescription.Text" xml:space="preserve"><value>Remove the app and runtime, and choose whether adapted Mods should be restored.</value></data>
-  <data name="UninstallApplicationButton.Content" xml:space="preserve"><value>Uninstall app…</value></data>
+  <data name="ApplicationUninstallTitle.Text" xml:space="preserve"><value>Prepare to remove JiggleForge</value></data>
+  <data name="ApplicationUninstallDescription.Text" xml:space="preserve"><value>Safely remove the runtime, choose whether adapted Mods should be restored, then delete the application folder manually.</value></data>
+  <data name="UninstallApplicationButton.Content" xml:space="preserve"><value>Prepare removal…</value></data>
   <data name="ApplicationUninstallDialogTitle" xml:space="preserve"><value>Choose how to uninstall</value></data>
-  <data name="ApplicationUninstallDialogIntro" xml:space="preserve"><value>Both options stop WheelBridge, remove the global deformation runtime, and delete the JiggleForge application files when complete. Choose how adapted Mods should be handled.</value></data>
+  <data name="ApplicationUninstallDialogIntro" xml:space="preserve"><value>Both options stop WheelBridge and remove the global deformation runtime. To avoid security-software false positives, JiggleForge does not delete itself. When preparation is complete, the application folder opens so you can delete it manually. Choose how adapted Mods should be handled.</value></data>
   <data name="ApplicationUninstallKeepTitle" xml:space="preserve"><value>Keep compatibility layer</value></data>
   <data name="ApplicationUninstallKeepDescription" xml:space="preserve"><value>Keep each Mod's JiggleForge configuration and original backup, and install a lightweight compatibility layer that performs no drawing or computation. Mods render normally without deformation; reinstalling the JiggleForge runtime later makes them usable again.</value></data>
-  <data name="ApplicationUninstallFullTitle" xml:space="preserve"><value>Full uninstall and restore Mods</value></data>
+  <data name="ApplicationUninstallFullTitle" xml:space="preserve"><value>Restore Mods and prepare removal</value></data>
   <data name="ApplicationUninstallFullDescription" xml:space="preserve"><value>Validate every JiggleForge.original.zip and restore adapted Mods recorded by the app or found in the current ZZMI. If an existing Mod has no valid backup, uninstall stops and shows its exact path.</value></data>
   <data name="ApplicationUninstallKeepAction" xml:space="preserve"><value>Keep compatibility</value></data>
-  <data name="ApplicationUninstallFullAction" xml:space="preserve"><value>Full uninstall</value></data>
+  <data name="ApplicationUninstallFullAction" xml:space="preserve"><value>Restore Mods</value></data>
   <data name="ApplicationUninstallPreparing" xml:space="preserve"><value>Preparing to uninstall JiggleForge…</value></data>
   <data name="ApplicationUninstallRestoringMods" xml:space="preserve"><value>Restoring {0} adapted Mod(s). Do not close the app.</value></data>
   <data name="ApplicationUninstallBackupInvalid" xml:space="preserve"><value>Full uninstall cannot continue because this Mod has no valid JiggleForge.original.zip backup: {0}</value></data>
   <data name="ApplicationUninstallRestoreFailureItem" xml:space="preserve"><value>{0}: {1}</value></data>
   <data name="ApplicationUninstallRestoreFailures" xml:space="preserve"><value>The following Mods could not be restored. Application files have not been deleted:&#xA;{0}</value></data>
-  <data name="ApplicationUninstallManifestMissing" xml:space="preserve"><value>The application integrity manifest is missing, so JiggleForge cannot safely remove itself. Update or reinstall this version first.</value></data>
-  <data name="ApplicationUninstallCannotStart" xml:space="preserve"><value>Could not start the JiggleForge uninstaller.</value></data>
+  <data name="ApplicationRemovalReadyTitle" xml:space="preserve"><value>The application is ready to remove</value></data>
+  <data name="ApplicationRemovalReadyDescription" xml:space="preserve"><value>The runtime and selected Mods have been processed. The button below opens the JiggleForge directory and closes the app; then delete the entire application folder manually.</value></data>
+  <data name="ApplicationRemovalOpenFolderAction" xml:space="preserve"><value>Open folder and exit</value></data>
+  <data name="ApplicationRemovalCannotOpenFolder" xml:space="preserve"><value>Could not open the JiggleForge application folder.</value></data>
   <data name="ApplicationUninstallFailed" xml:space="preserve"><value>Uninstall did not complete: {0}</value></data>
   <data name="RuntimeToggleKeyTitle.Text" xml:space="preserve"><value>In-game master switch</value></data>
   <data name="ApplyRuntimeToggleKeyButton.Content" xml:space="preserve"><value>Apply switch key</value></data>

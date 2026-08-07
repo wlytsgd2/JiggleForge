@@ -5,9 +5,9 @@
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RootNamespace>JiggleForge</RootNamespace>
     <DefaultLanguage>zh-CN</DefaultLanguage>
-    <Version>0.1.13</Version>
-    <AssemblyVersion>0.1.13.0</AssemblyVersion>
-    <FileVersion>0.1.13.0</FileVersion>
+    <Version>0.1.14</Version>
+    <AssemblyVersion>0.1.14.0</AssemblyVersion>
+    <FileVersion>0.1.14.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>..\..\assets\branding\JiggleForge.ico</ApplicationIcon>
     <Platforms>x64</Platforms>
