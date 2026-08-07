@@ -21,6 +21,7 @@ public sealed partial class RuntimeEnvironmentService
         string shaderIncludeSource = PayloadShaderIncludeRoot();
         string shaderIncludeTarget = Path.Combine(shaderFixesRoot, ShaderIncludeFolderName);
         IReadOnlyList<string>? dragKeys = ReadDragKeys(runtimeIniTarget);
+        string? runtimeToggleKey = ReadRuntimeToggleKey(runtimeIniTarget);
 
         bool payloadAvailable = File.Exists(runtimeIniSource) &&
                                 Directory.Exists(runtimeSource) &&
@@ -28,7 +29,7 @@ public sealed partial class RuntimeEnvironmentService
                                 RequiredShaderHashes.All(hash => File.Exists(PayloadShaderPath(hash)));
         bool runtimePresent = File.Exists(runtimeIniTarget) || Directory.Exists(runtimeFolderTarget);
         bool runtimeInstalled = File.Exists(runtimeIniTarget) && Directory.Exists(runtimeFolderTarget);
-        bool runtimeCurrent = runtimeInstalled && dragKeys is not null && payloadAvailable &&
+        bool runtimeCurrent = runtimeInstalled && dragKeys is not null && runtimeToggleKey is not null && payloadAvailable &&
                               RuntimeIniMatches(runtimeIniSource, runtimeIniTarget) &&
                               SourceTreeMatches(runtimeSource, runtimeFolderTarget) &&
                               SourceTreeMatches(shaderIncludeSource, shaderIncludeTarget);
@@ -68,7 +69,8 @@ public sealed partial class RuntimeEnvironmentService
             RequiredShaderHashes.Count,
             backups,
             IsWheelBridgeRunning(),
-            dragKeys);
+            dragKeys,
+            runtimeToggleKey);
     }
 
     private static bool RuntimeIniMatches(string source, string target)
@@ -85,6 +87,14 @@ public sealed partial class RuntimeEnvironmentService
         string targetText = MarkedDragKeyRegex().Replace(
             File.ReadAllText(target),
             BuildDragKeyBlock([DefaultDragKey]),
+            count: 1);
+        sourceText = MarkedRuntimeToggleKeyRegex().Replace(
+            sourceText,
+            BuildRuntimeToggleKeyBlock(DefaultRuntimeToggleKey),
+            count: 1);
+        targetText = MarkedRuntimeToggleKeyRegex().Replace(
+            targetText,
+            BuildRuntimeToggleKeyBlock(DefaultRuntimeToggleKey),
             count: 1);
         sourceText = MarkedDefaultPhysicsRegex().Replace(
             sourceText,

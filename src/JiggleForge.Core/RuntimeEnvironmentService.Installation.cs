@@ -11,17 +11,20 @@ public sealed partial class RuntimeEnvironmentService
     public void Install(
         string zzmiRoot,
         string dragKey = DefaultDragKey,
-        PhysicsSettings? defaultPhysics = null)
+        PhysicsSettings? defaultPhysics = null,
+        string runtimeToggleKey = DefaultRuntimeToggleKey)
     {
-        Install(zzmiRoot, [dragKey], defaultPhysics);
+        Install(zzmiRoot, [dragKey], defaultPhysics, runtimeToggleKey);
     }
 
     public void Install(
         string zzmiRoot,
         IReadOnlyCollection<string> dragKeys,
-        PhysicsSettings? defaultPhysics = null)
+        PhysicsSettings? defaultPhysics = null,
+        string runtimeToggleKey = DefaultRuntimeToggleKey)
     {
         IReadOnlyList<string> validatedDragKeys = ValidateDragKeys(dragKeys);
+        string validatedRuntimeToggleKey = ValidateRuntimeToggleKey(runtimeToggleKey);
         string root = NormalizeRoot(zzmiRoot);
         RuntimeEnvironmentStatus status = Inspect(root);
         if (!status.PayloadAvailable)
@@ -34,6 +37,7 @@ public sealed partial class RuntimeEnvironmentService
         }
 
         string shaderFixesRoot = Path.Combine(root, "ShaderFixes");
+        RemoveCompatibilityLayer(root);
         foreach (string hash in RequiredShaderHashes)
         {
             string source = PayloadShaderPath(hash);
@@ -63,6 +67,7 @@ public sealed partial class RuntimeEnvironmentService
         File.Copy(Path.Combine(payloadRoot, "JiggleForge.ini"), runtimeIniTarget, overwrite: true);
         CopyTree(Path.Combine(payloadRoot, "JiggleForge"), Path.Combine(targetRoot, "JiggleForge"));
         WriteDragKeys(runtimeIniTarget, validatedDragKeys);
+        WriteRuntimeToggleKey(runtimeIniTarget, validatedRuntimeToggleKey);
         if (defaultPhysics is not null)
         {
             WriteDefaultPhysics(runtimeIniTarget, defaultPhysics);
@@ -144,6 +149,39 @@ public sealed partial class RuntimeEnvironmentService
         {
             Directory.Delete(legacyFolder, recursive: true);
         }
+
+        RemoveCompatibilityLayer(root);
+    }
+
+    public void UninstallKeepingCompatibility(string zzmiRoot, bool stopWheelBridge = true)
+    {
+        string root = NormalizeRoot(zzmiRoot);
+        Uninstall(root, stopWheelBridge);
+
+        string compatibilityRoot = Path.Combine(root, "Mods", CompatibilityFolderName);
+        Directory.CreateDirectory(compatibilityRoot);
+        File.WriteAllText(
+            Path.Combine(compatibilityRoot, CompatibilityIniName),
+            CompatibilityLayerContents.ReplaceLineEndings("\r\n") + "\r\n",
+            new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    }
+
+    private static void RemoveCompatibilityLayer(string root)
+    {
+        string compatibilityRoot = Path.Combine(root, "Mods", CompatibilityFolderName);
+        string compatibilityIni = Path.Combine(compatibilityRoot, CompatibilityIniName);
+        if (!File.Exists(compatibilityIni))
+        {
+            return;
+        }
+
+        string contents = File.ReadAllText(compatibilityIni);
+        if (!contents.Contains(CompatibilityMarker, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        Directory.Delete(compatibilityRoot, recursive: true);
     }
 
     private static void RestoreObsoleteManagedShaders(string shaderFixesRoot)
@@ -164,7 +202,8 @@ public sealed partial class RuntimeEnvironmentService
         }
     }
 
-    private string PayloadShaderPath(string hash) => Path.Combine(payloadRoot, "ShaderFixes", hash + ReplacementSuffix);
+    private string PayloadShaderPath(string hash) =>
+        Path.Combine(payloadRoot, "ShaderFixes", hash + ReplacementSuffix);
 
     private string PayloadShaderIncludeRoot() =>
         Path.Combine(payloadRoot, "ShaderFixes", ShaderIncludeFolderName);

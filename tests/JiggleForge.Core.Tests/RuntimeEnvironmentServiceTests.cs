@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using JiggleForge.Core;
 
 namespace JiggleForge.Core.Tests;
@@ -56,6 +57,13 @@ public sealed class RuntimeEnvironmentServiceTests
             $mouseDown = 1
             post $mouseDown = 0
             ; JIGGLEFORGE_DRAG_KEY_END
+
+            ; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_BEGIN
+            [KeyJiggleForgeRuntimeToggle]
+            key = VK_F7
+            type = cycle
+            $runtimeEnabled = 1, 0
+            ; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_END
             """, Encoding.UTF8);
         File.WriteAllText(Path.Combine(payload, "JiggleForge", "WheelBridge.exe"), "test bridge", Encoding.UTF8);
         File.WriteAllText(
@@ -101,6 +109,7 @@ public sealed class RuntimeEnvironmentServiceTests
         Assert.IsTrue(status.RuntimeCurrent);
         Assert.AreEqual(RuntimeEnvironmentService.DefaultDragKey, status.DragKey);
         Assert.AreEqual(RuntimeEnvironmentService.RequiredShaderHashes.Count, status.CurrentShaderCount);
+        Assert.AreEqual(RuntimeEnvironmentService.DefaultRuntimeToggleKey, status.RuntimeToggleKey);
         Assert.AreEqual(1, status.BackupCount);
         string installedInclude = Path.Combine(
             zzmi!,
@@ -176,6 +185,31 @@ public sealed class RuntimeEnvironmentServiceTests
         Assert.IsTrue(updated.Ready, updated.ToString());
         CollectionAssert.AreEqual(new[] { "C", "V" }, updated.DragKeys!.ToArray());
         Assert.ThrowsExactly<ArgumentException>(() => service.SetDragKeys(zzmi!, []));
+    }
+
+    [TestMethod]
+    public void RuntimeToggleKeyCanBeInstalledAndUpdatedWithoutMakingRuntimeOutdated()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        service.Install(
+            zzmi!,
+            RuntimeEnvironmentService.DefaultDragKey,
+            defaultPhysics: null,
+            runtimeToggleKey: "VK_F11");
+
+        RuntimeEnvironmentStatus installed = service.Inspect(zzmi!);
+        Assert.IsTrue(installed.Ready, installed.ToString());
+        Assert.AreEqual("VK_F11", installed.RuntimeToggleKey);
+
+        service.SetRuntimeToggleKey(zzmi!, "VK_PAUSE");
+        RuntimeEnvironmentStatus updated = service.Inspect(zzmi!);
+        Assert.IsTrue(updated.Ready, updated.ToString());
+        Assert.AreEqual("VK_PAUSE", updated.RuntimeToggleKey);
+        string runtimeIni = File.ReadAllText(Path.Combine(
+            zzmi!, "Mods", "JiggleForgeShaderFix", "JiggleForge.ini"));
+        StringAssert.Contains(runtimeIni, "key = VK_PAUSE");
+        Assert.ThrowsExactly<ArgumentException>(
+            () => service.SetRuntimeToggleKey(zzmi!, "VK_F10"));
     }
 
     [TestMethod]
@@ -258,6 +292,49 @@ public sealed class RuntimeEnvironmentServiceTests
         {
             Assert.IsFalse(File.Exists(Path.Combine(zzmi!, "ShaderFixes", $"{hash}-vs_replace.txt")));
         }
+    }
+
+    [TestMethod]
+    public void CompatibilityUninstallLeavesOnlyNoOpAdaptedModContracts()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        service.Install(zzmi!);
+
+        service.UninstallKeepingCompatibility(zzmi!, stopWheelBridge: false);
+
+        string compatibilityIni = Path.Combine(
+            zzmi!, "Mods", "JiggleForgeCompatibility", "JiggleForgeCompatibility.ini");
+        Assert.IsTrue(File.Exists(compatibilityIni));
+        string contents = File.ReadAllText(compatibilityIni, Encoding.UTF8);
+        StringAssert.Contains(contents, "; JIGGLEFORGE_COMPATIBILITY_LAYER");
+        StringAssert.Contains(contents, "[CommandListEnableAdaptedOnly]");
+        StringAssert.Contains(contents, "[CommandListPickVisibleRange]");
+        StringAssert.Contains(contents, "[CommandListRegisterGroupParameters]");
+        StringAssert.Contains(contents, "[ResourceCapturedPick]");
+        StringAssert.Contains(contents, "[ResourceMotionStates]");
+        StringAssert.Contains(contents, "[ResourceGroupParameters]");
+        Assert.IsFalse(Regex.IsMatch(
+            contents,
+            @"(?im)^\s*(?:dispatch|draw|drawindexed)\s*="));
+        Assert.IsFalse(Directory.Exists(Path.Combine(zzmi!, "Mods", "JiggleForgeShaderFix")));
+        Assert.IsFalse(Directory.Exists(Path.Combine(zzmi!, "ShaderFixes", "JiggleForgeRuntime")));
+        Assert.AreEqual(0, service.Inspect(zzmi!).InstalledShaderCount);
+    }
+
+    [TestMethod]
+    public void InstallingOrFullyUninstallingRemovesOwnedCompatibilityLayer()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        service.UninstallKeepingCompatibility(zzmi!, stopWheelBridge: false);
+        string compatibilityRoot = Path.Combine(zzmi!, "Mods", "JiggleForgeCompatibility");
+        Assert.IsTrue(Directory.Exists(compatibilityRoot));
+
+        service.Install(zzmi!);
+        Assert.IsFalse(Directory.Exists(compatibilityRoot));
+
+        service.UninstallKeepingCompatibility(zzmi!, stopWheelBridge: false);
+        service.Uninstall(zzmi!, stopWheelBridge: false);
+        Assert.IsFalse(Directory.Exists(compatibilityRoot));
     }
 
     [TestMethod]

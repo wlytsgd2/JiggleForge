@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.13 — 2026-08-07
+
+### 简体中文
+
+- 新增可配置的游戏内总开关，默认按键为 `F7`；切换时会在游戏左上角短暂显示 `JiggleForge Enabled` 或 `JiggleForge Disabled`。
+- 关闭后停止变形并跳过拾取、物理模拟、自动校准、分组注册和适配 Draw 等主要 GPU 工作；再次开启时会安全清理并重建运行状态。
+- 保留稳定的自动 VS 替换流程，修复早期总开关方案重复执行外层 Draw、导致替换 Mod 出现三角形材质缺口的问题。
+- 在设置中加入应用卸载入口，可选择保留零计算兼容层，或校验备份并恢复全部已记录、已发现的适配 Mod 后完全卸载。
+- 完整性清单现在包含发布目录中的所有应用文件，使独立卸载器能够安全删除整个 JiggleForge 应用。
+
+### English
+
+- Added a configurable in-game master switch, using `F7` by default, with short `JiggleForge Enabled` and `JiggleForge Disabled` messages at the top left.
+- Disabling deformation now skips the main picking, physics, automatic calibration, group-registration, and adapted-draw GPU work; enabling it again safely clears and rebuilds runtime state.
+- Kept the stable automatic VS replacement path and fixed the earlier master-switch implementation that replayed outer draws and caused triangular material holes on replacement Mods.
+- Added application uninstall options in Settings: keep a zero-computation compatibility layer, or validate backups, restore every recorded/discovered adapted Mod, and fully uninstall.
+- Included every published application file in the integrity manifest so the standalone uninstaller can safely remove the complete JiggleForge application.
+
 ## 0.1.12 — 2026-08-07
 
 ### 简体中文

@@ -80,7 +80,9 @@ public sealed partial class MainWindow : Window
             return;
         }
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
+        string runtimeToggleKey = GetSelectedRuntimeToggleKey();
         SaveDragKeyPreference(dragKeys);
+        SaveRuntimeToggleKeyPreference(runtimeToggleKey);
         if (RuntimeEnvironmentService.IsWheelBridgeRunning() &&
             !await RunWheelOperationOnUiThreadAsync(
                 () => runtimeEnvironmentService.StopWheelBridge(requestElevation: true),
@@ -90,7 +92,7 @@ public sealed partial class MainWindow : Window
         }
 
         await RunRuntimeOperationAsync(
-            () => runtimeEnvironmentService.Install(runtimePath, dragKeys, defaultPhysics),
+            () => runtimeEnvironmentService.Install(runtimePath, dragKeys, defaultPhysics, runtimeToggleKey),
             L("RuntimeInstalled"));
     }
 
@@ -105,6 +107,20 @@ public sealed partial class MainWindow : Window
         await RunRuntimeOperationAsync(
             () => runtimeEnvironmentService.SetDragKeys(runtimePath, dragKeys),
             L("DragKeysUpdated"));
+    }
+
+    private async void ApplyRuntimeToggleKey_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryGetValidatedRuntimePath(out string runtimePath))
+        {
+            return;
+        }
+
+        string runtimeToggleKey = GetSelectedRuntimeToggleKey();
+        SaveRuntimeToggleKeyPreference(runtimeToggleKey);
+        await RunRuntimeOperationAsync(
+            () => runtimeEnvironmentService.SetRuntimeToggleKey(runtimePath, runtimeToggleKey),
+            L("RuntimeToggleKeyUpdated"));
     }
 
     private async void SaveDefaultPhysics_Click(object sender, RoutedEventArgs e)
@@ -288,6 +304,11 @@ public sealed partial class MainWindow : Window
                 SelectDragKeys(runtimeStatus.DragKeys);
                 SaveDragKeyPreference(runtimeStatus.DragKeys);
             }
+            if (runtimeStatus.RuntimeToggleKey is not null)
+            {
+                SelectRuntimeToggleKey(runtimeStatus.RuntimeToggleKey);
+                SaveRuntimeToggleKeyPreference(runtimeStatus.RuntimeToggleKey);
+            }
             RenderRuntimeStatus(runtimeStatus);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException)
@@ -358,6 +379,8 @@ public sealed partial class MainWindow : Window
         StopWheelButton.IsEnabled = status.WheelBridgeRunning;
         DragKeyOptionsList.IsEnabled = true;
         ApplyDragKeyButton.IsEnabled = status.RuntimeInstalled;
+        RuntimeToggleKeyComboBox.IsEnabled = true;
+        ApplyRuntimeToggleKeyButton.IsEnabled = status.RuntimeInstalled;
         RefreshRuntimeButton.IsEnabled = true;
     }
 
@@ -368,6 +391,7 @@ public sealed partial class MainWindow : Window
         RuntimeBusyRing.IsActive = isBusy;
         RuntimePathTextBox.IsEnabled = !isBusy;
         DragKeyOptionsList.IsEnabled = !isBusy;
+        RuntimeToggleKeyComboBox.IsEnabled = !isBusy;
         if (isBusy)
         {
             InstallRuntimeButton.IsEnabled = false;
@@ -375,6 +399,7 @@ public sealed partial class MainWindow : Window
             StartWheelButton.IsEnabled = false;
             StopWheelButton.IsEnabled = false;
             ApplyDragKeyButton.IsEnabled = false;
+            ApplyRuntimeToggleKeyButton.IsEnabled = false;
             RefreshRuntimeButton.IsEnabled = false;
         }
         else if (runtimeStatus is not null)
@@ -402,6 +427,39 @@ public sealed partial class MainWindow : Window
         }
 
         return selected;
+    }
+
+    private string GetSelectedRuntimeToggleKey()
+    {
+        if (RuntimeToggleKeyComboBox.SelectedItem is ComboBoxItem item && item.Tag is string key)
+        {
+            return key;
+        }
+
+        SelectRuntimeToggleKey(RuntimeEnvironmentService.DefaultRuntimeToggleKey);
+        return RuntimeEnvironmentService.DefaultRuntimeToggleKey;
+    }
+
+    private void SelectRuntimeToggleKey(string key)
+    {
+        foreach (object candidate in RuntimeToggleKeyComboBox.Items)
+        {
+            if (candidate is ComboBoxItem item &&
+                item.Tag is string itemKey &&
+                string.Equals(itemKey, key, StringComparison.OrdinalIgnoreCase))
+            {
+                RuntimeToggleKeyComboBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        if (!string.Equals(key, RuntimeEnvironmentService.DefaultRuntimeToggleKey, StringComparison.OrdinalIgnoreCase))
+        {
+            SelectRuntimeToggleKey(RuntimeEnvironmentService.DefaultRuntimeToggleKey);
+            return;
+        }
+
+        RuntimeToggleKeyComboBox.SelectedIndex = 0;
     }
 
     private void SelectDragKeys(IEnumerable<string> dragKeys)
@@ -446,6 +504,31 @@ public sealed partial class MainWindow : Window
         }
 
         return [RuntimeEnvironmentService.DefaultDragKey];
+    }
+
+    private static string LoadRuntimeToggleKeyPreference()
+    {
+        try
+        {
+            if (File.Exists(RuntimeToggleKeyPreferencePath))
+            {
+                string saved = File.ReadAllText(RuntimeToggleKeyPreferencePath).Trim();
+                string? supported = RuntimeEnvironmentService.SupportedRuntimeToggleKeys.FirstOrDefault(
+                    key => string.Equals(key, saved, StringComparison.OrdinalIgnoreCase));
+                if (supported is not null)
+                {
+                    return supported;
+                }
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+
+        return RuntimeEnvironmentService.DefaultRuntimeToggleKey;
     }
 
     private static void SaveDragKeyPreference(IEnumerable<string> dragKeys)
@@ -538,6 +621,21 @@ public sealed partial class MainWindow : Window
         if (resolution.WasCorrected && showCorrectionMessage)
         {
             ShowMessage(AppLanguageService.Format("AutoLocatedZzmiRoot", resolution.ResolvedPath), InfoBarSeverity.Informational);
+        }
+    }
+
+    private static void SaveRuntimeToggleKeyPreference(string runtimeToggleKey)
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(RuntimeToggleKeyPreferencePath)!);
+            File.WriteAllText(RuntimeToggleKeyPreferencePath, runtimeToggleKey);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 

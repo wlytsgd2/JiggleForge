@@ -62,6 +62,10 @@ public sealed partial class MainWindow : Window
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "JiggleForge",
         "DragKey.txt");
+    private static readonly string RuntimeToggleKeyPreferencePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "JiggleForge",
+        "RuntimeToggleKey.txt");
     private static readonly string ZzmiRootPreferencePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "JiggleForge",
@@ -114,6 +118,7 @@ public sealed partial class MainWindow : Window
             AppLanguageService.CurrentLanguage == AppLanguageService.English ? 1 : 0;
         RuntimePathTextBox.Text = LoadZzmiRootPreference();
         SelectDragKeys(LoadDragKeyPreference());
+        SelectRuntimeToggleKey(LoadRuntimeToggleKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
         InitializeApplicationUpdateView();
     }

@@ -12,8 +12,7 @@ if (-not (Test-Path -LiteralPath $root -PathType Container)) {
 $manifestPath = Join-Path $root 'JiggleForge.manifest.sha256'
 $lines = Get-ChildItem -LiteralPath $root -Recurse -Force -File |
     Where-Object {
-        $_.FullName -ne $manifestPath -and
-        $_.Extension -ne '.pdb'
+        $_.FullName -ne $manifestPath
     } |
     Sort-Object FullName |
     ForEach-Object {

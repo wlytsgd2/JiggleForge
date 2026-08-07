@@ -22,35 +22,171 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        string operation = "update";
+        string language = "zh-CN";
         try
         {
             Dictionary<string, string> options = ParseArguments(args);
-            int parentProcessId = int.Parse(Required(options, "parent"));
-            string packagePath = Path.GetFullPath(Required(options, "package"));
-            string targetDirectory = Path.GetFullPath(Required(options, "target"));
-            string executableName = Required(options, "executable");
-            string expectedSha256 = Required(options, "sha256");
+            options.TryGetValue("operation", out operation);
+            operation = string.IsNullOrWhiteSpace(operation) ? "update" : operation;
+            options.TryGetValue("language", out language);
+            language = string.Equals(language, "en-US", StringComparison.OrdinalIgnoreCase)
+                ? "en-US"
+                : "zh-CN";
 
-            Log($"Starting update. Package={packagePath}; Target={targetDirectory}");
-            WaitForParent(parentProcessId);
-            VerifyPackage(packagePath, expectedSha256);
-            ApplyPackage(packagePath, targetDirectory);
-            TryDeleteFile(packagePath);
-            StartApplication(targetDirectory, executableName);
-            Log("Update completed successfully.");
+            if (string.Equals(operation, "uninstall", StringComparison.OrdinalIgnoreCase))
+            {
+                RunUninstall(options, language);
+            }
+            else
+            {
+                RunUpdate(options);
+            }
         }
         catch (Exception exception)
         {
-            Log("Update failed: " + exception);
+            bool uninstalling = string.Equals(operation, "uninstall", StringComparison.OrdinalIgnoreCase);
+            Log((uninstalling ? "Uninstall" : "Update") + " failed: " + exception);
+            string title = uninstalling
+                ? language == "en-US" ? "JiggleForge uninstall failed" : "JiggleForge 卸载失败"
+                : "JiggleForge 更新失败 / Update failed";
+            string message = uninstalling
+                ? language == "en-US"
+                    ? "JiggleForge could not remove all application files.\r\n\r\n" + exception.Message +
+                      "\r\n\r\nLog: " + LogPath
+                    : "JiggleForge 无法删除全部应用文件。\r\n\r\n" + exception.Message +
+                      "\r\n\r\n日志：" + LogPath
+                : "JiggleForge 更新失败，原有程序文件已尽可能恢复。\r\n\r\n" + exception.Message +
+                  "\r\n\r\n日志：" + LogPath +
+                  "\r\n\r\nJiggleForge update failed. Existing files were restored where possible." +
+                  "\r\n\r\nLog: " + LogPath;
             MessageBox.Show(
-                "JiggleForge 更新失败，原有程序文件已尽可能恢复。\r\n\r\n" + exception.Message +
-                "\r\n\r\n日志：" + LogPath +
-                "\r\n\r\nJiggleForge update failed. Existing files were restored where possible." +
-                "\r\n\r\nLog: " + LogPath,
-                "JiggleForge 更新失败 / Update failed",
+                message,
+                title,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             Environment.ExitCode = 1;
+        }
+    }
+
+    private static void RunUpdate(IReadOnlyDictionary<string, string> options)
+    {
+        int parentProcessId = int.Parse(Required(options, "parent"));
+        string packagePath = Path.GetFullPath(Required(options, "package"));
+        string targetDirectory = Path.GetFullPath(Required(options, "target"));
+        string executableName = Required(options, "executable");
+        string expectedSha256 = Required(options, "sha256");
+
+        Log($"Starting update. Package={packagePath}; Target={targetDirectory}");
+        WaitForParent(parentProcessId);
+        VerifyPackage(packagePath, expectedSha256);
+        ApplyPackage(packagePath, targetDirectory);
+        TryDeleteFile(packagePath);
+        StartApplication(targetDirectory, executableName);
+        Log("Update completed successfully.");
+    }
+
+    private static void RunUninstall(IReadOnlyDictionary<string, string> options, string language)
+    {
+        int parentProcessId = int.Parse(Required(options, "parent"));
+        string targetDirectory = Path.GetFullPath(Required(options, "target"))
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        List<string> ownedFiles = ValidateInstalledApplication(targetDirectory);
+
+        Log($"Starting application removal. Target={targetDirectory}; Files={ownedFiles.Count}");
+        WaitForParent(parentProcessId);
+        foreach (string relativePath in ownedFiles.OrderByDescending(path => path.Length))
+        {
+            DeleteFileWithRetry(ContainedPath(targetDirectory, relativePath));
+        }
+
+        DeleteFileWithRetry(Path.Combine(targetDirectory, IntegrityManifestFileName));
+        RemoveEmptyDirectories(targetDirectory);
+        bool folderRemoved = !Directory.Exists(targetDirectory);
+        Log(folderRemoved
+            ? "Application removal completed successfully."
+            : "Application files were removed; unrelated files kept the target folder in place.");
+
+        string message = language == "en-US"
+            ? folderRemoved
+                ? "JiggleForge has been uninstalled."
+                : "JiggleForge files were removed. The folder was kept because it contains unrelated files."
+            : folderRemoved
+                ? "JiggleForge 已卸载。"
+                : "JiggleForge 文件已删除。由于目录中还有无关文件，文件夹本身被保留。";
+        MessageBox.Show(
+            message,
+            language == "en-US" ? "JiggleForge uninstalled" : "JiggleForge 已卸载",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    private static List<string> ValidateInstalledApplication(string targetDirectory)
+    {
+        string manifestPath = Path.Combine(targetDirectory, IntegrityManifestFileName);
+        if (!File.Exists(manifestPath) || !File.Exists(Path.Combine(targetDirectory, "JiggleForge.exe")))
+        {
+            throw new InvalidDataException("The selected folder is not a verifiable JiggleForge installation.");
+        }
+
+        List<string> paths = ReadManifestPaths(targetDirectory).ToList();
+        if (paths.Count == 0 || !paths.Any(path =>
+                string.Equals(path, "JiggleForge.exe", StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidDataException("The JiggleForge integrity manifest is empty or invalid.");
+        }
+
+        return paths;
+    }
+
+    private static void DeleteFileWithRetry(string path)
+    {
+        Exception lastException = null;
+        for (int attempt = 0; attempt < 30; attempt++)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.SetAttributes(path, FileAttributes.Normal);
+                    File.Delete(path);
+                }
+                return;
+            }
+            catch (IOException exception)
+            {
+                lastException = exception;
+            }
+            catch (UnauthorizedAccessException exception)
+            {
+                lastException = exception;
+            }
+
+            Thread.Sleep(250);
+        }
+
+        throw new IOException("Unable to remove application file: " + path, lastException);
+    }
+
+    private static void RemoveEmptyDirectories(string targetDirectory)
+    {
+        if (!Directory.Exists(targetDirectory))
+        {
+            return;
+        }
+
+        foreach (string directory in Directory.GetDirectories(targetDirectory, "*", SearchOption.AllDirectories)
+                     .OrderByDescending(path => path.Length))
+        {
+            if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
+            {
+                Directory.Delete(directory);
+            }
+        }
+
+        if (Directory.GetFileSystemEntries(targetDirectory).Length == 0)
+        {
+            Directory.Delete(targetDirectory);
         }
     }
 

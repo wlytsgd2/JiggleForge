@@ -1023,6 +1023,50 @@
                                 </Border>
 
                                 <Border Style="{StaticResource PageCardStyle}">
+                                    <Grid ColumnSpacing="12" RowSpacing="6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <StackPanel Spacing="6">
+                                            <TextBlock local:Localization.Key="RuntimeToggleKeyTitle"
+                                                       Text="Runtime master switch"
+                                                       FontWeight="SemiBold" />
+                                            <ComboBox x:Name="RuntimeToggleKeyComboBox"
+                                                      Width="220"
+                                                      HorizontalAlignment="Left">
+                                                <ComboBoxItem Content="F5" Tag="VK_F5" />
+                                                <ComboBoxItem Content="F7" Tag="VK_F7" />
+                                                <ComboBoxItem Content="F9" Tag="VK_F9" />
+                                                <ComboBoxItem Content="F11" Tag="VK_F11" />
+                                                <ComboBoxItem Content="F12" Tag="VK_F12" />
+                                                <ComboBoxItem Content="Insert" Tag="VK_INSERT" />
+                                                <ComboBoxItem Content="Home" Tag="VK_HOME" />
+                                                <ComboBoxItem Content="End" Tag="VK_END" />
+                                                <ComboBoxItem Content="Pause" Tag="VK_PAUSE" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <Button x:Name="ApplyRuntimeToggleKeyButton"
+                                                local:Localization.Key="ApplyRuntimeToggleKeyButton"
+                                                Grid.Column="1"
+                                                Content="Apply switch key"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                VerticalAlignment="Bottom"
+                                                Click="ApplyRuntimeToggleKey_Click" />
+                                        <TextBlock Grid.Row="1"
+                                                   Grid.ColumnSpan="2"
+                                                   local:Localization.Key="RuntimeToggleKeyDescription"
+                                                   Text="When switched off, JiggleForge uses the original game vertex shaders and skips all runtime GPU work."
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Style="{StaticResource PageCardStyle}">
                                     <Grid ColumnSpacing="18">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
@@ -1114,6 +1158,24 @@
                                             HorizontalAlignment="Stretch"
                                             Click="RefreshRuntime_Click" />
                                 </Grid>
+
+                                <Border Style="{StaticResource PageCardStyle}">
+                                    <StackPanel Spacing="10">
+                                        <TextBlock local:Localization.Key="ApplicationUninstallTitle"
+                                                   Text="卸载 JiggleForge"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock local:Localization.Key="ApplicationUninstallDescription"
+                                                   Text="卸载应用、运行环境，并选择是否恢复已经适配的 Mod。"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        <Button x:Name="UninstallApplicationButton"
+                                                local:Localization.Key="UninstallApplicationButton"
+                                                Content="卸载应用…"
+                                                HorizontalAlignment="Left"
+                                                Click="UninstallApplication_Click" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>

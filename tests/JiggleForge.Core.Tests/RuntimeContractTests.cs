@@ -196,7 +196,9 @@ public sealed class RuntimeContractTests
             ini,
             "ShaderOverrideJiggleForgeCalibrationRoleComposite857C");
         StringAssert.Contains(wallpaperOverride, "hash = 857cd16250c6142e");
-        StringAssert.Contains(wallpaperOverride, "if $roleCompositeSourceReady == 1");
+        StringAssert.Contains(
+            wallpaperOverride,
+            "if $runtimeEnabled == 1 && $roleCompositeSourceReady == 1");
         StringAssert.Contains(
             wallpaperOverride,
             "run = CommandListCaptureFilteredRoleCalibration");
@@ -574,6 +576,55 @@ public sealed class RuntimeContractTests
         Assert.IsTrue(File.Exists(Path.Combine(
             runtimeRoot,
             "deformation_field.hlsl")));
+    }
+
+    [TestMethod]
+    public void RuntimeMasterSwitch_KeepsSafeAutomaticReplacementsAndGatesGpuWork()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        string globalShaderFixRoot = Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "ShaderFixes");
+        Assert.AreEqual(
+            RuntimeEnvironmentService.RequiredShaderHashes.Count,
+            Directory.Exists(globalShaderFixRoot)
+                ? Directory.EnumerateFiles(globalShaderFixRoot, "*-vs_replace.txt").Count()
+                : 0,
+            "The safe automatic replacement shaders must remain installed for replacement-Mod compatibility.");
+
+        foreach (string hash in RuntimeEnvironmentService.RequiredShaderHashes)
+        {
+            string automaticReplacement = Path.Combine(globalShaderFixRoot, hash + "-vs_replace.txt");
+            Assert.IsTrue(File.Exists(automaticReplacement), $"Automatic replacement {hash} is missing.");
+        }
+
+        Assert.IsFalse(
+            ini.Contains("CustomShaderJiggleForgeDraw", StringComparison.Ordinal),
+            "Replaying an outer draw with draw = from_caller breaks replacement Mods that split or rebind the draw.");
+        StringAssert.Contains(ini, "global persist $runtimeEnabled = 1");
+        StringAssert.Contains(ini, "[CommandListResetRuntimeState]");
+        StringAssert.Contains(ReadSection(ini, "KeyJiggleForgeRuntimeToggle"), "key = VK_F7");
+        StringAssert.Contains(ReadSection(ini, "ResourceRuntimeEnabledText"), "JiggleForge Enabled");
+        StringAssert.Contains(ReadSection(ini, "ResourceRuntimeDisabledText"), "JiggleForge Disabled");
+
+        string present = ReadSection(ini, "Present");
+        StringAssert.Contains(present, "if $runtimeEnabled == 1");
+        StringAssert.Contains(present, "else if $runtimeEnabledPrevious == 1");
+        StringAssert.Contains(present, "$runtimeNoticeUntil = time + 2.0");
+        StringAssert.Contains(present, "run = CommandList\\ZZMIv1\\PrintText");
+
+        foreach (Match match in Regex.Matches(
+                     ini,
+                     @"(?ms)^\[(?<name>ShaderOverrideJiggleForgeGlobal[^\]]+)\]\s*$\r?\n(?<body>.*?)(?=^\[|\z)"))
+        {
+            string body = match.Groups["body"].Value;
+            StringAssert.Contains(body, "$runtimeEnabled == 1");
+        }
+
+        StringAssert.Contains(ReadSection(ini, "CommandListPickVisibleRange"), "$runtimeEnabled == 1");
+        StringAssert.Contains(ReadSection(ini, "CommandListRegisterGroupParameters"), "$runtimeEnabled == 1");
+        StringAssert.Contains(ReadSection(ini, "CommandListEnableAdaptedOnly"), "$runtimeEnabled == 1");
     }
 
     private static void AssertSectionArray(

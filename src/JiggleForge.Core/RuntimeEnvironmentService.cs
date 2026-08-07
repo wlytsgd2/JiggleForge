@@ -9,6 +9,7 @@ namespace JiggleForge.Core;
 public sealed partial class RuntimeEnvironmentService
 {
     public const string DefaultDragKey = "VK_LBUTTON";
+    public const string DefaultRuntimeToggleKey = "VK_F7";
     public static readonly IReadOnlyList<string> SupportedDragKeys =
     [
         "VK_LBUTTON",
@@ -19,6 +20,19 @@ public sealed partial class RuntimeEnvironmentService
         "X",
         "C",
         "V",
+    ];
+
+    public static readonly IReadOnlyList<string> SupportedRuntimeToggleKeys =
+    [
+        "VK_F5",
+        "VK_F7",
+        "VK_F9",
+        "VK_F11",
+        "VK_F12",
+        "VK_INSERT",
+        "VK_HOME",
+        "VK_END",
+        "VK_PAUSE",
     ];
 
     public static readonly IReadOnlyList<string> RequiredShaderHashes =
@@ -43,16 +57,65 @@ public sealed partial class RuntimeEnvironmentService
     ];
 
     private const string RuntimeFolderName = "JiggleForgeShaderFix";
+    private const string CompatibilityFolderName = "JiggleForgeCompatibility";
+    private const string CompatibilityIniName = "JiggleForgeCompatibility.ini";
+    private const string CompatibilityMarker = "; JIGGLEFORGE_COMPATIBILITY_LAYER";
     private const string ShaderIncludeFolderName = "JiggleForgeRuntime";
     private const string RetiredShaderIncludeFolderName = "JiggleForgeV2";
     private const string ReplacementSuffix = "-vs_replace.txt";
     private const string BackupSuffix = ".pre_jiggleForge_backup";
     private const string DragKeyBeginMarker = "; JIGGLEFORGE_DRAG_KEY_BEGIN";
     private const string DragKeyEndMarker = "; JIGGLEFORGE_DRAG_KEY_END";
+    private const string RuntimeToggleKeyBeginMarker = "; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_BEGIN";
+    private const string RuntimeToggleKeyEndMarker = "; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_END";
     private const string DefaultPhysicsBeginMarker = "; JIGGLEFORGE_DEFAULT_PHYSICS_BEGIN";
     private const string DefaultPhysicsEndMarker = "; JIGGLEFORGE_DEFAULT_PHYSICS_END";
     private const string WheelBridgeConfigName = "WheelBridge.txt";
     private readonly string payloadRoot;
+
+    internal static string CompatibilityLayerContents => $$"""
+        {{CompatibilityMarker}}
+        ; Keeps Mods adapted by JiggleForge loadable after the deformation runtime is removed.
+        ; This file performs no draw, dispatch, copy, clear, or per-frame command.
+        namespace = jiggle_forge
+
+        [Constants]
+        global $activePickPipeline = 0
+        global $pickObjectID = 1
+        global $pickSourceDraw = 0
+        global $pickRangeAuto = 0
+        global $pickRangeCount = 0
+        global $pickRangeFirst = 0
+        global $pickRangeBase = 0
+        global $mouseDown = 0
+
+        [CommandListEnableAdaptedOnly]
+        ; Intentionally empty.
+
+        [CommandListPickVisibleRange]
+        ; Intentionally empty.
+
+        [CommandListRegisterGroupParameters]
+        ; Intentionally empty.
+
+        [ResourceCapturedPick]
+        type = Buffer
+        format = R32G32B32A32_FLOAT
+        array = 7
+        data = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+        [ResourceMotionStates]
+        type = Buffer
+        format = R32G32B32A32_FLOAT
+        array = 1
+        data = 0 0 0 0
+
+        [ResourceGroupParameters]
+        type = Buffer
+        format = R32G32B32A32_FLOAT
+        array = 5
+        data = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        """;
 
     public RuntimeEnvironmentService(string payloadRoot)
     {
@@ -87,7 +150,8 @@ public sealed record RuntimeEnvironmentStatus(
     int RequiredShaderCount,
     int BackupCount,
     bool WheelBridgeRunning,
-    IReadOnlyList<string>? DragKeys)
+    IReadOnlyList<string>? DragKeys,
+    string? RuntimeToggleKey)
 {
     public bool Ready => PayloadAvailable && RuntimeCurrent && CurrentShaderCount == RequiredShaderCount;
 

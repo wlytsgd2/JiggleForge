@@ -47,6 +47,30 @@ public sealed partial class RuntimeEnvironmentService
         WriteDefaultPhysics(runtimeIni, settings);
     }
 
+    public void SetRuntimeToggleKey(string zzmiRoot, string runtimeToggleKey)
+    {
+        string validated = ValidateRuntimeToggleKey(runtimeToggleKey);
+        string root = NormalizeRoot(zzmiRoot);
+        string runtimeIni = Path.Combine(root, "Mods", RuntimeFolderName, "JiggleForge.ini");
+        if (!File.Exists(runtimeIni))
+        {
+            throw new InvalidOperationException(
+                "The global runtime is not installed. Install it before changing the runtime toggle key.");
+        }
+
+        WriteRuntimeToggleKey(runtimeIni, validated);
+    }
+
+    private static string ValidateRuntimeToggleKey(string runtimeToggleKey)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(runtimeToggleKey);
+        string? canonical = SupportedRuntimeToggleKeys.FirstOrDefault(
+            candidate => string.Equals(candidate, runtimeToggleKey.Trim(), StringComparison.OrdinalIgnoreCase));
+        return canonical ?? throw new ArgumentException(
+            $"Unsupported runtime toggle key: {runtimeToggleKey}",
+            nameof(runtimeToggleKey));
+    }
+
     private static string ValidateDragKey(string dragKey)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(dragKey);
@@ -163,6 +187,56 @@ public sealed partial class RuntimeEnvironmentService
         return output.ToString().ReplaceLineEndings("\r\n");
     }
 
+    private static string BuildRuntimeToggleKeyBlock(string runtimeToggleKey)
+    {
+        return RuntimeToggleKeyBeginMarker + "\r\n" +
+               "[KeyJiggleForgeRuntimeToggle]\r\n" +
+               $"key = {runtimeToggleKey}\r\n" +
+               "type = cycle\r\n" +
+               "$runtimeEnabled = 1, 0\r\n" +
+               RuntimeToggleKeyEndMarker + "\r\n";
+    }
+
+    private static void WriteRuntimeToggleKey(string path, string runtimeToggleKey)
+    {
+        string contents = File.ReadAllText(path);
+        Regex marker = MarkedRuntimeToggleKeyRegex();
+        if (!marker.IsMatch(contents))
+        {
+            throw new InvalidDataException(
+                "The installed runtime does not contain the runtime-toggle key block. Update the runtime first.");
+        }
+
+        contents = marker.Replace(
+            contents,
+            BuildRuntimeToggleKeyBlock(runtimeToggleKey),
+            count: 1);
+        File.WriteAllText(path, contents, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+    }
+
+    private static string? ReadRuntimeToggleKey(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            Match section = MarkedRuntimeToggleKeyRegex().Match(File.ReadAllText(path));
+            Match key = KeyLineRegex().Match(section.Value);
+            return key.Success ? ValidateRuntimeToggleKey(key.Groups[1].Value) : null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
+    }
+
     private static string BuildDefaultPhysicsBlock(PhysicsSettings physics)
     {
         ValidateDefaultPhysics(physics);
@@ -251,6 +325,10 @@ public sealed partial class RuntimeEnvironmentService
 
     private static Regex MarkedDragKeyRegex() => new(
         @"(?ms)^[ \t]*; JIGGLEFORGE_DRAG_KEY_BEGIN[ \t]*\r?\n.*?^[ \t]*; JIGGLEFORGE_DRAG_KEY_END[ \t]*(?:\r?\n)?",
+        RegexOptions.CultureInvariant);
+
+    private static Regex MarkedRuntimeToggleKeyRegex() => new(
+        @"(?ms)^[ \t]*; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_BEGIN[ \t]*\r?\n.*?^[ \t]*; JIGGLEFORGE_RUNTIME_TOGGLE_KEY_END[ \t]*(?:\r?\n)?",
         RegexOptions.CultureInvariant);
 
     private static Regex MarkedDefaultPhysicsRegex() => new(
