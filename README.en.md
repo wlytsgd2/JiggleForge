@@ -1,88 +1,235 @@
 # JiggleForge
 
-[中文版](README.md)
+[简体中文](README.md)
 
-JiggleForge is a Windows desktop application for 《Zenless Zone Zero》 XXMI/ZZMI replacement Mods. It converts a replacement Mod into a configurable mouse-drag deformation Mod.
+JiggleForge is an open-source Windows desktop application for *Zenless Zone Zero* running through XXMI/ZZMI. It adds real-time vertex deformation to supported character rendering paths, allowing players to drag characters with the mouse, control depth with the wheel, and create a slap-like impulse with a quick click.
+
+The global runtime can process supported original character geometry directly. For third-party replacement Mods, JiggleForge can also analyze actual Draws, generate a dedicated configuration, and provide groups, dependencies, masks, and per-group physics.
+
+> JiggleForge is under active development. Game updates, scenes, LODs, transparent materials, special shaders, and third-party Mods may affect compatibility.
 
 ## Features
 
-- Installs, updates, checks, and removes the global JiggleForge runtime.
-- Does not scan ordinary Mods. Projects that are opened and adapted are remembered, and the current ZZMI is searched only for explicit JiggleForge adaptation markers so those projects can be reopened from the home page.
-- Scans a Mod's DrawIndexed commands and adapts the Mod in place.
-- Assigns each Draw a stable identity, with editable aliases and deformation switches.
-- Groups Draws and edits directed dependencies, so related parts can deform together.
-- Supports per-group physics, global defaults, multiple drag keys, short-click taps, and wheel-controlled depth.
-- Supports DDS masks: white deforms fully, black does not deform, and missing masks default to weight `1.0`.
-- Includes an optional in-game Draw inspector for identifying small or overlapping parts.
-- Creates `JiggleForge.original.zip` before first adaptation and restores the original Mod from the Overview page.
-- Checks the latest stable GitHub Release at startup, with one-click update or a persistent title-bar reminder when postponed.
-- Checks for updates, reinstalls the latest version, and verifies installed files from **Settings**.
-- Asks for Simplified Chinese or English on first launch, with language switching available later in **Settings**.
+- Install, update, verify, or remove the global JiggleForge runtime.
+- Drag models with the mouse, control depth with the wheel, and create tap impulses with a quick click.
+- Disable deformation and its main GPU work with a configurable in-game master switch (`F7` by default).
+- Adapt an existing replacement Mod in place without its Blender project or a new model export.
+- Give each Draw a stable identity, editable alias, and independent deformation switch.
+- Group multiple Draws and assign independent physics to every group.
+- Connect groups through transitive directed dependencies.
+- Control deformation weights inside a Draw with DDS texture masks.
+- Identify small or overlapping parts with the optional in-game Draw Inspector.
+- Create an original backup automatically before first adaptation and restore the Mod from the app.
+- Remember adapted projects and rediscover Mods carrying JiggleForge markers in the current ZZMI.
+- Provide Simplified Chinese and English interfaces, onboarding, application updates, and integrity verification.
 
 ## Requirements
 
-- Windows 10 version 19041 or newer, or Windows 11.
-- XXMI/ZZMI and a supported game installation.
-- A self-contained JiggleForge release package. No separate .NET installation is required.
+- 64-bit Windows 10 version 19041 or newer, or Windows 11.
+- The Windows version of *Zenless Zone Zero*.
+- The latest official XXMI/ZZMI release.
+- A fully extracted official self-contained JiggleForge package.
 
-Game updates can change shader hashes. If a pass is no longer recognized, update the [VS hash matrix](docs/development/shader-hash-matrix.zh-CN.md) before adapting new Mods.
+The official package includes the required .NET and Windows App SDK runtime components. A separate installation is normally unnecessary. Do not launch the application from inside its ZIP archive.
 
-## Quick start
+## Quick Start for Players
 
-1. Download and extract the latest self-contained package from [Releases](https://github.com/wlytsgd2/JiggleForge/releases).
-2. Start `JiggleForge.exe`, choose a display language, and follow the first-run guide.
-3. Open **Settings**, select the ZZMI root folder containing `Mods` and `ShaderFixes`, and install or update the runtime.
-4. Drop one concrete Mod folder onto the home page, or choose the folder manually. After successful adaptation, the project is remembered on the home page for direct access later.
-5. Review Draws, groups, masks, dependencies, and physics, then click **Apply configuration**.
-6. Return to the game and press `F10`.
-7. Hold a configured drag key to drag the model, or briefly click to tap along the picked triangle normal. Start WheelBridge from **Settings** if wheel depth is needed.
+1. Download the latest `win-x64` archive from [GitHub Releases](https://github.com/wlytsgd2/JiggleForge/releases) and extract it completely.
+2. Run `JiggleForge.exe`, choose a language, and follow the first-run guide.
+3. In **Settings**, select the ZZMI root actually used to launch the game. The correct folder normally contains both `Mods` and `ShaderFixes`.
+4. Close the game if possible, then select **Install or update runtime**.
+5. Start the game, or return to it and press `F10` to reload configuration.
+6. Place the cursor over a supported character surface, hold a configured drag key (left mouse button by default), and move the mouse.
+7. For third-axis control, start WheelBridge from **Settings** and scroll while the drag key is held.
 
-## Application updates
+Characters can now be dragged, but replacement Mods may not respond correctly without adaptation. An unadapted Mod can only use approximate original-geometry picking, which may miss parts, select the wrong location, or respond only in some areas. If you want accurate replacement-Mod support or separate parameters for each Mod, continue with the Mod-creator section below.
 
-The app checks the latest stable GitHub Release at startup. A new version can be installed immediately or postponed; postponing leaves a highlighted reminder beside the app name.
+## For Mod Creators
 
-One-click update downloads both the ZIP and its SHA-256 file. JiggleForge closes and replaces its files only after verification succeeds. The separate updater attempts to roll back if replacement fails. **Settings → Application update and integrity** can check again, reinstall the latest version, or verify the current installation at any time.
+This section is intended for authors who want to publish JiggleForge-adapted Mods, and for advanced users who want to configure a specific replacement Mod precisely. JiggleForge does not require the original Blender project or a new model export. An existing replacement Mod that already works through XXMI/ZZMI can be adapted directly.
 
-`v0.1.1` and earlier do not contain the updater. Install `v0.1.2` or later manually once; subsequent releases can use one-click update.
+### Adapting a Replacement Mod
 
-The app edits the selected Mod folder directly. The first adaptation creates `JiggleForge.txt`, generated runtime files, and an original backup archive in that folder.
+1. Drop one specific Mod folder onto the JiggleForge home page, or select that folder manually.
+2. Do not select the complete `Mods` directory, the ZZMI root, or a Mod-manager collection folder.
+3. JiggleForge inspects INI files, Draw commands, and resource references, and creates a backup before the first change.
+4. Review the detected Draws. Use the Draw Inspector in game when a part needs to be identified.
+5. Configure Draw aliases, groups, dependencies, masks, and per-group physics.
+6. Select **Apply configuration**.
+7. Return to the game, press `F10`, and test the relevant characters, scenes, and camera views.
 
-## Backup and restore
+Adapted projects are remembered on the home page. JiggleForge does not treat every ordinary Mod or manager container as a project: it keeps projects that were actually opened and adapted, and scans the current ZZMI only for explicit JiggleForge markers.
 
-The backup file is `JiggleForge.original.zip` in the Mod root. It contains only the source files JiggleForge changed and any relevant files that already existed. It is kept after restoration, so the Mod can be restored repeatedly.
+### Generated Files
 
-Mods adapted by an older build without this archive cannot be restored byte-for-byte by the current app. Make an external copy before reapplying such a Mod.
+An adapted Mod normally contains:
 
-## Important behavior
+```text
+JiggleForge.txt
+_JiggleForgeRuntime
+JiggleForge.original.zip
+```
 
-- A group contains Draws that share a deformation state.
-- A directed edge `A -> B` means dragging group A also affects group B.
-- A missing mask means the whole Draw participates.
-- Runtime installation is global; each Mod still needs separate adaptation.
-- A Mod must be tested after pressing `F10`, and the game should be closed while installing or updating the runtime.
-- Not every character, scene, LOD, transparent pass, or third-party replacement Mod is guaranteed to use the same shader layout.
+- `JiggleForge.txt`: the project configuration source.
+- `_JiggleForgeRuntime`: private runtime resources generated from that configuration.
+- `JiggleForge.original.zip`: the pre-adaptation backup; it is not required during gameplay.
 
-## Documentation
+### Draws, Groups, and Original Parts
+
+A Draw represents one actual rendering path found in the source Mod. It does not necessarily correspond to one complete visible body part.
+
+- Draws in one group share deformation state and physics parameters.
+- Multiple Draws forming one continuous component can share a group.
+- Left and right legs should use separate groups when they need independent responses.
+- A Draw with deformation disabled can still be shown by the inspector, but it does not generate or receive deformation.
+- **Original Parts** represents geometry not replaced by the current Mod and still rendered through the game's original path. Its switch is separate from normal replacement Draws and is disabled by default for new projects.
+
+The Draw Inspector is intended for configuration and diagnostics. Disable it for regular gameplay after the parts have been identified.
+
+### Dependencies
+
+A directed edge:
+
+```text
+A -> B
+```
+
+means that dragging group A also affects group B. Dependencies are transitive. For example:
+
+```text
+Body -> Underwear
+Underwear -> Coat
+```
+
+allows a drag originating from `Body` to reach `Coat`, reducing clipping between the body and clothing.
+
+Dependencies can also create effects such as lifting or pulling clothing. Put the body and clothing into separate groups and add only the required dependency direction. Clothing can then move independently when dragged without automatically pulling the body, while selected outer layers can still follow inner components when needed.
+
+### Texture Masks
+
+JiggleForge reads the red channel of a DDS texture as deformation weight:
+
+- Black: `0.0`, no deformation.
+- White: `1.0`, full deformation.
+- Gray: partial deformation.
+- Missing or invalid file: fallback to `1.0`.
+
+Multiple Draws may share one mask. The mask must match the model's UV layout. It changes vertex deformation weight, not which triangles the cursor can pick.
+
+### Physics
+
+Global defaults in **Settings** apply to original characters and new projects. Every group can override them independently. Major parameters include:
+
+- Influence radius and falloff exponent.
+- Strength, drag scale, and maximum offset.
+- Hold/release frequency and damping ratio.
+- Release/tap impulse.
+- Target follow time.
+- Wheel depth step and minimum/maximum depth.
+- Volume response.
+
+Save or apply changes before returning to the game and pressing `F10`.
+
+## In-Game Controls and Performance
+
+- Drag key: left mouse button by default; multiple keys can be configured.
+- Mouse wheel: controls depth toward or away from the camera while a drag key is held; requires WheelBridge.
+- Quick click: creates a tap and rebound along the picked triangle normal.
+- `F10`: reloads XXMI/ZZMI configuration.
+- `F7`: disables or enables JiggleForge; the key is configurable.
+
+Disabling JiggleForge does more than block mouse input. It skips the main picking, physics, automatic calibration, group-registration, and adapted-Draw GPU work. Adapted Mods continue to render through the compatibility path.
+
+## Backup and Restore
+
+Before first adaptation, JiggleForge creates `JiggleForge.original.zip` in the Mod root. It stores only the source files the application is about to modify and relevant runtime files that already existed. It does not copy the complete Mod.
+
+To restore:
+
+1. Open the project in JiggleForge.
+2. Go to **Overview** and confirm that the backup is valid.
+3. Select **Restore original Mod** and confirm.
+
+The application restores the original INI bytes, removes the project configuration and generated private runtime, and keeps the backup archive for another restore later. A Mod adapted by an old version without a valid backup cannot be guaranteed a byte-for-byte restore; make an external copy first.
+
+## Updates and Integrity Verification
+
+The application checks the latest stable release at startup. An update can be installed immediately or postponed; postponing keeps a reminder beside the application name.
+
+One-click update downloads both the release ZIP and its SHA-256 file and replaces files only after verification succeeds. **Settings → Application update and integrity** can check again, reinstall the latest release, or verify the current installation.
+
+## Uninstallation
+
+### Remove Only the Global Runtime
+
+Stop WheelBridge in **Settings**, then select **Uninstall runtime**. This removes the global deformation runtime and restores ShaderFix files backed up during installation.
+
+Adapted Mods may still need either the JiggleForge runtime or its compatibility layer to render correctly. Do not delete random generated INI blocks from adapted Mods.
+
+### Remove the Complete Application
+
+Select **Prepare removal**, then choose:
+
+- **Keep compatibility layer**: remove deformation work while retaining project configuration and backups, so adapted Mods continue to render without deformation.
+- **Restore Mods**: validate backups, restore every recorded or discovered adapted Mod, and remove the global runtime.
+
+After either operation, JiggleForge opens its application folder and exits. Delete the application folder manually. JiggleForge intentionally avoids an elevated self-deleting uninstaller to reduce antivirus heuristic false positives.
+
+## Troubleshooting
+
+### Nothing Happens in Game
+
+- Update to the latest official XXMI/ZZMI.
+- Confirm that JiggleForge points to the ZZMI root actually launching the game.
+- Reinstall the JiggleForge global runtime.
+- Confirm that `F7` has not disabled the runtime.
+- Return to the game and press `F10`; restart the game completely when necessary.
+
+### A Draw Name Appears, but the Model Does Not Deform
+
+The inspector or part of the runtime is loaded, but the deformation state, shader pass, Draw binding, or global runtime does not match. Update XXMI/ZZMI and JiggleForge, reinstall the runtime, and apply the Mod configuration again.
+
+### Only Some Areas Respond
+
+Possible causes include approximate picking on an unadapted Mod, an unregistered shader pass, transparent/outline/shadow/close-camera paths, an invisible mesh winning the pick, a disabled Draw, a black mask, or an outdated configuration.
+
+### The Model Is Broken, White, or Flickering
+
+First verify that the original Mod works without JiggleForge. Do not copy configurations between characters, game versions, or LODs. Restore and adapt again when resource layouts change.
+
+### Cursor and Deformation Positions Do Not Match
+
+Scenes may use different projection, canvas-scaling, or composition paths. Record the resolution, window mode, and exact scene, and provide `d3d11_log.txt` plus a FrameAnalysis capture of the affected scene.
+
+Before reporting any issue, verify that the latest official XXMI/ZZMI is installed. Modified, repackaged, or outdated distributions are not guaranteed to work.
+
+## Documentation and Support
 
 - [Quick start](docs/user-guide/quick-start.md)
-- [Backup and restore](docs/user-guide/backup.md)
 - [Configuration](docs/user-guide/configuration.md)
+- [Backup and restore](docs/user-guide/backup.md)
 - [Troubleshooting](docs/user-guide/troubleshooting.md)
-- [VS hash matrix](docs/development/shader-hash-matrix.zh-CN.md)
+- [Shader hash matrix](docs/development/shader-hash-matrix.zh-CN.md)
 - [Build instructions](docs/development/building.md)
+- [Bilibili introduction video](https://www.bilibili.com/video/BV1Bt3d6DEYN/)
+- QQ group: `451901293`
 
-## Project layout
+Whether you have a problem, a suggestion, want to keep up with updates, or simply want to chat, you are welcome to join.
 
-- `app/JiggleForge` — WinUI 3 desktop application.
-- `src/JiggleForge.Core` — scanning, configuration, patching, and runtime generation.
-- `src/JiggleForge.WheelBridge` — wheel input bridge.
-- `src/JiggleForge.Updater` — separate application updater.
-- `StandaloneShaderFixes` — global runtime and supported VS replacement sources.
-- `tests` — automated tests.
-- `docs` — user and developer documentation.
+## Repository Layout
 
-## License and disclaimer
+- `app/JiggleForge`: WinUI 3 desktop application.
+- `src/JiggleForge.Core`: scanning, configuration, patching, and runtime generation.
+- `src/JiggleForge.WheelBridge`: wheel-input bridge.
+- `src/JiggleForge.Updater`: standalone updater.
+- `StandaloneShaderFixes`: global runtime and supported VS replacement sources.
+- `tests`: automated tests.
+- `docs`: user and developer documentation.
 
-The original source code is licensed under [GNU GPL-3.0-only](LICENSE). See [BRANDING.md](BRANDING.md) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for project branding and third-party material.
+## License and Disclaimer
 
-JiggleForge is an independent community tool and is not affiliated with the game publisher, XXMI, or 3DMigoto. Follow the rules of the game, Mod authors, and distribution platforms.
+JiggleForge source code is licensed under [GNU GPL-3.0-only](LICENSE). See [BRANDING.md](BRANDING.md) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for project branding and third-party material.
+
+This is an independent community project and is not affiliated with HoYoverse, the game publisher, XXMI, ZZMI, 3DMigoto, or any Mod platform.
+
+Follow the rules of the game, original Mod creators, and hosting platforms. Adapting another creator's Mod with JiggleForge does not grant permission to modify, reupload, or redistribute that Mod. Keep backups of important Mods.
