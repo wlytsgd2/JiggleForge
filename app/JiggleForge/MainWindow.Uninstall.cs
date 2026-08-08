@@ -225,8 +225,7 @@ public sealed partial class MainWindow
 
     private static void OpenApplicationFolder()
     {
-        string targetDirectory = Path.GetFullPath(AppContext.BaseDirectory)
-            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        string targetDirectory = ApplicationLayout.InstallationDirectory;
         ProcessStartInfo startInfo = new("explorer.exe", targetDirectory)
         {
             UseShellExecute = true,

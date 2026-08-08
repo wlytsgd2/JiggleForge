@@ -32,6 +32,22 @@ JiggleForge 是一个面向《绝区零》XXMI/ZZMI 的开源 Windows 桌面应�
 
 官方发布包包含所需的 .NET 和 Windows App SDK 运行组件，正常情况下不需要另外安装。不要直接在 ZIP 压缩包内启动应用。
 
+## 发布包目录
+
+完整解压后的目录按用途分开：
+
+```text
+JiggleForge/
+├─ JiggleForge.exe   # 启动入口；请运行这个文件
+├─ App/              # 应用本体、.NET 与 WinUI 组件
+├─ Runtime/          # 安装到 ZZMI 的 JiggleForge 运行时
+├─ docs/             # 使用文档
+├─ README.md
+└─ LICENSE
+```
+
+请保持目录结构完整，不要单独移动或运行 `App` 中的文件。JiggleForge 主程序以当前用户的普通权限运行；只有启动 WheelBridge 或写入确实需要管理员权限的位置时，Windows 才会单独请求授权。
+
 ## 普通玩家快速开始
 
 1. 从 [GitHub Releases](https://github.com/wlytsgd2/JiggleForge/releases) 下载最新的 `win-x64` 压缩包并完整解压。

@@ -29,7 +29,7 @@ public sealed partial class MainWindow : Window
     private readonly ModProjectHistoryService projectHistoryService = new(
         ApplicationSettingsDirectory);
     private readonly RuntimeEnvironmentService runtimeEnvironmentService = new(
-        Path.Combine(AppContext.BaseDirectory, "RuntimePayload"));
+        ApplicationLayout.RuntimePayloadDirectory);
     private readonly ObservableCollection<DrawEditorRow> drawRows = [];
     private readonly ObservableCollection<DrawEditorRow> maskRows = [];
     private readonly ObservableCollection<ModLibraryRow> modLibraryRows = [];

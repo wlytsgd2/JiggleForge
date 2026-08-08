@@ -12,7 +12,7 @@ public sealed partial class MainWindow
 {
     private readonly ApplicationUpdateService applicationUpdateService = new(
         GetCurrentApplicationVersion(),
-        AppContext.BaseDirectory);
+        ApplicationLayout.InstallationDirectory);
     private ApplicationReleaseInfo? latestApplicationRelease;
     private bool applicationUpdateAvailable;
     private bool applicationUpdateBusy;
@@ -279,7 +279,7 @@ public sealed partial class MainWindow
 
     private void LaunchApplicationUpdater(ApplicationUpdateDownload download)
     {
-        string sourceUpdater = Path.Combine(AppContext.BaseDirectory, "JiggleForge.Updater.exe");
+        string sourceUpdater = ApplicationLayout.UpdaterPath;
         if (!File.Exists(sourceUpdater))
         {
             throw new InvalidOperationException(L("UpdaterMissing"));
@@ -294,8 +294,8 @@ public sealed partial class MainWindow
         string updaterPath = Path.Combine(updaterDirectory, "JiggleForge.Updater.exe");
         File.Copy(sourceUpdater, updaterPath, overwrite: true);
 
-        string targetDirectory = Path.GetFullPath(AppContext.BaseDirectory).TrimEnd(Path.DirectorySeparatorChar);
-        string executableName = Path.GetFileName(Environment.ProcessPath) ?? "JiggleForge.exe";
+        string targetDirectory = ApplicationLayout.InstallationDirectory;
+        string executableName = ApplicationLayout.RestartExecutableRelativePath;
         string arguments = string.Join(' ',
             "--parent", Environment.ProcessId.ToString(),
             "--package", QuoteArgument(download.PackagePath),

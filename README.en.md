@@ -32,6 +32,22 @@ The global runtime can process supported original character geometry directly. F
 
 The official package includes the required .NET and Windows App SDK runtime components. A separate installation is normally unnecessary. Do not launch the application from inside its ZIP archive.
 
+## Release Package Layout
+
+The fully extracted package separates files by purpose:
+
+```text
+JiggleForge/
+├─ JiggleForge.exe   # Launcher; run this file
+├─ App/              # Application, .NET, and WinUI components
+├─ Runtime/          # JiggleForge runtime installed into ZZMI
+├─ docs/             # User documentation
+├─ README.md
+└─ LICENSE
+```
+
+Keep the directory structure intact, and do not move or launch files from `App` separately. The JiggleForge application runs with the current user's standard privileges. Windows requests elevation separately only when starting WheelBridge or writing to a location that genuinely requires administrator access.
+
 ## Quick Start for Players
 
 1. Download the latest `win-x64` archive from [GitHub Releases](https://github.com/wlytsgd2/JiggleForge/releases) and extract it completely.
