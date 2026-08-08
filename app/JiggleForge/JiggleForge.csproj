@@ -5,7 +5,7 @@
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RootNamespace>JiggleForge</RootNamespace>
     <DefaultLanguage>zh-CN</DefaultLanguage>
-    <Version>0.1.15-beta.1</Version>
+    <Version>0.1.15</Version>
     <AssemblyVersion>0.1.15.0</AssemblyVersion>
     <FileVersion>0.1.15.0</FileVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>

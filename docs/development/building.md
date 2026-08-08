@@ -29,6 +29,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build\CreateReleasePackage
 
 The script publishes the app, includes the updater and user documentation, generates `JiggleForge.manifest.sha256`, and creates both the ZIP and its `.sha256` sidecar under `artifacts`.
 
+All official packages use this stable layout:
+
+```text
+JiggleForge/
+├─ JiggleForge.exe
+├─ App/
+├─ Runtime/
+├─ docs/
+├─ README.md
+└─ LICENSE
+```
+
+`JiggleForge.exe` at the package root is the user-facing launcher. .NET and WinUI files stay under `App`, while files installed into ZZMI stay under `Runtime`. Do not publish the raw `dotnet publish` directory directly. `CreateReleasePackage.ps1` validates the required layout and fails if a required launcher, application, updater, runtime, or documentation file is missing.
+
 Upload both files to a GitHub Release whose tag is `v<Version>`. The asset names must remain `JiggleForge-win-x64-v<Version>.zip` and `JiggleForge-win-x64-v<Version>.zip.sha256`; the in-app updater locates those names. Do not include local FrameAnalysis dumps, generated Mod folders, test captures, or personal configuration files.
 
 ## Runtime validation

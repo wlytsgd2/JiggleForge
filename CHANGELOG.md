@@ -1,20 +1,20 @@
 # Changelog
 
-## 0.1.15-beta.1 — 2026-08-08
+## 0.1.15 — 2026-08-08
 
 ### 简体中文
 
 - 将发布包整理为根启动器、`App` 应用组件、`Runtime` 游戏运行时和 `docs` 文档目录。
 - 为根启动器和 WinUI 主程序显式声明 `asInvoker`，主界面以当前用户的普通权限运行；只有确实需要提权的独立操作才请求 UAC。
 - 更新应用更新、完整性校验、运行时安装和卸载路径，使旧版平铺目录能够迁移到新结构。
-- 这是用于验证 Windows 权限提示和新发布目录的预发布测试版，不会进入正式版自动更新通道。
+- 将有组织的发布目录固化到正式打包流程，后续正式版继续使用相同结构。
 
 ### English
 
 - Organized the release package into a root launcher, `App` application components, `Runtime` game runtime, and `docs` documentation directories.
 - Explicitly declared `asInvoker` for both the root launcher and WinUI application so the main interface runs with the current user's standard privileges; only operations that genuinely require elevation request UAC separately.
 - Updated application-update, integrity-verification, runtime-installation, and removal paths so an older flat installation can migrate to the organized layout.
-- This is a prerelease for testing Windows permission prompts and the new package layout; it is not offered through the stable automatic-update channel.
+- Made the organized release layout part of the official packaging flow so future stable releases keep the same structure.
 
 ## 0.1.14 — 2026-08-07
 
