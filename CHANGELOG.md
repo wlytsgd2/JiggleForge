@@ -8,6 +8,7 @@
 - 为根启动器和 WinUI 主程序显式声明 `asInvoker`，主界面以当前用户的普通权限运行；只有确实需要提权的独立操作才请求 UAC。
 - 更新应用更新、完整性校验、运行时安装和卸载路径，使旧版平铺目录能够迁移到新结构。
 - 将有组织的发布目录固化到正式打包流程，后续正式版继续使用相同结构。
+- 新增不含 EXE、DLL 或命令脚本的手动安装包，默认同时支持鼠标左键和 X 键拖动，并附带纯文本卸载代码。
 
 ### English
 
@@ -15,6 +16,7 @@
 - Explicitly declared `asInvoker` for both the root launcher and WinUI application so the main interface runs with the current user's standard privileges; only operations that genuinely require elevation request UAC separately.
 - Updated application-update, integrity-verification, runtime-installation, and removal paths so an older flat installation can migrate to the organized layout.
 - Made the organized release layout part of the official packaging flow so future stable releases keep the same structure.
+- Added a manual package containing no EXE, DLL, or command script. It enables both left-button and X-key dragging by default and includes removal code as plain text.
 
 ## 0.1.14 — 2026-08-07
 

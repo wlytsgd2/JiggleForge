@@ -1,0 +1,59 @@
+JiggleForge 手动安装版
+======================
+
+用途
+----
+
+这是不包含桌面应用、更新器和 WheelBridge.exe 的基础运行时。
+它适合无法或不希望运行 JiggleForge 桌面应用的玩家。
+
+保留的功能
+----------
+
+- 鼠标左键或 X 键拖动，以及快速点击/拍打。
+- 默认 F7 游戏内总开关。
+- 原版角色和受当前运行时支持的场景。
+- 已经由 JiggleForge 适配完成的 Mod 运行时支持。
+
+不包含的功能
+------------
+
+- 桌面配置界面。
+- 新 Mod 的自动适配、Draw 分组、依赖图和 Mask 编辑。
+- WheelBridge 与滚轮第三维控制。
+- 自动更新、完整性检查和图形化卸载。
+
+安装
+----
+
+1. 关闭游戏，或至少准备在安装后按 F10。
+2. 找到游戏实际使用的 ZZMI 根目录；其中必须同时存在 Mods 和 ShaderFixes。
+3. 将本压缩包中的 Mods 与 ShaderFixes 文件夹复制到 ZZMI 根目录并合并。
+4. 启动游戏，或回到游戏按 F10。
+5. 将鼠标放在支持的角色表面，按住鼠标左键或 X 键并移动。
+
+同名 ShaderFix 冲突
+-------------------
+
+安装包会向 ShaderFixes 写入若干“hash-vs_replace.txt”文件。
+
+- 如果目标文件不存在，可以直接复制。
+- 如果目标文件属于旧版 JiggleForge，可以覆盖。
+- 如果目标文件属于其他 Shader Mod，不要直接覆盖。先将它改名为：
+
+    原文件名.pre_jiggleForge_backup
+
+- 如果同名 .pre_jiggleForge_backup 已经存在，请停止安装并手动处理冲突。
+
+桌面应用会自动处理这种备份；纯手动复制无法自动判断文件归属。
+
+卸载
+----
+
+打开 UNINSTALL.txt，按照说明在 ZZMI 根目录的 PowerShell 窗口中粘贴卸载代码。
+卸载代码只会删除能够识别为 JiggleForge 的 Shader，并恢复上述备份。
+
+许可
+----
+
+JiggleForge 使用 GNU GPL-3.0-only。详见 LICENSE 与 THIRD-PARTY-NOTICES.md。

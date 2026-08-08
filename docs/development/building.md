@@ -45,6 +45,16 @@ JiggleForge/
 
 Upload both files to a GitHub Release whose tag is `v<Version>`. The asset names must remain `JiggleForge-win-x64-v<Version>.zip` and `JiggleForge-win-x64-v<Version>.zip.sha256`; the in-app updater locates those names. Do not include local FrameAnalysis dumps, generated Mod folders, test captures, or personal configuration files.
 
+### Manual package
+
+Create the no-executable manual package with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\build\CreateManualPackage.ps1
+```
+
+The result is written to `artifacts\JiggleForge-manual-v<Version>.zip` with a matching `.sha256` file. It contains only the `Mods` and `ShaderFixes` runtime trees, bilingual installation instructions, removal code stored as plain text, and license notices. The build fails if any executable, DLL, command script, PowerShell script, or other blocked executable extension enters the package.
+
 ## Runtime validation
 
 The shader validation script checks HLSL compilation and compares the CPU reference model with the GPU-compatible runtime path. Warnings emitted for decompiled game shaders can be expected; compilation errors and parity failures are blocking issues.

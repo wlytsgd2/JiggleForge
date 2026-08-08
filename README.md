@@ -48,6 +48,8 @@ JiggleForge/
 
 请保持目录结构完整，不要单独移动或运行 `App` 中的文件。JiggleForge 主程序以当前用户的普通权限运行；只有启动 WheelBridge 或写入确实需要管理员权限的位置时，Windows 才会单独请求授权。
 
+如果无法或不希望运行桌面应用，也可以从同一 GitHub Release 下载 `JiggleForge-manual-v<版本>.zip`。手动包不含 EXE、DLL 或命令脚本；将其中的 `Mods` 和 `ShaderFixes` 合并到 ZZMI 根目录即可。它默认同时支持鼠标左键和 X 键拖动，但不包含 WheelBridge、图形化配置、Mod 自动适配和自动更新。
+
 ## 普通玩家快速开始
 
 1. 从 [GitHub Releases](https://github.com/wlytsgd2/JiggleForge/releases) 下载最新的 `win-x64` 压缩包并完整解压。

@@ -48,6 +48,8 @@ JiggleForge/
 
 Keep the directory structure intact, and do not move or launch files from `App` separately. The JiggleForge application runs with the current user's standard privileges. Windows requests elevation separately only when starting WheelBridge or writing to a location that genuinely requires administrator access.
 
+If the desktop application cannot or should not be run, download `JiggleForge-manual-v<version>.zip` from the same GitHub Release. The manual package contains no EXE, DLL, or command script: merge its `Mods` and `ShaderFixes` folders into the ZZMI root. It enables both left-button and X-key dragging by default, but does not include WheelBridge, graphical configuration, automatic Mod adaptation, or automatic updates.
+
 ## Quick Start for Players
 
 1. Download the latest `win-x64` archive from [GitHub Releases](https://github.com/wlytsgd2/JiggleForge/releases) and extract it completely.

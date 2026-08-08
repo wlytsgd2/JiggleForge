@@ -1,0 +1,67 @@
+JiggleForge Manual Package
+==========================
+
+Purpose
+-------
+
+This is the basic runtime without the desktop application, updater, or
+WheelBridge.exe. It is intended for players who cannot or do not want to run
+the JiggleForge desktop application.
+
+Included
+--------
+
+- Dragging with either the left mouse button or X key, plus quick-click/slap impulses.
+- The in-game master switch (F7 by default).
+- Supported original characters and scenes.
+- Runtime support for Mods that have already been adapted with JiggleForge.
+
+Not included
+------------
+
+- The desktop configuration interface.
+- Automatic Mod adaptation, Draw grouping, dependency graph, or mask editing.
+- WheelBridge and mouse-wheel depth control.
+- Automatic updates, integrity verification, or graphical removal.
+
+Installation
+------------
+
+1. Close the game, or be ready to press F10 after installation.
+2. Find the ZZMI root that the game actually uses. It must contain both Mods
+   and ShaderFixes.
+3. Copy the Mods and ShaderFixes folders from this package into the ZZMI root
+   and merge them with the existing folders.
+4. Start the game, or return to it and press F10.
+5. Place the pointer over a supported character surface, hold either the left
+   mouse button or X key, and move the mouse.
+
+Conflicting ShaderFix files
+---------------------------
+
+The package installs several "hash-vs_replace.txt" files into ShaderFixes.
+
+- If a target file does not exist, copy it normally.
+- If it belongs to an older JiggleForge runtime, it may be overwritten.
+- If it belongs to another Shader Mod, do not overwrite it directly. Rename
+  the existing file to:
+
+    original-name.pre_jiggleForge_backup
+
+- If that backup name already exists, stop and resolve the conflict manually.
+
+The desktop application performs this backup automatically. Plain file copying
+cannot determine ownership safely.
+
+Removal
+-------
+
+Open UNINSTALL.txt and paste its removal block into a PowerShell window opened
+at the ZZMI root. It removes only files recognized as JiggleForge files and
+restores backups made with the name above.
+
+License
+-------
+
+JiggleForge is licensed under GNU GPL-3.0-only. See LICENSE and
+THIRD-PARTY-NOTICES.md.

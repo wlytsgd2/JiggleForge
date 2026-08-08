@@ -1,0 +1,94 @@
+JiggleForge 手动卸载 / Manual Removal
+=====================================
+
+使用方法 / Instructions
+------------------------
+
+1. 找到游戏实际使用的 ZZMI 根目录，其中应包含 Mods 和 ShaderFixes。
+2. 在该目录空白处按住 Shift 并右键，选择“在此处打开 PowerShell 窗口”或“在终端中打开”。
+3. 完整复制并粘贴下面从 $hashes 开始、到最后一个 Write-Host 结束的代码。
+4. 执行完成后回到游戏按 F10；建议直接重启游戏。
+
+1. Open the ZZMI root actually used by the game. It should contain Mods and
+   ShaderFixes.
+2. Open PowerShell/Terminal in that directory.
+3. Paste the complete block below, from $hashes through the final Write-Host.
+4. Press F10 in game after it completes; restarting the game is recommended.
+
+卸载代码 / Removal block
+------------------------
+
+$hashes = @(
+    '26214fb5eedfcbdd',
+    'c280f6945b23a42a',
+    '6883e4375b728e90',
+    'aa59281029db3a5a',
+    '1f6ab42231416fdb',
+    '699981e2a62dd9b4',
+    '402766e2987d7821',
+    'a0b37a7c7c2a1905',
+    '160b58ea1824c794',
+    'ad24b1c214866fd7',
+    'd0a1a756bd3bde31',
+    '1b6d08acd285344c',
+    'a6030ebb8c49cf02'
+)
+
+if (-not (Test-Path -LiteralPath '.\Mods' -PathType Container) -or
+    -not (Test-Path -LiteralPath '.\ShaderFixes' -PathType Container)) {
+    throw 'This is not a ZZMI root: Mods or ShaderFixes is missing.'
+}
+
+Remove-Item -LiteralPath '.\Mods\JiggleForgeShaderFix' `
+    -Recurse -Force -ErrorAction SilentlyContinue
+
+Remove-Item -LiteralPath '.\ShaderFixes\JiggleForgeRuntime' `
+    -Recurse -Force -ErrorAction SilentlyContinue
+
+Remove-Item -LiteralPath '.\ShaderFixes\JiggleForgeV2' `
+    -Recurse -Force -ErrorAction SilentlyContinue
+
+foreach ($hash in $hashes) {
+    $path = ".\ShaderFixes\$hash-vs_replace.txt"
+    $backup = "$path.pre_jiggleForge_backup"
+
+    if (Test-Path -LiteralPath $path -PathType Leaf) {
+        $text = Get-Content -LiteralPath $path -Raw
+        $isJiggleForge =
+            $text.Contains('JiggleForgeState') -or
+            (($text.Contains('JF_MotionState') -or
+              $text.Contains('JF2_MotionState')) -and
+             $text.Contains('JiggleForgeDirectStateIndex'))
+
+        if ($isJiggleForge) {
+            Remove-Item -LiteralPath $path -Force
+        }
+    }
+
+    if ((Test-Path -LiteralPath $backup -PathType Leaf) -and
+        -not (Test-Path -LiteralPath $path)) {
+        Move-Item -LiteralPath $backup -Destination $path
+    }
+}
+
+$legacyIni = '.\ShaderFixes\JiggleForge.ini'
+if (Test-Path -LiteralPath $legacyIni -PathType Leaf) {
+    Remove-Item -LiteralPath $legacyIni -Force
+}
+
+$legacyFolder = '.\ShaderFixes\JiggleForge'
+if (Test-Path -LiteralPath $legacyFolder -PathType Container) {
+    Remove-Item -LiteralPath $legacyFolder -Recurse -Force
+}
+
+Write-Host 'JiggleForge runtime removed. Press F10 or restart the game.'
+
+注意 / Note
+-----------
+
+如果仍有经过 JiggleForge 适配、且尚未恢复原样的 Mod，完全移除全局运行时可能使这些 Mod 报错。
+请先用桌面应用恢复这些 Mod，或者保留桌面应用提供的零计算兼容层。
+
+If adapted Mods have not been restored, fully removing the global runtime may
+make those Mods report errors. Restore them with the desktop application first,
+or keep the zero-computation compatibility layer provided by the application.
