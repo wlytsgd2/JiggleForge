@@ -244,6 +244,12 @@ Mask 使用 DDS 纹理红色通道作为变形权重：
 - `tests`：自动化测试。
 - `docs`：用户和开发文档。
 
+## 致谢
+
+JiggleForge 的开发离不开先行研究、开发工具和社区测试，其中包括 Rayvich / RZMenu 对《绝区零》交互式模型变形技术的早期探索与启发。
+
+完整的项目来源与致谢记录见 [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md)。
+
 ## 许可与声明
 
 JiggleForge 源代码采用 [GNU GPL-3.0-only](LICENSE) 许可。项目品牌和第三方内容另见 [BRANDING.md](BRANDING.md) 与 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。

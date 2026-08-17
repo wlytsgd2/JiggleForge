@@ -244,6 +244,12 @@ Whether you have a problem, a suggestion, want to keep up with updates, or simpl
 - `tests`: automated tests.
 - `docs`: user and developer documentation.
 
+## Acknowledgements
+
+JiggleForge was made possible by prior research, development tools, and community testing, including Rayvich / RZMenu's earlier exploration of interactive model deformation in *Zenless Zone Zero*.
+
+See [ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md) for the complete project provenance and acknowledgements.
+
 ## License and Disclaimer
 
 JiggleForge source code is licensed under [GNU GPL-3.0-only](LICENSE). See [BRANDING.md](BRANDING.md) and [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for project branding and third-party material.
