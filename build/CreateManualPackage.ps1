@@ -39,34 +39,16 @@ Copy-Item -LiteralPath (Join-Path $runtimeSource 'JiggleForge.ini') `
     -Destination $modTarget
 $manualRuntimeIni = Join-Path $modTarget 'JiggleForge.ini'
 $manualRuntimeContents = Get-Content -LiteralPath $manualRuntimeIni -Raw
-$manualDragKeyBlock = @"
-; JIGGLEFORGE_DRAG_KEY_BEGIN
-[KeyJiggleForgeDrag1]
-key = VK_LBUTTON
-type = hold
-`$mouseDown = 1
-post `$mouseDown = 0
-
-[KeyJiggleForgeDrag2]
-key = X
-type = hold
-`$mouseDown = 1
-post `$mouseDown = 0
-; JIGGLEFORGE_DRAG_KEY_END
-"@.Replace("`n", "`r`n")
 $dragKeyPattern = '(?ms)^; JIGGLEFORGE_DRAG_KEY_BEGIN\r?\n.*?^; JIGGLEFORGE_DRAG_KEY_END'
 $dragKeyMatches = [regex]::Matches($manualRuntimeContents, $dragKeyPattern)
 if ($dragKeyMatches.Count -ne 1) {
     throw "Expected one controlled drag-key block, found $($dragKeyMatches.Count)."
 }
-$manualRuntimeContents = [regex]::Replace(
-    $manualRuntimeContents,
-    $dragKeyPattern,
-    [System.Text.RegularExpressions.MatchEvaluator]{ param($match) $manualDragKeyBlock })
-[System.IO.File]::WriteAllText(
-    $manualRuntimeIni,
-    $manualRuntimeContents,
-    [System.Text.UTF8Encoding]::new($false))
+$manualDragKeyBlock = $dragKeyMatches[0].Value
+if ($manualDragKeyBlock -notmatch '(?mi)^key\s*=\s*VK_LBUTTON\s*$' -or
+    $manualDragKeyBlock -notmatch '(?mi)^key\s*=\s*X\s*$') {
+    throw 'The source runtime must enable both VK_LBUTTON and X in the default drag-key block.'
+}
 Copy-Item -LiteralPath (Join-Path $runtimeSource 'JiggleForge') `
     -Destination $modTarget `
     -Recurse
