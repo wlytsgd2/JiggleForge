@@ -651,9 +651,9 @@ public sealed class RuntimeContractTests
 
         StringAssert.Contains(ReadSection(ini, "CommandListPickVisibleRange"), "$runtimeEnabled == 1");
         StringAssert.Contains(ReadSection(ini, "CommandListRegisterGroupParameters"), "$runtimeEnabled == 1");
-        StringAssert.Contains(
-            ReadSection(ini, "CommandListEnableAdaptedOnly"),
-            "Compatibility no-op");
+        string adaptedOnly = ReadSection(ini, "CommandListEnableAdaptedOnly");
+        StringAssert.Contains(adaptedOnly, "run = CustomShaderDiscardFallbackPick");
+        StringAssert.Contains(adaptedOnly, "$adaptedOnlySeenThisFrame = 1");
     }
 
     private static void AssertSectionArray(

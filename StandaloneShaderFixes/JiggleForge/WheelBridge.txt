@@ -13,4 +13,4 @@ require_drag_button = true
 # Keep this synchronized with the drag keys selected in JiggleForge.
 # The singular field keeps older WheelBridge builds usable with the first key.
 drag_key = VK_LBUTTON
-drag_keys = VK_LBUTTON
+drag_keys = VK_LBUTTON, X

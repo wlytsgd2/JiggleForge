@@ -108,6 +108,9 @@ public sealed class RuntimeEnvironmentServiceTests
         Assert.IsTrue(status.Ready, status.ToString());
         Assert.IsTrue(status.RuntimeCurrent);
         Assert.AreEqual(RuntimeEnvironmentService.DefaultDragKey, status.DragKey);
+        CollectionAssert.AreEqual(
+            RuntimeEnvironmentService.DefaultDragKeys.ToArray(),
+            status.DragKeys!.ToArray());
         Assert.AreEqual(RuntimeEnvironmentService.RequiredShaderHashes.Count, status.CurrentShaderCount);
         Assert.AreEqual(RuntimeEnvironmentService.DefaultRuntimeToggleKey, status.RuntimeToggleKey);
         Assert.AreEqual(1, status.BackupCount);

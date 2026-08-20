@@ -9,6 +9,11 @@ namespace JiggleForge.Core;
 public sealed partial class RuntimeEnvironmentService
 {
     public const string DefaultDragKey = "VK_LBUTTON";
+    public static readonly IReadOnlyList<string> DefaultDragKeys =
+    [
+        "VK_LBUTTON",
+        "X",
+    ];
     public const string DefaultRuntimeToggleKey = "VK_F7";
     public static readonly IReadOnlyList<string> SupportedDragKeys =
     [

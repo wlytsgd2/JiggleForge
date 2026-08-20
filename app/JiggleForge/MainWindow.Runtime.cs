@@ -503,7 +503,7 @@ public sealed partial class MainWindow : Window
         {
         }
 
-        return [RuntimeEnvironmentService.DefaultDragKey];
+        return RuntimeEnvironmentService.DefaultDragKeys;
     }
 
     private static string LoadRuntimeToggleKeyPreference()

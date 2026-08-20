@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.17 — 2026-08-21
+
+### 简体中文
+
+- 将已经过游戏验证的内联拾取运行时固定为本次候选版本，保留特殊材质像素着色器兼容路径和适配 Mod 的回退拾取隔离。
+- 应用安装、内置运行时、滚轮输入桥接器和手动安装包现在统一默认支持鼠标左键与 `X` 键拖动。
+- 增加默认多按键安装和运行时契约测试，防止正式打包与本地测试版本再次出现差异。
+
+### English
+
+- Frozen the game-verified inline-picking runtime as this release candidate, retaining the special material-pixel-shader compatibility path and adapted-Mod fallback-pick isolation.
+- Application installs, the embedded runtime, WheelBridge, and the manual package now consistently enable both left-button and `X`-key dragging by default.
+- Added default multi-key installation and runtime contract coverage so official packages cannot silently diverge from the locally tested candidate again.
+
 ## 0.1.16 — 2026-08-21
 
 ### 简体中文

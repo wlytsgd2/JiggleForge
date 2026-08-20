@@ -82,11 +82,11 @@ public sealed partial class RuntimeEnvironmentService
 
         string sourceText = MarkedDragKeyRegex().Replace(
             File.ReadAllText(source),
-            BuildDragKeyBlock([DefaultDragKey]),
+            BuildDragKeyBlock(DefaultDragKeys),
             count: 1);
         string targetText = MarkedDragKeyRegex().Replace(
             File.ReadAllText(target),
-            BuildDragKeyBlock([DefaultDragKey]),
+            BuildDragKeyBlock(DefaultDragKeys),
             count: 1);
         sourceText = MarkedRuntimeToggleKeyRegex().Replace(
             sourceText,

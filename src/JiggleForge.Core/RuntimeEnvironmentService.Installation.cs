@@ -10,11 +10,15 @@ public sealed partial class RuntimeEnvironmentService
 {
     public void Install(
         string zzmiRoot,
-        string dragKey = DefaultDragKey,
+        string? dragKey = null,
         PhysicsSettings? defaultPhysics = null,
         string runtimeToggleKey = DefaultRuntimeToggleKey)
     {
-        Install(zzmiRoot, [dragKey], defaultPhysics, runtimeToggleKey);
+        Install(
+            zzmiRoot,
+            dragKey is null ? DefaultDragKeys : [dragKey],
+            defaultPhysics,
+            runtimeToggleKey);
     }
 
     public void Install(
