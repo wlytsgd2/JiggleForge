@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.18 — 2026-08-21
+
+### 简体中文
+
+- 将旧适配 Mod 使用的 `CommandListEnableAdaptedOnly` 恢复为无副作用的兼容空操作。
+- 删除未被当前适配器使用、且引用不存在着色器文件的回退拾取清除路径及其状态变量。
+- 保留 v0.1.17 的鼠标左键与 `X` 键默认值、手动包换行修复和全部已验证的内联拾取路径。
+
+### English
+
+- Restored `CommandListEnableAdaptedOnly`, used by legacy adapted Mods, as a side-effect-free compatibility no-op.
+- Removed the unused fallback-pick discard path and state variables that referenced a nonexistent shader file.
+- Retained the v0.1.17 left-button and `X` defaults, manual-package line-ending fix, and all verified inline-picking paths.
+
 ## 0.1.17 — 2026-08-21
 
 ### 简体中文
