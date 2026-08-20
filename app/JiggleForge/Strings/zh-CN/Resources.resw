@@ -213,8 +213,6 @@
   <data name="UpdateToLatest" xml:space="preserve"><value>更新到最新版本</value></data>
   <data name="ReinstallLatest" xml:space="preserve"><value>重新安装最新版本</value></data>
   <data name="UnsupportedQuoteInPath" xml:space="preserve"><value>路径包含不受支持的双引号字符。</value></data>
-  <data name="OriginalPartsToggle.OnContent" xml:space="preserve"><value>允许原版部件变形</value></data>
-  <data name="OriginalPartsToggle.OffContent" xml:space="preserve"><value>禁止原版部件变形</value></data>
   <data name="DrawAliasTextBox.PlaceholderText" xml:space="preserve"><value>例如 Body</value></data>
   <data name="UpdateTitleButton.Content" xml:space="preserve"><value>发现新版本</value></data>
   <data name="OverviewNavItem.Content" xml:space="preserve"><value>概览</value></data>
@@ -237,7 +235,7 @@
   <data name="RestoreOriginalButton.Content" xml:space="preserve"><value>恢复原始 Mod</value></data>
   <data name="OpenExplorerButton.Content" xml:space="preserve"><value>在资源管理器中打开</value></data>
   <data name="DrawPageTitle.Text" xml:space="preserve"><value>Draw 配置</value></data>
-  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。</value></data>
+  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是默认通道使用的固定组。</value></data>
   <data name="CreateDrawGroupButton.Content" xml:space="preserve"><value>新建组</value></data>
   <data name="DrawDeformColumn.Text" xml:space="preserve"><value>变形</value></data>
   <data name="DrawNameColumn.Text" xml:space="preserve"><value>名称</value></data>
@@ -310,7 +308,6 @@
   <data name="OnboardingPreviousButton.Content" xml:space="preserve"><value>上一步</value></data>
   <data name="OnboardingExitButton.Content" xml:space="preserve"><value>退出向导</value></data>
   <data name="OnboardingNextButton.Content" xml:space="preserve"><value>下一步</value></data>
-  <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>控制所有未被当前 Mod 替换的原版部件。</value></data>
   <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>打开设置并更新 JiggleForge</value></data>
   <data name="LoadingModHistory" xml:space="preserve"><value>正在读取已适配项目…</value></data>
   <data name="ModHistoryDescription" xml:space="preserve"><value>显示项目历史，并在当前 ZZMI 中只检索带有 JiggleForge 适配标记的 Mod；普通 Mod 不会被扫描或列出。</value></data>

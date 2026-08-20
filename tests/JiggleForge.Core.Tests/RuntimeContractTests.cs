@@ -36,6 +36,33 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void InlinePicking_ReusesPixelShadersThatAlreadyConsumePositionXY()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        string pattern = ReadSection(
+            ini,
+            "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern");
+        string replacement = ReadSection(
+            ini,
+            "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern.Replace");
+        string declarations = ReadSection(
+            ini,
+            "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.InsertDeclarations");
+
+        StringAssert.Contains(
+            pattern,
+            @"dcl_input_ps_siv linear noperspective v9\.xy, position");
+        StringAssert.Contains(
+            replacement,
+            "dcl_input_ps_siv linear noperspective v9.xyzw, position");
+        Assert.IsFalse(
+            declarations.Contains("v9", StringComparison.Ordinal),
+            "The existing-position branch must reuse v9 instead of declaring it twice.");
+        StringAssert.Contains(declarations, "dcl_input_ps linear v11.xyz");
+        StringAssert.Contains(declarations, "dcl_input_ps linear v12.xyz");
+    }
+
+    [TestMethod]
     public void Runtime_IsAlwaysActiveAndConsumerAccessIsRestrictedToSupportedSlots()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
@@ -624,7 +651,9 @@ public sealed class RuntimeContractTests
 
         StringAssert.Contains(ReadSection(ini, "CommandListPickVisibleRange"), "$runtimeEnabled == 1");
         StringAssert.Contains(ReadSection(ini, "CommandListRegisterGroupParameters"), "$runtimeEnabled == 1");
-        StringAssert.Contains(ReadSection(ini, "CommandListEnableAdaptedOnly"), "$runtimeEnabled == 1");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListEnableAdaptedOnly"),
+            "Compatibility no-op");
     }
 
     private static void AssertSectionArray(

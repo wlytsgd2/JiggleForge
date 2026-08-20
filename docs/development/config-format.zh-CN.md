@@ -18,7 +18,7 @@
 
 ```ini
 [Project]
-schema = 2
+schema = 3
 project_id = "62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"
 state_namespace = 37
 
@@ -41,9 +41,6 @@ wheel_max_depth = 0.15
 
 [Inspector]
 enabled = true
-
-[OriginalParts]
-deform_enabled = false
 
 [Draw:Draw0001]
 alias = "Body_Nude"
@@ -77,18 +74,18 @@ edge = ["OriginalParts", "Outerwear"]
 
 `volume_response` 控制 Kelvinlet 的方向性体积响应。`0` 关闭周围顶点的额外收缩、鼓起和剪切，效果接近所有顶点沿拖动方向平行移动；数值越大，软组织的体积联动越明显。默认值为 `2`，建议在 `0` 到 `5` 之间调整。
 
-Schema 2 直接保存正式运行时解算器的物理量：
+Schema 3 直接保存正式运行时解算器的物理量：
 
 - `hold_frequency_hz` 和 `release_frequency_hz` 是按住与松手阶段的弹簧固有频率；数值越大，响应越快、越硬。
 - `hold_damping_ratio` 和 `release_damping_ratio` 是阻尼比；`1` 接近临界阻尼，较小的值产生更多回弹。
 - `target_follow_seconds` 是拖动目标的指数跟随时间常数；越小越跟手，`0` 表示不滤波。
 - `release_impulse` 是松手瞬间继承目标速度的比例，同时控制短按拍打力度；`0` 会同时关闭甩动惯性和拍打冲量。
 
-应用读取 Schema 1 配置时会先在同目录生成 `JiggleForge.txt.schema1.bak`，再将旧的抓取弹性、松手弹性、目标跟随速度和松手惯性转换成上述 Schema 2 参数并写回。若同名备份已经存在，会使用递增后缀，绝不覆盖旧备份。
+应用读取旧 Schema 配置时会先在同目录生成对应的 `JiggleForge.txt.schemaN.bak`，再迁移并写回 Schema 3。若同名备份已经存在，会使用递增后缀，绝不覆盖旧备份。旧配置中的 `[OriginalParts] deform_enabled` 与 `adapted_draws_only` 会被安全忽略。
 
 每个 `[Draw:...]` 的 `deform_enabled` 控制该 Draw 是否绑定变形状态。设为 `false` 后仍会执行原 Mod 的 `drawindexed` 和精确范围拾取，因此 Draw 检测器仍能显示它；该结果只覆盖同一真实游戏 Draw 流程中较早的 pre-Skin 全局回退候选，不会抢占另一 Draw 在前景中的可见表面。禁用 Draw 不注册物理参数、不绑定 State 列表，也不会读取依赖组的变形。省略该字段时默认为 `true`，因此旧配置保持原有行为。
 
-`[OriginalParts]` 表示所有未被当前 Mod 替换、仍由全局 fallback 处理的原版部件。它在 Draw 配置页显示为不可重命名、不可删除的固定组，变形开关直接位于组标题旁。`deform_enabled = false` 时，只要当前 Mod 的任一适配 Draw 在本帧实际执行，全局拾取器就丢弃未适配候选；原版部件仍正常显示，但不能成为新拖动目标。新项目以及省略整个节的配置默认禁止原版部件变形；显式保存为 `true` 的已有项目保持开启。
+`OriginalParts` 表示全局默认通道，在 Draw 配置页显示为不可重命名、不可删除的固定组。原版角色和未适配部分始终允许成为拖动目标；Schema 3 不再提供关闭该通道的开关。
 
 原版部件固定共用全局 `StateIndex 0 / ObjectID 1`。移入 `[Group:OriginalParts]` 的适配 Draw 也使用该全局状态，从原版部件或组内适配 Draw 开始拖动都会同步影响整组。固定组可以作为依赖边的起点影响其他组，但不能作为依赖边的终点，因为原版 Draw 无法读取其他组的私有 State。
 

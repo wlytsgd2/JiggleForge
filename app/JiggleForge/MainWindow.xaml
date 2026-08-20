@@ -82,7 +82,6 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <FontIcon Glyph="&#xE8B7;"
                               FontSize="16"
@@ -102,13 +101,6 @@
                                    FontSize="12"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </Border>
-                    <ToggleSwitch Grid.Column="3"
-                                  local:Localization.Key="OriginalPartsToggle"
-                                  IsOn="{Binding Content.OriginalPartsEnabled, Mode=TwoWay}"
-                                  Visibility="{Binding Content.OriginalToggleVisibility}"
-                                  OnContent="允许原版部件变形"
-                                  OffContent="禁止原版部件变形"
-                                  ToolTipService.ToolTip="控制所有未被当前 Mod 替换的原版部件。" />
                 </Grid>
             </Border>
         </DataTemplate>
@@ -408,7 +400,7 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
                                         <TextBlock local:Localization.Key="DrawPageTitle" Text="Draw 配置" Style="{StaticResource PageTitleTextStyle}" />
-                                        <TextBlock local:Localization.Key="DrawPageSubtitle" Text="拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是固定组，开关位于组名旁。"
+                                        <TextBlock local:Localization.Key="DrawPageSubtitle" Text="拖动 Draw 到组标题，或右键 Draw 选择目标组。OriginalParts 是默认通道使用的固定组。"
                                                    Style="{StaticResource PageSubtitleTextStyle}" />
                                     </StackPanel>
                                     <Button Grid.Column="1"

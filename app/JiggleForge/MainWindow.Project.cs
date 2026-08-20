@@ -128,7 +128,6 @@ public sealed partial class MainWindow : Window
         maskRows.Clear();
         editorGroupNames.Clear();
         editorGroupNames.Add(OriginalPartsConfig.GroupName);
-        originalPartsEnabledEditor = config.OriginalParts.DeformationEnabled;
         foreach (JiggleGroupConfig group in config.Groups)
         {
             editorGroupNames.Add(group.Name);
@@ -361,9 +360,7 @@ public sealed partial class MainWindow : Window
             draw.Group = row.Group.Trim();
             draw.Mask = row.Mask.Trim();
         }
-        CaptureOriginalPartsToggle();
         CommitCurrentPhysicsScope();
-        config.OriginalParts.DeformationEnabled = originalPartsEnabledEditor;
         config.OriginalParts.LegacyGroup = string.Empty;
         config.Physics = GetDefaultProjectPhysics().Clone();
 

@@ -135,8 +135,9 @@ void main(
   out float4 o7 : TEXCOORD7,
   out float3 o8 : TEXCOORD8,
   out float3 o10 : TEXCOORD9,
-  out float3 o11 : TEXCOORD10,
-  out float3 o12 : TEXCOORD11,
+  out float4 jiggleForgePickPadding : TEXCOORD10,
+  out float3 o11 : TEXCOORD11,
+  out float3 o12 : TEXCOORD12,
   out float4 o9 : SV_POSITION0)
 {
   float4 r0,r1,r2,r3,r4,r5,r6,r7,r8;
@@ -174,6 +175,7 @@ void main(
   r1.xyzw = cb0[129].xyzw * r0.zzzz + r1.xyzw;
   r1.xyzw = cb0[130].xyzw + r1.xyzw;
   o9.xy = cb0[21].xy * r1.ww + r1.xy;
+  jiggleForgePickPadding = 0.0f;
   o11.xyz = jiggleForgeScreenRight;
   o12.xyz = jiggleForgeScreenUp;
   r0.w = cb1[9].w * v2.w;

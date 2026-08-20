@@ -55,8 +55,7 @@ public sealed partial class ModRuntimeCompiler
                     text,
                     fileGroup.ToArray(),
                     assignments,
-                    config.StateNamespace,
-                    !config.OriginalParts.DeformationEnabled);
+                    config.StateNamespace);
                 generatedText[iniPath] = updated;
                 continue;
             }
@@ -65,8 +64,7 @@ public sealed partial class ModRuntimeCompiler
                 text,
                 fileGroup.OrderBy(draw => draw.SourceLine).ToArray(),
                 config.StateNamespace,
-                assignments,
-                !config.OriginalParts.DeformationEnabled);
+                assignments);
             generatedText[iniPath] = patched;
             patchedIniCount++;
         }

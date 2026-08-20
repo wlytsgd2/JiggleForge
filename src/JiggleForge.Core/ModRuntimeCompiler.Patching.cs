@@ -10,8 +10,7 @@ public sealed partial class ModRuntimeCompiler
         string source,
         IReadOnlyList<JiggleDrawConfig> draws,
         int stateNamespace,
-        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments,
-        bool adaptedDrawsOnly)
+        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments)
     {
         Match[] matches = DrawRegex().Matches(source)
             .Where(match => match.Groups["auto"].Success ||
@@ -54,8 +53,7 @@ public sealed partial class ModRuntimeCompiler
                 maskNamespace,
                 maskName,
                 stateNamespace,
-                indent,
-                adaptedDrawsOnly));
+                indent));
             cursor = match.Index + match.Length;
 
         }
@@ -75,8 +73,7 @@ public sealed partial class ModRuntimeCompiler
         string maskNamespace,
         string maskName,
         int stateNamespace,
-        string indent,
-        bool adaptedDrawsOnly)
+        string indent)
     {
         StringBuilder block = new();
         block.Append(indent).Append("; ").Append(ModProjectService.PatchMarker)
@@ -89,16 +86,11 @@ public sealed partial class ModRuntimeCompiler
             .Append(draw.SourceSection.Replace('|', '_')).AppendLine();
         block.Append(indent).Append("$\\jiggle_forge_inspector_")
             .Append(stateNamespace).Append("\\drawSeen = 1").AppendLine();
-        if (adaptedDrawsOnly)
-        {
-            block.Append(indent).Append("run = CommandList\\jiggle_forge\\EnableAdaptedOnly").AppendLine();
-        }
-
         if (!draw.DeformationEnabled)
         {
             block.Append(indent).Append("vs-t72 = null").AppendLine();
             block.Append(indent).Append("vs-t73 = null").AppendLine();
-            AppendPickCommands(block, indent, draw, assignment, resourceName, maskNamespace, maskName, rebindState: false);
+            AppendPickCommands(block, indent, draw, assignment);
             block.Append(match.Value.TrimEnd('\r', '\n')).AppendLine();
             AppendPickObjectReset(block, indent);
             block.Append(indent).Append("; ").Append(ModProjectService.PatchMarker).Append(" END");
@@ -114,7 +106,7 @@ public sealed partial class ModRuntimeCompiler
                 indent,
                 binding);
         }
-        AppendPickCommands(block, indent, draw, assignment, resourceName, maskNamespace, maskName, rebindState: true);
+        AppendPickCommands(block, indent, draw, assignment);
         AppendConsumerBindings(block, indent);
         block.Append(match.Value.TrimEnd('\r', '\n')).AppendLine();
         AppendConsumerReset(block, indent);
@@ -129,44 +121,30 @@ public sealed partial class ModRuntimeCompiler
         StringBuilder block,
         string indent,
         JiggleDrawConfig draw,
-        RuntimeDrawAssignment assignment,
-        string resourceName,
-        string maskNamespace,
-        string maskName,
-        bool rebindState)
+        RuntimeDrawAssignment assignment)
     {
         block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
+        block.Append(indent).Append("    $\\jiggle_forge\\pickPriority = 3").AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = ").Append(assignment.ObjectId).AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = ").Append(DrawOrdinal(draw.Id)).AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickRangeAuto = ").Append(draw.Kind == JiggleDrawKind.Auto ? 1 : 0).AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickRangeCount = ").Append(draw.Count ?? 0).AppendLine();
-        if (draw.Kind == JiggleDrawKind.Numeric)
-        {
-            block.Append(indent).Append("    $\\jiggle_forge\\pickRangeFirst = ").Append(draw.FirstIndex).AppendLine();
-            block.Append(indent).Append("    $\\jiggle_forge\\pickRangeBase = ").Append(draw.BaseVertex).AppendLine();
-        }
-
-        block.Append(indent).Append("    run = CommandList\\jiggle_forge\\PickVisibleRange").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickRangeAuto = 0").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickRangeCount = 0").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = 0").AppendLine();
-        if (rebindState)
-        {
-            block.Append(indent).Append("    vs-t72 = ").Append(resourceName).AppendLine();
-            block.Append(indent).Append("    vs-t73 = Resource\\").Append(maskNamespace).Append('\\').Append(maskName).AppendLine();
-        }
-        else
-        {
-            block.Append(indent).Append("    vs-t72 = null").AppendLine();
-            block.Append(indent).Append("    vs-t73 = null").AppendLine();
-        }
+        // Inline pixel-shader picking reads the live IniParams register rather
+        // than the named variables themselves. Keep the register synchronized
+        // for the DrawIndexed that immediately follows this block.
+        block.Append(indent).Append("    x26 = $\\jiggle_forge\\pickPriority").AppendLine();
+        block.Append(indent).Append("    y26 = $\\jiggle_forge\\pickSourceDraw").AppendLine();
+        block.Append(indent).Append("    z26 = $\\jiggle_forge\\pickObjectID").AppendLine();
         block.Append(indent).Append("endif").AppendLine();
     }
 
     private static void AppendPickObjectReset(StringBuilder block, string indent)
     {
         block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
+        block.Append(indent).Append("    $\\jiggle_forge\\pickPriority = 1").AppendLine();
         block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = 1").AppendLine();
+        block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = 0").AppendLine();
+        block.Append(indent).Append("    x26 = $\\jiggle_forge\\pickPriority").AppendLine();
+        block.Append(indent).Append("    y26 = $\\jiggle_forge\\pickSourceDraw").AppendLine();
+        block.Append(indent).Append("    z26 = $\\jiggle_forge\\pickObjectID").AppendLine();
         block.Append(indent).Append("endif").AppendLine();
     }
 
@@ -186,8 +164,7 @@ public sealed partial class ModRuntimeCompiler
         string source,
         IReadOnlyCollection<JiggleDrawConfig> draws,
         IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments,
-        int stateNamespace,
-        bool adaptedDrawsOnly)
+        int stateNamespace)
     {
         HashSet<string> expected = draws.Select(draw => draw.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         HashSet<string> patchedBlocks = new(StringComparer.OrdinalIgnoreCase);
@@ -225,8 +202,7 @@ public sealed partial class ModRuntimeCompiler
                 maskNamespace,
                 maskName,
                 stateNamespace,
-                drawCommand.Groups["indent"].Value,
-                adaptedDrawsOnly);
+                drawCommand.Groups["indent"].Value);
         });
 
         foreach (JiggleDrawConfig draw in draws)

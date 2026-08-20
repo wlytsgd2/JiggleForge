@@ -125,7 +125,7 @@ JiggleForge 将任意受支持角色及替换 Mod 的 Draw 映射为可独立配
 - 生成 Mask 与 Draw 检测器资源；
 - 原地更新 Mod，同时保留原始绘制命令和条件结构。
 
-Schema 1 项目迁移到 Schema 2 前必须创建不可覆盖备份。
+旧 Schema 项目迁移到当前 Schema 前必须创建不可覆盖备份。
 
 ## 验收条件
 

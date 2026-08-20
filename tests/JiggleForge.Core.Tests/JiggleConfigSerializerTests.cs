@@ -13,7 +13,6 @@ public sealed class JiggleConfigSerializerTests
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
             StateNamespace = 37,
         };
-        source.OriginalParts.DeformationEnabled = false;
         source.Physics.HoldDampingRatio = 0.73;
         source.Physics.HoldFrequencyHz = 14.0;
         source.Physics.ReleaseDampingRatio = 0.81;
@@ -74,7 +73,6 @@ public sealed class JiggleConfigSerializerTests
 
         Assert.AreEqual(source.ProjectId, result.ProjectId);
         Assert.AreEqual(37, result.StateNamespace);
-        Assert.IsFalse(result.OriginalParts.DeformationEnabled);
         Assert.AreEqual("Body Nude", result.Draws[0].Alias);
         Assert.AreEqual("Masks\\Body.dds", result.Draws[0].Mask);
         Assert.AreEqual("Draw0001", result.Groups[0].Draws[0]);
@@ -95,14 +93,13 @@ public sealed class JiggleConfigSerializerTests
     }
 
     [TestMethod]
-    public void OlderConfigurationsKeepDrawsEnabledButDefaultOriginalPartsToDisabled()
+    public void RemovedOriginalPartsSwitchIsAcceptedButNotSerialized()
     {
         JiggleProjectConfig source = new()
         {
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
             StateNamespace = 37,
         };
-        source.OriginalParts.DeformationEnabled = true;
         source.Draws.Add(new JiggleDrawConfig
         {
             Id = "Draw0001",
@@ -115,18 +112,49 @@ public sealed class JiggleConfigSerializerTests
             ObjectId = 101,
         });
         string current = JiggleConfigSerializer.Serialize(source);
-        Assert.IsTrue(JiggleConfigSerializer.Parse(current).OriginalParts.DeformationEnabled);
-        string legacy = current
-            .Replace(
-                "\r\n[OriginalParts]\r\ndeform_enabled = true\r\n",
-                "\r\n",
-                StringComparison.Ordinal)
-            .Replace("deform_enabled = true\r\n", string.Empty, StringComparison.Ordinal);
+        Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
+        string legacy = current + "\r\n[OriginalParts]\r\ndeform_enabled = false\r\n";
 
         JiggleProjectConfig result = JiggleConfigSerializer.Parse(legacy);
 
         Assert.IsTrue(result.Draws[0].DeformationEnabled);
-        Assert.IsFalse(result.OriginalParts.DeformationEnabled);
+        Assert.IsFalse(JiggleConfigSerializer.Serialize(result)
+            .Contains("[OriginalParts]", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void SchemaTwoOriginalPartsSwitchMigratesToAlwaysEnabledDefaultChannel()
+    {
+        JiggleProjectConfig source = new()
+        {
+            ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
+            StateNamespace = 37,
+        };
+        string legacy = JiggleConfigSerializer.Serialize(source)
+            .Replace("schema = 3", "schema = 2", StringComparison.Ordinal) +
+            "\r\n[OriginalParts]\r\ndeform_enabled = false\r\n";
+        string root = Path.Combine(
+            Path.GetTempPath(),
+            "JiggleForgeSchemaTests",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        string path = Path.Combine(root, JiggleProjectConfig.DefaultFileName);
+        File.WriteAllText(path, legacy);
+
+        try
+        {
+            JiggleProjectConfig migrated = JiggleConfigSerializer.Load(path);
+
+            Assert.AreEqual(JiggleProjectConfig.CurrentSchemaVersion, migrated.SchemaVersion);
+            Assert.IsTrue(File.Exists(path + ".schema2.bak"));
+            string current = File.ReadAllText(path);
+            Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
+            StringAssert.Contains(current, "schema = 3");
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 
     [TestMethod]
@@ -153,7 +181,7 @@ public sealed class JiggleConfigSerializerTests
     }
 
     [TestMethod]
-    public void SchemaOnePhysicsMigratesToSchemaTwoAndLoadCreatesABackup()
+    public void SchemaOnePhysicsMigratesToCurrentSchemaAndLoadCreatesABackup()
     {
         string legacy = """
             [Project]
@@ -196,16 +224,17 @@ public sealed class JiggleConfigSerializerTests
         {
             JiggleProjectConfig migrated = JiggleConfigSerializer.Load(path);
 
-            Assert.AreEqual(2, migrated.SchemaVersion);
+            Assert.AreEqual(JiggleProjectConfig.CurrentSchemaVersion, migrated.SchemaVersion);
             Assert.AreEqual(10.0, migrated.Physics.HoldFrequencyHz, 0.0001);
             Assert.AreEqual(2.2, migrated.Physics.ReleaseFrequencyHz, 0.0001);
             Assert.AreEqual(0.12, migrated.Physics.ReleaseImpulse, 0.0001);
             Assert.AreEqual(0.02, migrated.Physics.TargetFollowSeconds, 0.0001);
             Assert.IsTrue(File.Exists(path + ".schema1.bak"));
             string current = File.ReadAllText(path);
-            StringAssert.Contains(current, "schema = 2");
+            StringAssert.Contains(current, $"schema = {JiggleProjectConfig.CurrentSchemaVersion}");
             StringAssert.Contains(current, "hold_frequency_hz = 10");
             Assert.IsFalse(current.Contains("grab_spring", StringComparison.Ordinal));
+            Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
         }
         finally
         {

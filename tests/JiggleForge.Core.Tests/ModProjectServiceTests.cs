@@ -49,7 +49,6 @@ public sealed class ModProjectServiceTests
         Assert.AreEqual("else if $swapvar == 1", config.Draws[1].Branch);
         Assert.AreEqual(config.Draws[0].StateIndex + 1, config.Draws[0].ObjectId);
         Assert.IsTrue(config.Inspector.Enabled);
-        Assert.IsFalse(config.OriginalParts.DeformationEnabled);
         Assert.IsTrue(config.Groups.Any(group =>
             string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)));
     }
@@ -341,21 +340,30 @@ public sealed class ModProjectServiceTests
         string disabled = File.ReadAllText(iniPath);
         string disabledBody = GetDrawMarkerBody(disabled, "Draw0001");
         StringAssert.Contains(disabledBody, "drawindexed = 300, 0, 0");
-        StringAssert.Contains(disabledBody, "PickVisibleRange");
+        StringAssert.Contains(disabledBody, "$\\jiggle_forge\\pickPriority = 3");
+        StringAssert.Contains(disabledBody, "x26 = $\\jiggle_forge\\pickPriority");
+        StringAssert.Contains(disabledBody, "y26 = $\\jiggle_forge\\pickSourceDraw");
+        StringAssert.Contains(disabledBody, "z26 = $\\jiggle_forge\\pickObjectID");
+        Assert.IsFalse(disabledBody.Contains("PickVisibleRange", StringComparison.Ordinal));
         StringAssert.Contains(disabledBody, "drawSeen = 1");
         StringAssert.Contains(disabledBody, $"$\\jiggle_forge\\pickObjectID = {config.Draws[0].ObjectId}");
         StringAssert.Contains(disabledBody, "vs-t72 = null");
         Assert.IsFalse(disabledBody.Contains("RegisterParams", StringComparison.Ordinal));
         Assert.IsFalse(disabledBody.Contains("vs-t72 = ResourceJiggleForgeDrawState001", StringComparison.Ordinal));
         string enabledSibling = GetDrawMarkerBody(disabled, "Draw0002");
-        StringAssert.Contains(enabledSibling, "PickVisibleRange");
+        StringAssert.Contains(enabledSibling, "$\\jiggle_forge\\pickPriority = 3");
+        Assert.IsFalse(enabledSibling.Contains("PickVisibleRange", StringComparison.Ordinal));
         StringAssert.Contains(enabledSibling, $"$\\jiggle_forge\\pickObjectID = {config.Draws[1].ObjectId}");
         StringAssert.Contains(GetStateResourceBody(disabled, 2), $"data = {config.Draws[1].StateIndex}");
 
         config.Draws[0].DeformationEnabled = true;
         new ModRuntimeCompiler().Apply(root!, config);
         string enabledBody = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
-        StringAssert.Contains(enabledBody, "PickVisibleRange");
+        StringAssert.Contains(enabledBody, "$\\jiggle_forge\\pickPriority = 3");
+        StringAssert.Contains(enabledBody, "x26 = $\\jiggle_forge\\pickPriority");
+        StringAssert.Contains(enabledBody, "y26 = $\\jiggle_forge\\pickSourceDraw");
+        StringAssert.Contains(enabledBody, "z26 = $\\jiggle_forge\\pickObjectID");
+        Assert.IsFalse(enabledBody.Contains("PickVisibleRange", StringComparison.Ordinal));
         StringAssert.Contains(enabledBody, "RegisterGroupParameters");
         StringAssert.Contains(enabledBody, "vs-t72");
         StringAssert.Contains(enabledBody, "drawSeen = 1");
@@ -363,12 +371,13 @@ public sealed class ModProjectServiceTests
         config.Draws[0].DeformationEnabled = false;
         new ModRuntimeCompiler().Apply(root!, config);
         string disabledAgain = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
-        StringAssert.Contains(disabledAgain, "PickVisibleRange");
+        StringAssert.Contains(disabledAgain, "$\\jiggle_forge\\pickPriority = 3");
+        Assert.IsFalse(disabledAgain.Contains("PickVisibleRange", StringComparison.Ordinal));
         Assert.IsFalse(disabledAgain.Contains("RegisterParams", StringComparison.Ordinal));
     }
 
     [TestMethod]
-    public void DisablingOriginalPartsAddsAdaptedOnlyModeAndCanBeReversed()
+    public void AdaptedDrawsNeverSuppressTheDefaultChannel()
     {
         string iniPath = Path.Combine(root!, "Example.ini");
         File.WriteAllText(iniPath, """
@@ -379,24 +388,13 @@ public sealed class ModProjectServiceTests
 
         ModProjectService service = new();
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
-        config.OriginalParts.DeformationEnabled = false;
 
         new ModRuntimeCompiler().Apply(root!, config);
-        string restricted = File.ReadAllText(iniPath);
-        foreach (JiggleDrawConfig draw in config.Draws)
-        {
-            StringAssert.Contains(
-                GetDrawMarkerBody(restricted, draw.Id),
-                "run = CommandList\\jiggle_forge\\EnableAdaptedOnly");
-        }
-
-        config.OriginalParts.DeformationEnabled = true;
-        new ModRuntimeCompiler().Apply(root!, config);
-        string unrestricted = File.ReadAllText(iniPath);
+        string patched = File.ReadAllText(iniPath);
         foreach (JiggleDrawConfig draw in config.Draws)
         {
             Assert.IsFalse(
-                GetDrawMarkerBody(unrestricted, draw.Id)
+                GetDrawMarkerBody(patched, draw.Id)
                     .Contains("EnableAdaptedOnly", StringComparison.Ordinal));
         }
     }
@@ -413,7 +411,6 @@ public sealed class ModProjectServiceTests
 
         ModProjectService service = new();
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
-        config.OriginalParts.DeformationEnabled = true;
         config.Draws[0].Group = OriginalPartsConfig.GroupName;
         config.Draws[1].Group = "Clothes";
 
@@ -495,11 +492,8 @@ public sealed class ModProjectServiceTests
         other.Draws.Add(config.Draws[1].Id);
         config.Groups.Add(other);
 
-        string legacy = JiggleConfigSerializer.Serialize(config)
-            .Replace(
-                "[OriginalParts]\r\ndeform_enabled = true",
-                "[OriginalParts]\r\ndeform_enabled = true\r\ngroup = \"Body\"",
-                StringComparison.Ordinal)
+        string legacy = (JiggleConfigSerializer.Serialize(config) +
+                         "\r\n[OriginalParts]\r\ndeform_enabled = false\r\ngroup = \"Body\"\r\n")
             .Replace(
                 $"draws = [\"{config.Draws[0].Id}\"]",
                 $"draws = [\"{OriginalPartsConfig.Id}\",\"{config.Draws[0].Id}\"]",

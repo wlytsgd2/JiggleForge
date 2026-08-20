@@ -1,6 +1,6 @@
 // Coordinate-only picker for supported native body/material vertex shaders.
 // The replacement VS exports the undeformed world position and the camera
-// screen basis through TEXCOORD9/10/11.
+// screen basis through dedicated TEXCOORD channels.
 
 #ifdef JIGGLEFORGE_1F6_LAYOUT
 
@@ -40,8 +40,9 @@ struct VS_OUT
     float4 texcoord7 : TEXCOORD7;
     float3 texcoord8 : TEXCOORD8;
     float3 jiggleForgeWorldPosition : TEXCOORD9;
-    float3 jiggleForgeScreenRight : TEXCOORD10;
-    float3 jiggleForgeScreenUp : TEXCOORD11;
+    float4 jiggleForgePickPadding : TEXCOORD10;
+    float3 jiggleForgeScreenRight : TEXCOORD11;
+    float3 jiggleForgeScreenUp : TEXCOORD12;
     float4 pos : SV_Position;
 };
 

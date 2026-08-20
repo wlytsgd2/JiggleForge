@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.16 — 2026-08-21
+
+### 简体中文
+
+- 将鼠标拾取内联到实际材质像素着色器，在材质裁剪之后使用可见表面的深度结果，改善未适配 Mod 中可见模型与可拖动区域不一致、鼠标穿透前方部件的问题。
+- 适配 Mod 的每个 `DrawIndexed` 现在直接向运行时提供独立的 ObjectID 和 Draw 身份，继续支持独立状态、分组、依赖关系与纹理 Mask。
+- 新增对已占用 `SV_POSITION.xy` 输入布局的材质 PS 的兼容，并由主体 VS 提供世界坐标、屏幕基向量和表面法线。
+- 删除旧的第二次拾取与范围拾取路径，避免后一次无条件拾取覆盖有效结果；移除不再符合当前拾取模型的“关闭原版变形”开关。
+- 配置 schema 升级到 3；旧配置仍可读取，旧适配 Mod 的兼容接口继续保留为空操作。
+- 内联拾取使用提前深度/模板处理，因此摄像机近距离下的角色淡出可能会保持为清晰、不透明状态。
+
+### English
+
+- Moved cursor picking into the actual material pixel shader. Visible-surface depth is evaluated after material clipping, improving alignment between rendered geometry and draggable areas in unadapted Mods and reducing picks through foreground parts.
+- Every adapted `DrawIndexed` now supplies its own ObjectID and Draw identity directly to the runtime while retaining independent state, groups, dependency edges, and texture masks.
+- Added compatibility for material pixel shaders that already consume `SV_POSITION.xy`; body vertex shaders now export world position, screen basis vectors, and the surface normal.
+- Removed the old second-pick and range-pick paths so a later unconditional pick cannot overwrite a valid result, and removed the “disable original deformation” option because it no longer matches the current picking model.
+- Bumped the configuration schema to 3. Older configurations remain readable, and the legacy adapted-Mod compatibility interface remains available as a no-op.
+- Inline picking uses early depth/stencil processing, so close-camera character fading may remain visually clear and opaque.
+
 ## 0.1.15 — 2026-08-08
 
 ### 简体中文

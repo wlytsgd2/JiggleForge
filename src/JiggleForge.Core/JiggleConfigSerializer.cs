@@ -60,10 +60,6 @@ public static class JiggleConfigSerializer
         output.AppendLine("[Inspector]");
         Write(output, "enabled", config.Inspector.Enabled);
 
-        output.AppendLine();
-        output.AppendLine("[OriginalParts]");
-        Write(output, "deform_enabled", config.OriginalParts.DeformationEnabled);
-
         foreach (JiggleDrawConfig draw in config.Draws)
         {
             output.AppendLine();
@@ -203,7 +199,10 @@ public static class JiggleConfigSerializer
                     switch (key.ToLowerInvariant())
                     {
                         case "deform_enabled":
-                            config.OriginalParts.DeformationEnabled = bool.Parse(value);
+                            // Removed in schema 3. Parse the legacy value so malformed
+                            // configurations still fail, but default parts are now
+                            // always allowed to participate in deformation.
+                            _ = bool.Parse(value);
                             break;
                         case "group":
                             config.OriginalParts.LegacyGroup = ParseString(value);
@@ -264,7 +263,7 @@ public static class JiggleConfigSerializer
             }
         }
 
-        if (config.SchemaVersion == 1)
+        if (config.SchemaVersion < JiggleProjectConfig.CurrentSchemaVersion)
         {
             config.SchemaVersion = JiggleProjectConfig.CurrentSchemaVersion;
         }
@@ -350,9 +349,9 @@ public static class JiggleConfigSerializer
             case "project_id": config.ProjectId = Guid.Parse(ParseString(value)); break;
             case "state_namespace": config.StateNamespace = int.Parse(value, CultureInfo.InvariantCulture); break;
             case "adapted_draws_only":
-                // Compatibility with the short-lived project switch that
-                // preceded the editable OriginalParts virtual draw.
-                config.OriginalParts.DeformationEnabled = !bool.Parse(value);
+                // Compatibility with the removed project switch. Validate and
+                // ignore it; the default channel is always enabled in schema 3.
+                _ = bool.Parse(value);
                 break;
             default: throw new InvalidDataException($"Unknown Project key: {key}.");
         }

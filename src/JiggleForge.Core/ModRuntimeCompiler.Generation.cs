@@ -55,8 +55,7 @@ public sealed partial class ModRuntimeCompiler
         Dictionary<string, RuntimeGroupLeader> leaders = new(StringComparer.OrdinalIgnoreCase);
         foreach (JiggleGroupConfig group in config.Groups)
         {
-            if (config.OriginalParts.DeformationEnabled &&
-                string.Equals(
+            if (string.Equals(
                     group.Name,
                     OriginalPartsConfig.GroupName,
                     StringComparison.OrdinalIgnoreCase))

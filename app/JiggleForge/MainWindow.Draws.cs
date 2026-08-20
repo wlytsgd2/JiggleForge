@@ -12,20 +12,8 @@ public sealed partial class MainWindow
 {
     private const string DrawDragDataFormat = "JiggleForge.DrawId";
 
-    private void CaptureOriginalPartsToggle()
-    {
-        DrawGroupEditorNode? node = drawTreeRoots
-            .OfType<DrawGroupEditorNode>()
-            .FirstOrDefault(group => group.IsOriginalParts);
-        if (node is not null)
-        {
-            originalPartsEnabledEditor = node.OriginalPartsEnabled;
-        }
-    }
-
     private void RefreshDrawTree()
     {
-        CaptureOriginalPartsToggle();
         Dictionary<string, bool> expanded = new(StringComparer.OrdinalIgnoreCase);
         foreach (TreeViewNode node in DrawGroupTree.RootNodes)
         {
@@ -53,7 +41,6 @@ public sealed partial class MainWindow
             isOriginalParts: true,
             isUngrouped: false,
             expanded);
-        original.OriginalPartsEnabled = originalPartsEnabledEditor;
         AddDrawChildren(original, OriginalPartsConfig.GroupName);
         rebuiltRoots.Add(original);
 

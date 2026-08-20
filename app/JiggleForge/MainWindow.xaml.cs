@@ -90,7 +90,6 @@ public sealed partial class MainWindow : Window
     private RuntimeEnvironmentStatus? runtimeStatus;
     private bool runtimeStatusInitialized;
     private int runtimeBusyCount;
-    private bool originalPartsEnabledEditor;
     private const string DefaultPhysicsScopeKey = "";
     private string activePhysicsScopeKey = DefaultPhysicsScopeKey;
     private bool physicsScopeChanging;
@@ -285,8 +284,6 @@ public sealed class DrawTreeDrawNode : DrawTreeItem
 
 public sealed class DrawGroupEditorNode : DrawTreeItem, INotifyPropertyChanged
 {
-    private bool originalPartsEnabled;
-
     public required string Name { get; init; }
 
     public required string DisplayName { get; init; }
@@ -297,25 +294,7 @@ public sealed class DrawGroupEditorNode : DrawTreeItem, INotifyPropertyChanged
 
     public bool IsExpanded { get; set; } = true;
 
-    public Visibility OriginalToggleVisibility =>
-        IsOriginalParts ? Visibility.Visible : Visibility.Collapsed;
-
     public ObservableCollection<DrawTreeItem> Children { get; } = [];
-
-    public bool OriginalPartsEnabled
-    {
-        get => originalPartsEnabled;
-        set
-        {
-            if (originalPartsEnabled == value)
-            {
-                return;
-            }
-
-            originalPartsEnabled = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OriginalPartsEnabled)));
-        }
-    }
 
     public string CountText => AppLanguageService.Format("DrawCount", Children.Count);
 

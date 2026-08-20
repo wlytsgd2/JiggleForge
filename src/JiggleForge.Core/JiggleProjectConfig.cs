@@ -2,7 +2,7 @@ namespace JiggleForge.Core;
 
 public sealed class JiggleProjectConfig
 {
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
     public const string DefaultFileName = "JiggleForge.txt";
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
@@ -86,8 +86,6 @@ public sealed class OriginalPartsConfig
     public const string Id = "OriginalParts";
 
     public const string GroupName = "OriginalParts";
-
-    public bool DeformationEnabled { get; set; }
 
     public string LegacyGroup { get; set; } = string.Empty;
 }

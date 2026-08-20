@@ -59,8 +59,6 @@
   <data name="TourNext" xml:space="preserve"><value>Next</value></data>
   <data name="TourCompleted" xml:space="preserve"><value>The interface tour is complete. You can replay it from Guide at the bottom of the navigation pane.</value></data>
   <data name="TourSaveFailed" xml:space="preserve"><value>The tour is complete, but its completion state could not be saved: {0}</value></data>
-  <data name="OriginalPartsToggle.OnContent" xml:space="preserve"><value>Allow original parts</value></data>
-  <data name="OriginalPartsToggle.OffContent" xml:space="preserve"><value>Disable original parts</value></data>
   <data name="DrawAliasTextBox.PlaceholderText" xml:space="preserve"><value>For example: Body</value></data>
   <data name="UpdateTitleButton.Content" xml:space="preserve"><value>Update available</value></data>
   <data name="OverviewNavItem.Content" xml:space="preserve"><value>Overview</value></data>
@@ -83,7 +81,7 @@
   <data name="RestoreOriginalButton.Content" xml:space="preserve"><value>Restore original Mod</value></data>
   <data name="OpenExplorerButton.Content" xml:space="preserve"><value>Open in File Explorer</value></data>
   <data name="DrawPageTitle.Text" xml:space="preserve"><value>Draw configuration</value></data>
-  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>Drag a Draw onto a group header, or right-click it to choose a group. OriginalParts is fixed and its switch is beside the group name.</value></data>
+  <data name="DrawPageSubtitle.Text" xml:space="preserve"><value>Drag a Draw onto a group header, or right-click it to choose a group. OriginalParts is the fixed group used by the default channel.</value></data>
   <data name="CreateDrawGroupButton.Content" xml:space="preserve"><value>New group</value></data>
   <data name="DrawDeformColumn.Text" xml:space="preserve"><value>Deform</value></data>
   <data name="DrawNameColumn.Text" xml:space="preserve"><value>Name</value></data>
@@ -310,7 +308,6 @@
   <data name="UpdateToLatest" xml:space="preserve"><value>Update to latest</value></data>
   <data name="ReinstallLatest" xml:space="preserve"><value>Reinstall latest version</value></data>
   <data name="UnsupportedQuoteInPath" xml:space="preserve"><value>The path contains an unsupported double-quote character.</value></data>
-  <data name="OriginalPartsToggle.ToolTip" xml:space="preserve"><value>Controls all original parts not replaced by the current Mod.</value></data>
   <data name="UpdateTitleButton.ToolTip" xml:space="preserve"><value>Open Settings and update JiggleForge</value></data>
   <data name="LoadingModHistory" xml:space="preserve"><value>Loading adapted projects…</value></data>
   <data name="ModHistoryDescription" xml:space="preserve"><value>Shows project history and searches the current ZZMI only for Mods with JiggleForge adaptation markers. Ordinary Mods are not scanned or listed.</value></data>
