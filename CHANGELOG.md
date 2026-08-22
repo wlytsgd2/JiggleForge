@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.19 — 2026-08-22
+
+### 简体中文
+
+- 允许 JiggleForge 与 RabbitFX 在同一个材质像素着色器中共享标准 `t120` INI 参数槽位。
+- 继续使用 JiggleForge 私有的 `t119` 与 `u7` 作为重复注入保护，不改变拾取、运动状态或适配 Mod 接口。
+- 完整正式包与手动安装包现在包含完全相同的共享槽位运行时。
+
+### English
+
+- Allowed JiggleForge and RabbitFX to share the standard `t120` INI-parameter slot in the same material pixel shader.
+- Kept the JiggleForge-private `t119` and `u7` resources as duplicate-injection guards without changing picking, motion state, or the adapted-Mod interface.
+- The full release and manual package now contain the exact same shared-slot runtime.
+
 ## 0.1.18 — 2026-08-21
 
 ### 简体中文

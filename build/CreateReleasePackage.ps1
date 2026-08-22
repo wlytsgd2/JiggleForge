@@ -7,6 +7,8 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $projectPath = Join-Path $repositoryRoot 'app\JiggleForge\JiggleForge.csproj'
 $launcherProjectPath = Join-Path $repositoryRoot 'src\JiggleForge.Launcher\JiggleForge.Launcher.csproj'
+$updaterProjectPath = Join-Path $repositoryRoot 'src\JiggleForge.Updater\JiggleForge.Updater.csproj'
+$wheelBridgeProjectPath = Join-Path $repositoryRoot 'src\JiggleForge.WheelBridge\JiggleForge.WheelBridge.csproj'
 [xml]$project = Get-Content -LiteralPath $projectPath -Raw
 $version = [string]$project.Project.PropertyGroup.Version
 if ([string]::IsNullOrWhiteSpace($version)) {
@@ -17,6 +19,8 @@ $artifactRoot = Join-Path $repositoryRoot 'artifacts'
 $publishDirectory = Join-Path $artifactRoot "JiggleForge-v$version"
 $applicationDirectory = Join-Path $publishDirectory 'App'
 $runtimeDirectory = Join-Path $publishDirectory 'Runtime'
+$buildArtifactsDirectory = Join-Path $artifactRoot '_release-build'
+$configurationPivot = $Configuration.ToLowerInvariant()
 $zipPath = Join-Path $artifactRoot "JiggleForge-win-x64-v$version.zip"
 $checksumPath = "$zipPath.sha256"
 
@@ -30,10 +34,35 @@ if (Test-Path -LiteralPath $publishDirectory) {
     Remove-Item -LiteralPath $publishDirectory -Recurse -Force
 }
 
+if (Test-Path -LiteralPath $buildArtifactsDirectory) {
+    $resolvedArtifactRoot = [System.IO.Path]::GetFullPath($artifactRoot).TrimEnd('\') + '\'
+    $resolvedBuildArtifactsDirectory = [System.IO.Path]::GetFullPath($buildArtifactsDirectory)
+    if (-not $resolvedBuildArtifactsDirectory.StartsWith(
+            $resolvedArtifactRoot,
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to remove unexpected build-artifacts directory: $resolvedBuildArtifactsDirectory"
+    }
+
+    Remove-Item -LiteralPath $buildArtifactsDirectory -Recurse -Force
+}
+
+# These two payloads are copied by the WinUI project from their normal build
+# locations. Build them explicitly so a release can never reuse stale files.
+foreach ($payloadProjectPath in @($updaterProjectPath, $wheelBridgeProjectPath)) {
+    dotnet build $payloadProjectPath `
+        --configuration $Configuration `
+        --property:NuGetAudit=false
+    if ($LASTEXITCODE -ne 0) {
+        throw "Payload build failed with exit code $LASTEXITCODE`: $payloadProjectPath"
+    }
+}
+
 dotnet publish $projectPath `
     --configuration $Configuration `
     --runtime $RuntimeIdentifier `
     --self-contained true `
+    --artifacts-path $buildArtifactsDirectory `
+    --property:NuGetAudit=false `
     --output $applicationDirectory
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE"
@@ -72,12 +101,14 @@ Remove-Item -LiteralPath (Join-Path $applicationDirectory 'JiggleForge.manifest.
 
 dotnet build $launcherProjectPath `
     --configuration $Configuration `
-    --property:Platform=x64
+    --property:Platform=x64 `
+    --artifacts-path $buildArtifactsDirectory `
+    --property:NuGetAudit=false
 if ($LASTEXITCODE -ne 0) {
     throw "Launcher build failed with exit code $LASTEXITCODE"
 }
 
-$launcherOutput = Join-Path $repositoryRoot "src\JiggleForge.Launcher\bin\x64\$Configuration\net48\JiggleForge.exe"
+$launcherOutput = Join-Path $buildArtifactsDirectory "bin\JiggleForge.Launcher\$configurationPivot\JiggleForge.exe"
 if (-not (Test-Path -LiteralPath $launcherOutput -PathType Leaf)) {
     throw "Launcher output is missing: $launcherOutput"
 }

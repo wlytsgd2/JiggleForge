@@ -15,6 +15,7 @@ Included
 - The in-game master switch (F7 by default).
 - Supported original characters and scenes.
 - Runtime support for Mods that have already been adapted with JiggleForge.
+- The standard t120 INI-parameter slot is shared with RabbitFX.
 
 Not included
 ------------

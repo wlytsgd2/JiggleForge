@@ -63,6 +63,31 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void InlinePicking_SharesStandardIniParamsT120ButKeepsPrivateInjectionGuards()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        foreach (string sectionName in new[]
+                 {
+                     "ShaderRegexJiggleForgeInlineBodyPick.Pattern",
+                     "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern"
+                 })
+        {
+            string pattern = ReadSection(ini, sectionName);
+            StringAssert.Contains(pattern, @"(?:t119|u7)\b");
+            Assert.IsFalse(
+                pattern.Contains("t119|t120|u7", StringComparison.Ordinal),
+                $"{sectionName} must allow an existing shared t120 declaration.");
+        }
+
+        StringAssert.Contains(
+            ReadSection(ini, "ShaderRegexJiggleForgeInlineBodyPick.InsertDeclarations"),
+            "dcl_resource_texture1d (float,float,float,float) t120");
+        StringAssert.Contains(
+            ReadSection(ini, "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.InsertDeclarations"),
+            "dcl_resource_texture1d (float,float,float,float) t120");
+    }
+
+    [TestMethod]
     public void Runtime_IsAlwaysActiveAndConsumerAccessIsRestrictedToSupportedSlots()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
