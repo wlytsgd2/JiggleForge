@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.20 — 2026-08-24
+
+### 简体中文
+
+- 新增 NPC 身体轮廓 VS `29837c29e23201fd`，使该轮廓 pass 可以复用主体的 JiggleState 并同步变形。
+- NPC 轮廓只消费已有状态，不参与鼠标拾取；位移同时应用到主裁剪位置和第二套位置输出，避免轮廓与主体错位。
+- 桌面应用、完整正式包、手动安装包和手动卸载清单均已登记这一新 VS。
+
+### English
+
+- Added NPC body-outline VS `29837c29e23201fd`, allowing the outline pass to reuse the body JiggleState and deform in sync.
+- The NPC outline only consumes existing state and never participates in picking; displacement is applied to both position paths to keep the outline aligned with the body.
+- Registered the new VS in the desktop application, full release, manual package, and manual-removal list.
+
 ## 0.1.19 — 2026-08-22
 
 ### 简体中文

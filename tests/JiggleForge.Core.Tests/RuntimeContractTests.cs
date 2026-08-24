@@ -94,18 +94,19 @@ public sealed class RuntimeContractTests
 
         string present = ReadSection(ini, "Present");
         StringAssert.Contains(present, "run = CommandListRuntimeStep");
+        int expectedConsumerBindings = RuntimeEnvironmentService.RequiredShaderHashes.Count + 3;
         Assert.AreEqual(
-            14,
+            expectedConsumerBindings,
             Regex.Matches(
                 ini,
                 @"(?im)^\s*vs-t75\s*=\s*ResourceMotionStates\s*$").Count,
-            "The eleven render paths, two picker paths, and visible-range rebind must use the motion-state table.");
+            "Every render path, both picker paths, and the visible-range rebind must use the motion-state table.");
         Assert.AreEqual(
-            14,
+            expectedConsumerBindings,
             Regex.Matches(
                 ini,
                 @"(?im)^\s*vs-t76\s*=\s*ResourceGroupParameters\s*$").Count,
-            "The eleven render paths, two picker paths, and visible-range rebind must use the group-parameter table.");
+            "Every render path, both picker paths, and the visible-range rebind must use the group-parameter table.");
         Assert.IsFalse(ini.Contains("vs-t66", StringComparison.Ordinal));
     }
 
@@ -550,6 +551,7 @@ public sealed class RuntimeContractTests
             "6883e4375b728e90",
             "1f6ab42231416fdb",
             "aa59281029db3a5a",
+            "29837c29e23201fd",
             "160b58ea1824c794",
             "a0b37a7c7c2a1905",
             "ad24b1c214866fd7",
@@ -596,6 +598,16 @@ public sealed class RuntimeContractTests
                 shader.Contains("JF_TestRadialWeight", StringComparison.Ordinal),
                 "The radial visibility probe must be replaced by the independent deformation field.");
         }
+
+        string npcOutline = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "ShaderFixes",
+            "29837c29e23201fd-vs_replace.txt"));
+        StringAssert.Contains(
+            npcOutline,
+            "r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;");
+        StringAssert.Contains(npcOutline, "r4.xyz += jiggleForgeAppliedDisplacement;");
     }
 
     [TestMethod]
