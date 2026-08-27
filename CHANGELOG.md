@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.21 — 2026-08-28
+
+### 简体中文
+
+- 新增公开的单 Draw 完全旁路接口：在目标 Draw 前设置 `z112 = 1`，并在 Draw 后恢复 `z112 = 0`。
+- 旁路时，替换 VS 会尽早跳过 JiggleForge 的 Mask、状态遍历、位移、屏幕基向量和法线重建等附加计算。
+- 旁路表面仍参加游戏原有深度测试；命中鼠标像素并通过深度测试时会清空拾取包，因此它不会被选中，也不会让鼠标穿过并拾取后方普通几何。
+- 保留应用现有“关闭 Draw 变形”开关的原有行为，并增加中英文开发文档与运行时契约测试。
+
+### English
+
+- Added a public per-Draw full-bypass interface: set `z112 = 1` immediately before the target Draw and restore `z112 = 0` immediately afterward.
+- The replacement VS now bypasses JiggleForge mask sampling, state iteration, displacement, screen-basis construction, and normal reconstruction as early as practical.
+- A bypassed surface still participates in the game's depth test. When it covers the cursor pixel and passes depth, it clears the pick packet, preventing both self-selection and ordinary click-through selection of geometry behind it.
+- Preserved the application's existing Disable Deformation behavior and added bilingual developer documentation plus runtime contract coverage.
+
 ## 0.1.20 — 2026-08-24
 
 ### 简体中文

@@ -28,6 +28,7 @@ Buffer<uint> JiggleForgeDirectStateIndex : register(t72);
 Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
 Buffer<float4> JF_MotionState : register(t75);
 Buffer<float4> JF_GroupParams : register(t76);
+Texture1D<float4> IniParams : register(t120);
 
 #include "JiggleForgeRuntime/draw_state_consumer.hlsl"
 
@@ -146,21 +147,27 @@ void main(
   r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
   r0.xyz = cb1[3].xyz + r0.xyz;
   float3 jiggleForgeBasePosition = r0.xyz;
-  float4 jiggleForgeUndeformedClip = ProjectJiggleForgePosition(jiggleForgeBasePosition);
-  float3 jiggleForgeScreenRight;
-  float3 jiggleForgeScreenUp;
-  ComputeJiggleForgeScreenBasis(jiggleForgeUndeformedClip, jiggleForgeScreenRight, jiggleForgeScreenUp);
+  bool jfDrawBypassed = JF_IsDrawBypassed();
+  float3 jiggleForgeScreenRight = float3(1.0, 0.0, 0.0);
+  float3 jiggleForgeScreenUp = float3(0.0, 1.0, 0.0);
   float3 jiggleForgeAppliedDisplacement = float3(0.0, 0.0, 0.0);
-  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+  float jiggleForgeVertexMask = 1.0;
   float3 jfActiveBaseDisplacement = float3(0.0, 0.0, 0.0);
   float jfMinimumActiveRadius = 0.0;
   bool jfDeformationActive = false;
 
-  jfActiveBaseDisplacement = JF_EvaluateBoundStates(
-    jiggleForgeBasePosition,
-    jiggleForgeVertexMask,
-    jfDeformationActive,
-    jfMinimumActiveRadius);
+  [branch]
+  if (!jfDrawBypassed)
+  {
+    float4 jiggleForgeUndeformedClip = ProjectJiggleForgePosition(jiggleForgeBasePosition);
+    ComputeJiggleForgeScreenBasis(jiggleForgeUndeformedClip, jiggleForgeScreenRight, jiggleForgeScreenUp);
+    jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+    jfActiveBaseDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition,
+      jiggleForgeVertexMask,
+      jfDeformationActive,
+      jfMinimumActiveRadius);
+  }
   jiggleForgeAppliedDisplacement = jfActiveBaseDisplacement;
 
   r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;

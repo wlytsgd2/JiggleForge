@@ -33,6 +33,7 @@ Buffer<uint> JiggleForgeDirectStateIndex : register(t72);
 Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
 Buffer<float4> JF_MotionState : register(t75);
 Buffer<float4> JF_GroupParams : register(t76);
+Texture1D<float4> IniParams : register(t120);
 
 #include "JiggleForgeRuntime/draw_state_consumer.hlsl"
 
@@ -172,24 +173,29 @@ void main(
   r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
   r0.xyz = cb1[3].xyz + r0.xyz;
   float3 jiggleForgeBasePosition = r0.xyz;
-  float4 jiggleForgeUndeformedClip = ProjectJiggleForgePosition(jiggleForgeBasePosition);
-  float3 jiggleForgeScreenRight;
-  float3 jiggleForgeScreenUp;
-  float3 jiggleForgeScreenForward;
-  ComputeJiggleForgeScreenBasis(
-    jiggleForgeUndeformedClip,
-    jiggleForgeScreenRight,
-    jiggleForgeScreenUp,
-    jiggleForgeScreenForward);
+  bool jfDrawBypassed = JF_IsDrawBypassed();
   float3 jiggleForgeTotalDisplacement = float3(0.0, 0.0, 0.0);
-  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
-  bool jfUnusedMovingInfluence;
-  float jfUnusedRadius;
-  jiggleForgeTotalDisplacement = JF_EvaluateBoundStates(
-    jiggleForgeBasePosition,
-    jiggleForgeVertexMask,
-    jfUnusedMovingInfluence,
-    jfUnusedRadius);
+  [branch]
+  if (!jfDrawBypassed)
+  {
+    float4 jiggleForgeUndeformedClip = ProjectJiggleForgePosition(jiggleForgeBasePosition);
+    float3 jiggleForgeScreenRight;
+    float3 jiggleForgeScreenUp;
+    float3 jiggleForgeScreenForward;
+    ComputeJiggleForgeScreenBasis(
+      jiggleForgeUndeformedClip,
+      jiggleForgeScreenRight,
+      jiggleForgeScreenUp,
+      jiggleForgeScreenForward);
+    float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+    bool jfUnusedMovingInfluence;
+    float jfUnusedRadius;
+    jiggleForgeTotalDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition,
+      jiggleForgeVertexMask,
+      jfUnusedMovingInfluence,
+      jfUnusedRadius);
+  }
 
   r0.xyz = jiggleForgeBasePosition + jiggleForgeTotalDisplacement;
   r1.xyzw = cb0[126].xyzw * r0.yyyy;

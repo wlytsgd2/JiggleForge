@@ -34,6 +34,7 @@ Buffer<uint> JiggleForgeDirectStateIndex : register(t72);
 Texture2D<float4> JiggleForgeDirectMaskTexture : register(t73);
 Buffer<float4> JF_MotionState : register(t75);
 Buffer<float4> JF_GroupParams : register(t76);
+Texture1D<float4> IniParams : register(t120);
 
 #include "JiggleForgeRuntime/draw_state_consumer.hlsl"
 
@@ -86,16 +87,20 @@ void main(
   r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
   r0.xyz = cb1[3].xyz + r0.xyz;
   float3 jiggleForgeBasePosition = r0.xyz;
+  bool jfDrawBypassed = JF_IsDrawBypassed();
   float3 jiggleForgeAppliedDisplacement = float3(0.0, 0.0, 0.0);
-  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
-
-  bool jfUnusedMovingInfluence;
-  float jfUnusedRadius;
-  jiggleForgeAppliedDisplacement = JF_EvaluateBoundStates(
-    jiggleForgeBasePosition,
-    jiggleForgeVertexMask,
-    jfUnusedMovingInfluence,
-    jfUnusedRadius);
+  [branch]
+  if (!jfDrawBypassed)
+  {
+    float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+    bool jfUnusedMovingInfluence;
+    float jfUnusedRadius;
+    jiggleForgeAppliedDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition,
+      jiggleForgeVertexMask,
+      jfUnusedMovingInfluence,
+      jfUnusedRadius);
+  }
 
   r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;
   r0.w = dot(v5.xy, v5.xy);

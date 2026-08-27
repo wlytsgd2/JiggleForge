@@ -1,5 +1,10 @@
 #include "deformation_field.hlsl"
 
+bool JF_IsDrawBypassed()
+{
+  return IniParams[112].z > 0.5;
+}
+
 float3 JF_EvaluateBoundStates(
   float3 worldPosition,
   float vertexMask,
@@ -7,6 +12,11 @@ float3 JF_EvaluateBoundStates(
   out float minimumActiveRadius)
 {
   hasMovingInfluence = false;
+  minimumActiveRadius = 0.0;
+
+  if (JF_IsDrawBypassed())
+    return float3(0.0, 0.0, 0.0);
+
   minimumActiveRadius = 100.0;
   float3 totalDisplacement = float3(0.0, 0.0, 0.0);
 

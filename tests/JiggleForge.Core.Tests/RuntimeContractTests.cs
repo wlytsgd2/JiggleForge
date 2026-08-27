@@ -88,6 +88,97 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    public void PerDrawBypass_UsesZ112AcrossIniPickingAndVertexDeformation()
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        foreach (string replacementSection in new[]
+                 {
+                     "ShaderRegexJiggleForgeInlineBodyPick.Pattern.Replace",
+                     "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern.Replace"
+                 })
+        {
+            string replacement = ReadSection(ini, replacementSection);
+            StringAssert.Contains(
+                replacement,
+                "${jf2}.xyzw, l(112, 0, 0, 0), t120.xyzw");
+            StringAssert.Contains(replacement, "${jf2}.x, ${jf2}.z, l(0.500000)");
+            Match bypassClear = Regex.Match(
+                replacement,
+                @"  else\\n(?<clear>.*?)  endif\\n",
+                RegexOptions.Singleline);
+            Assert.IsTrue(bypassClear.Success, $"{replacementSection} must contain a z112 bypass-clear branch.");
+            Assert.AreEqual(
+                8,
+                Regex.Matches(
+                    bypassClear.Groups["clear"].Value,
+                    @"store_uav_typed u7\.xyzw, l\([0-7],[0-7],[0-7],[0-7]\), l\(0,0,0,0\)").Count,
+                $"{replacementSection} must invalidate the complete pick packet when z112 is enabled.");
+            Assert.IsTrue(
+                replacement.IndexOf("if_nz ${jf0}.x", StringComparison.Ordinal)
+                < replacement.IndexOf("if_nz ${jf2}.x", StringComparison.Ordinal),
+                $"{replacementSection} must test the cursor pixel before choosing normal pick or bypass clearing.");
+        }
+
+        StringAssert.Contains(ReadSection(ini, "Constants"), "z112 = 0");
+
+        foreach (Match match in Regex.Matches(
+                     ini,
+                     @"(?ms)^\[(?<name>ShaderOverrideJiggleForgeGlobal[^\]]+)\]\s*$\r?\n(?<body>.*?)(?=^\[|\z)"))
+        {
+            string body = match.Groups["body"].Value;
+            Assert.IsFalse(body.Contains("z112", StringComparison.Ordinal));
+            StringAssert.Contains(body, "run = CommandList\\ZZMIv1\\Skin");
+        }
+
+        Assert.IsFalse(ini.Contains("CommandListJiggleForgeBypassDraw", StringComparison.Ordinal));
+        Assert.IsFalse(ini.Contains("post z112", StringComparison.Ordinal));
+
+        string sourceConsumer = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "runtime",
+            "draw_state_consumer.hlsl"));
+        string deployedConsumer = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "ShaderFixes",
+            "JiggleForgeRuntime",
+            "draw_state_consumer.hlsl"));
+        Assert.AreEqual(sourceConsumer, deployedConsumer);
+        StringAssert.Contains(deployedConsumer, "IniParams[112].z > 0.5");
+        StringAssert.Contains(deployedConsumer, "bool JF_IsDrawBypassed()");
+
+        foreach (string replacementPath in Directory.EnumerateFiles(
+                     Path.Combine(RepositoryRoot, "StandaloneShaderFixes", "ShaderFixes"),
+                     "*-vs_replace.txt"))
+        {
+            string replacementShader = File.ReadAllText(replacementPath);
+            StringAssert.Contains(
+                replacementShader,
+                "Texture1D<float4> IniParams : register(t120);");
+            StringAssert.Contains(
+                replacementShader,
+                "bool jfDrawBypassed = JF_IsDrawBypassed();");
+            StringAssert.Contains(
+                replacementShader,
+                "if (!jfDrawBypassed)");
+        }
+
+        foreach (string sourceShader in new[] { "c280_jiggle.hlsl", "2621_jiggle.hlsl" })
+        {
+            string contents = File.ReadAllText(Path.Combine(
+                RepositoryRoot,
+                "StandaloneShaderFixes",
+                "JiggleForge",
+                "shaders",
+                sourceShader));
+            StringAssert.Contains(contents, "bool jfDrawBypassed = JF_IsDrawBypassed();");
+            StringAssert.Contains(contents, "if (!jfDrawBypassed)");
+        }
+    }
+
+    [TestMethod]
     public void Runtime_IsAlwaysActiveAndConsumerAccessIsRestrictedToSupportedSlots()
     {
         string ini = File.ReadAllText(RuntimeIniPath);

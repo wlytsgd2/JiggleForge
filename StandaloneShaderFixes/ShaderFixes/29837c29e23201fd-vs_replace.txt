@@ -87,14 +87,20 @@ void main(
   r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
   r0.xyz = cb1[3].xyz + r0.xyz;
   float3 jiggleForgeBasePosition = r0.xyz;
-  float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
-  bool jfUnusedMovingInfluence;
-  float jfUnusedRadius;
-  float3 jiggleForgeAppliedDisplacement = JF_EvaluateBoundStates(
-    jiggleForgeBasePosition,
-    jiggleForgeVertexMask,
-    jfUnusedMovingInfluence,
-    jfUnusedRadius);
+  bool jfDrawBypassed = JF_IsDrawBypassed();
+  float3 jiggleForgeAppliedDisplacement = float3(0.0, 0.0, 0.0);
+  [branch]
+  if (!jfDrawBypassed)
+  {
+    float jiggleForgeVertexMask = SampleJiggleForgeDirectMask(v4.xy);
+    bool jfUnusedMovingInfluence;
+    float jfUnusedRadius;
+    jiggleForgeAppliedDisplacement = JF_EvaluateBoundStates(
+      jiggleForgeBasePosition,
+      jiggleForgeVertexMask,
+      jfUnusedMovingInfluence,
+      jfUnusedRadius);
+  }
   r0.xyz = jiggleForgeBasePosition + jiggleForgeAppliedDisplacement;
   r0.w = dot(v5.xy, v5.xy);
   r0.w = min(1, r0.w);
