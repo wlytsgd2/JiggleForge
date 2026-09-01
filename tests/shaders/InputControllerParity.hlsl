@@ -41,6 +41,11 @@ JF_PickRecord JF_InputParityPick(
     pick.TriangleOrdinal = 7u;
     pick.TriangleIndices = uint3(10u, 20u, 30u);
     pick.Barycentric = float3(0.2f, 0.3f, 0.5f);
+    pick.ProjectId = uint4(
+        0x7fc00001u,
+        0xffffffffu,
+        0x80000000u,
+        0x1234abcdu);
     return pick;
 }
 
@@ -59,7 +64,9 @@ void JF_StoreInputParity(
     float4 q4;
     float4 q5;
     float4 q6;
-    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5, q6);
+    float4 q7;
+    float4 q8;
+    JF_EncodeCapturedPick(capture, q0, q1, q2, q3, q4, q5, q6, q7, q8);
 
     uint baseRecord = scenario * JF_INPUT_PARITY_RECORD_COUNT;
     OutputRecords[baseRecord + 0u] = c0;
@@ -71,6 +78,8 @@ void JF_StoreInputParity(
     OutputRecords[baseRecord + 6u] = q4;
     OutputRecords[baseRecord + 7u] = q5;
     OutputRecords[baseRecord + 8u] = q6;
+    OutputRecords[baseRecord + 9u] = q7;
+    OutputRecords[baseRecord + 10u] = q8;
 }
 
 void JF_RunIdleInputScenario(

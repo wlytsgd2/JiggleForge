@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -7,11 +8,17 @@ namespace JiggleForge.Core;
 
 public sealed partial class ModRuntimeCompiler
 {
-    private static IReadOnlyDictionary<string, RuntimeDrawAssignment> BuildAssignments(JiggleProjectConfig config)
+    private static string ProjectNamespace(Guid projectId) =>
+        $"jiggle_forge_project_{projectId:N}";
+
+    private static string ProjectMaskNamespace(Guid projectId) =>
+        $"jiggle_forge_masks_{projectId:N}";
+
+    private static string ProjectInspectorNamespace(Guid projectId) =>
+        $"jiggle_forge_inspector_{projectId:N}";
+
+    private static RuntimeProjectLayout BuildRuntimeLayout(JiggleProjectConfig config)
     {
-        Dictionary<string, JiggleDrawConfig> drawById = config.Draws.ToDictionary(
-            draw => draw.Id,
-            StringComparer.OrdinalIgnoreCase);
         Dictionary<string, string> drawGroup = new(StringComparer.OrdinalIgnoreCase);
         foreach (JiggleGroupConfig group in config.Groups)
         {
@@ -52,110 +59,90 @@ public sealed partial class ModRuntimeCompiler
             reachableTargets[sourceGroup.Name] = reachable;
         }
 
-        Dictionary<string, RuntimeGroupLeader> leaders = new(StringComparer.OrdinalIgnoreCase);
-        foreach (JiggleGroupConfig group in config.Groups)
-        {
-            if (string.Equals(
-                    group.Name,
-                    OriginalPartsConfig.GroupName,
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                leaders[group.Name] = new RuntimeGroupLeader(ObjectId: 1, StateIndex: 0);
-                continue;
-            }
-
-            JiggleDrawConfig? leader = group.Draws
-                .Select(drawId => drawById[drawId])
-                .Where(draw => draw.DeformationEnabled)
-                .OrderBy(draw => draw.StateIndex)
-                .FirstOrDefault();
-            if (leader is not null)
-            {
-                leaders[group.Name] = new RuntimeGroupLeader(leader.ObjectId, leader.StateIndex);
-            }
-        }
-
-        Dictionary<int, PhysicsSettings> physicsByState = config.Draws.ToDictionary(
-            draw => draw.StateIndex,
-            _ => config.Physics,
-            EqualityComparer<int>.Default);
-        foreach (JiggleGroupConfig group in config.Groups)
-        {
-            if (leaders.TryGetValue(group.Name, out RuntimeGroupLeader? leader))
-            {
-                physicsByState[leader.StateIndex] = group.Physics ?? config.Physics;
-            }
-        }
-
-        RuntimeDrawAssignment CreateAssignment(int objectId, IEnumerable<int> states)
-        {
-            int[] stateIndices = states.Distinct().ToArray();
-            PhysicsSettings[] statePhysics = stateIndices
-                .Select(stateIndex => physicsByState.TryGetValue(stateIndex, out PhysicsSettings? physics)
-                    ? physics
-                    : config.Physics)
-                .ToArray();
-            return new RuntimeDrawAssignment(objectId, stateIndices, statePhysics);
-        }
+        Dictionary<string, int> groupIds = config.Groups.ToDictionary(
+            group => group.Name,
+            group => group.LocalStateId,
+            StringComparer.OrdinalIgnoreCase);
+        List<RuntimeProjectGroup> runtimeGroups = config.Groups
+            .Where(group => group.LocalStateId > 0)
+            .Select(group => new RuntimeProjectGroup(
+                group.LocalStateId,
+                group.Name,
+                group.Physics ?? config.Physics,
+                IsImplicit: false))
+            .OrderBy(group => group.GroupId)
+            .ToList();
+        int nextImplicitGroupId = runtimeGroups.Count == 0
+            ? 1
+            : runtimeGroups.Max(group => group.GroupId) + 1;
 
         Dictionary<string, RuntimeDrawAssignment> assignments = new(StringComparer.OrdinalIgnoreCase);
         foreach (JiggleDrawConfig draw in config.Draws)
         {
+            int pickGroupId;
+            if (drawGroup.TryGetValue(draw.Id, out string? targetGroup))
+            {
+                pickGroupId = groupIds[targetGroup];
+            }
+            else
+            {
+                pickGroupId = nextImplicitGroupId++;
+                runtimeGroups.Add(new RuntimeProjectGroup(
+                    pickGroupId,
+                    $"@{draw.Id}",
+                    config.Physics,
+                    IsImplicit: true));
+            }
+
             if (!draw.DeformationEnabled)
             {
-                assignments[draw.Id] = CreateAssignment(draw.ObjectId, [draw.StateIndex]);
+                assignments[draw.Id] = new RuntimeDrawAssignment(pickGroupId, []);
                 continue;
             }
 
-            if (!drawGroup.TryGetValue(draw.Id, out string? targetGroup))
+            if (targetGroup is null)
             {
-                assignments[draw.Id] = CreateAssignment(draw.ObjectId, [draw.StateIndex]);
+                assignments[draw.Id] = new RuntimeDrawAssignment(pickGroupId, [pickGroupId]);
                 continue;
             }
 
-            List<int> stateIndices = [];
-            foreach (JiggleGroupConfig sourceGroup in config.Groups)
-            {
-                if (reachableTargets[sourceGroup.Name].Contains(targetGroup) &&
-                    leaders.TryGetValue(sourceGroup.Name, out RuntimeGroupLeader? sourceLeader))
-                {
-                    stateIndices.Add(sourceLeader.StateIndex);
-                }
-            }
-
-            if (!leaders.TryGetValue(targetGroup, out RuntimeGroupLeader? targetLeader))
-            {
-                assignments[draw.Id] = CreateAssignment(draw.ObjectId, [draw.StateIndex]);
-                continue;
-            }
-
-            assignments[draw.Id] = CreateAssignment(targetLeader.ObjectId, stateIndices);
+            int[] influences = config.Groups
+                .Where(sourceGroup => reachableTargets[sourceGroup.Name].Contains(targetGroup))
+                .Select(sourceGroup => groupIds[sourceGroup.Name])
+                .Distinct()
+                .Order()
+                .ToArray();
+            assignments[draw.Id] = new RuntimeDrawAssignment(pickGroupId, influences);
         }
 
-        return assignments;
+        int maximumGroupId = runtimeGroups.Count == 0
+            ? 0
+            : runtimeGroups.Max(group => group.GroupId);
+        return new RuntimeProjectLayout(assignments, runtimeGroups, maximumGroupId);
     }
 
     private static string BuildMasksIni(
         string root,
-        string runtimeMaskRoot,
-        JiggleProjectConfig config,
-        IDictionary<string, byte[]> generatedBinary)
+        string runtimeRoot,
+        JiggleProjectConfig config)
     {
-        Directory.CreateDirectory(runtimeMaskRoot);
         StringBuilder output = new();
         output.AppendLine("; Generated by JiggleForge. Edit JiggleForge.txt instead.");
-        output.Append("namespace = jiggle_forge_masks_").Append(config.StateNamespace).AppendLine();
+        output.Append("namespace = ").Append(ProjectMaskNamespace(config.ProjectId)).AppendLine();
+        HashSet<string> emittedResources = new(StringComparer.OrdinalIgnoreCase);
 
-        foreach (JiggleDrawConfig draw in config.Draws)
+        foreach (JiggleDrawConfig draw in config.Draws.Where(draw =>
+                     draw.DeformationEnabled &&
+                     !string.IsNullOrWhiteSpace(draw.Mask)))
         {
-            output.AppendLine();
-            output.Append("[ResourceMask").Append(draw.Id).AppendLine("]");
-            if (string.IsNullOrWhiteSpace(draw.Mask))
+            string resourceName = MaskResourceName(config, draw);
+            if (!emittedResources.Add(resourceName))
             {
-                output.AppendLine("; No texture is bound. The shader uses mask 1.0.");
                 continue;
             }
 
+            output.AppendLine();
+            output.Append("[Resource").Append(resourceName).AppendLine("]");
             string sourceMask = ResolveInsideRoot(root, draw.Mask);
             if (!File.Exists(sourceMask))
             {
@@ -163,12 +150,186 @@ public sealed partial class ModRuntimeCompiler
                 continue;
             }
 
-            string runtimeName = $"{draw.Id}{Path.GetExtension(sourceMask).ToLowerInvariant()}";
-            string runtimePath = Path.Combine(runtimeMaskRoot, runtimeName);
-            generatedBinary[runtimePath] = File.ReadAllBytes(sourceMask);
-            output.Append("filename = Masks\\").AppendLine(runtimeName);
+            string directPath = Path.GetRelativePath(runtimeRoot, sourceMask).Replace('/', '\\');
+            output.Append("filename = ").AppendLine(directPath);
         }
 
+        return output.ToString().ReplaceLineEndings("\r\n");
+    }
+
+    private static string MaskResourceName(JiggleProjectConfig config, JiggleDrawConfig draw)
+    {
+        string normalizedPath = NormalizeMaskPath(draw.Mask);
+        JiggleDrawConfig owner = config.Draws.First(candidate =>
+            candidate.DeformationEnabled &&
+            !string.IsNullOrWhiteSpace(candidate.Mask) &&
+            string.Equals(NormalizeMaskPath(candidate.Mask), normalizedPath, StringComparison.OrdinalIgnoreCase));
+        return $"Mask{owner.Id}";
+    }
+
+    private static string NormalizeMaskPath(string path) => path.Trim().Replace('/', '\\');
+
+    private static string BuildProjectIni(
+        JiggleProjectConfig config,
+        RuntimeProjectLayout layout)
+    {
+        static string F(double value) => value.ToString("R", CultureInfo.InvariantCulture);
+
+        bool hasPrivateState = ModRuntimeRequirements.RequiresPrivateState(config);
+        bool needsProjectIdentity = hasPrivateState || config.Inspector.Enabled;
+        JiggleDrawConfig[] runtimeDraws = config.Draws
+            .Where(draw => ModRuntimeRequirements.RequiresDrawRuntime(config, draw, config.Inspector.Enabled))
+            .ToArray();
+
+        byte[] projectBytes = config.ProjectId.ToByteArray();
+        uint[] projectWords = new uint[4];
+        for (int index = 0; index < projectWords.Length; index++)
+        {
+            projectWords[index] = BinaryPrimitives.ReadUInt32LittleEndian(
+                projectBytes.AsSpan(index * sizeof(uint), sizeof(uint)));
+        }
+
+        int groupCapacity = Math.Max(layout.MaximumGroupId, 1);
+        Dictionary<int, RuntimeProjectGroup> groupById = layout.Groups.ToDictionary(group => group.GroupId);
+        List<string> parameterValues = new(groupCapacity * 20);
+        for (int groupId = 1; groupId <= groupCapacity; groupId++)
+        {
+            if (!groupById.TryGetValue(groupId, out RuntimeProjectGroup? group))
+            {
+                parameterValues.AddRange(Enumerable.Repeat("0", 20));
+                continue;
+            }
+
+            PhysicsSettings physics = group.Physics;
+            parameterValues.AddRange([
+                groupId.ToString(CultureInfo.InvariantCulture), "2", F(physics.Radius), F(physics.Strength),
+                F(physics.Falloff), F(physics.VolumeResponse), F(physics.DragScale), F(physics.MaxOffset),
+                F(physics.TargetFollowSeconds), F(physics.HoldFrequencyHz), F(physics.HoldDampingRatio), F(physics.ReleaseFrequencyHz),
+                F(physics.ReleaseDampingRatio), F(physics.ReleaseImpulse), F(physics.WheelDepthStep), F(physics.WheelMinDepth),
+                F(physics.WheelMaxDepth), "1", "-1", "1",
+            ]);
+        }
+
+        string projectNamespace = ProjectNamespace(config.ProjectId);
+        StringBuilder output = new();
+        output.AppendLine("; Generated by JiggleForge. Edit JiggleForge.txt instead.");
+        output.Append("namespace = ").AppendLine(projectNamespace).AppendLine();
+        if (hasPrivateState)
+        {
+            output.AppendLine("[Constants]");
+            output.AppendLine("global $visibleThisFrame = 0");
+            output.AppendLine("global $runtimeEnabledPrevious = 0").AppendLine();
+        }
+        if (needsProjectIdentity)
+        {
+            output.AppendLine("[ResourceProjectIdentity]");
+            output.AppendLine("type = Buffer");
+            output.AppendLine("format = R32G32B32A32_UINT");
+            output.AppendLine("array = 2");
+            output.Append("data = ").AppendJoin(' ', projectWords)
+                .Append(' ').Append((hasPrivateState ? layout.MaximumGroupId : 0).ToString(CultureInfo.InvariantCulture))
+                .AppendLine(" 0 0 0").AppendLine();
+        }
+        if (hasPrivateState)
+        {
+            output.AppendLine("[ResourceProjectGroupParameters]");
+            output.AppendLine("type = Buffer");
+            output.AppendLine("format = R32G32B32A32_FLOAT");
+            output.Append("array = ").AppendLine((groupCapacity * 5).ToString(CultureInfo.InvariantCulture));
+            output.Append("data = ").AppendLine(string.Join(' ', parameterValues)).AppendLine();
+            output.AppendLine("[ResourceProjectMotionStates]");
+            output.AppendLine("type = RWBuffer");
+            output.AppendLine("format = R32G32B32A32_FLOAT");
+            output.Append("array = ").AppendLine((groupCapacity * 7).ToString(CultureInfo.InvariantCulture));
+            output.AppendLine("bind_flags = unordered_access shader_resource").AppendLine();
+
+            output.AppendLine("[CommandListBeginPrivateDraw]");
+            output.AppendLine("$visibleThisFrame = 1");
+            if (config.Inspector.Enabled)
+            {
+                output.Append("$\\").Append(ProjectInspectorNamespace(config.ProjectId)).AppendLine("\\drawSeen = 1");
+            }
+            output.AppendLine("run = CommandList\\jiggle_forge\\BeginAdaptedDraw");
+            output.AppendLine("vs-t75 = ResourceProjectMotionStates");
+            output.AppendLine("vs-t76 = ResourceProjectGroupParameters");
+            output.AppendLine("ps-t118 = ResourceProjectIdentity").AppendLine();
+        }
+
+        foreach (JiggleDrawConfig draw in runtimeDraws)
+        {
+            int ordinal = DrawOrdinal(draw.Id);
+            RuntimeDrawAssignment assignment = layout.Assignments[draw.Id];
+            if (assignment.InfluenceGroupIds.Count > 0)
+            {
+                output.Append("[ResourceDrawInfluences").Append(ordinal.ToString("D3", CultureInfo.InvariantCulture)).AppendLine("]");
+                output.AppendLine("type = Buffer");
+                output.AppendLine("format = R32_UINT");
+                output.Append("array = ").AppendLine(assignment.InfluenceGroupIds.Count.ToString(CultureInfo.InvariantCulture));
+                output.Append("data = ").AppendJoin(' ', assignment.InfluenceGroupIds).AppendLine().AppendLine();
+            }
+
+            output.Append("[CommandListBeginDraw").Append(ordinal.ToString("D4", CultureInfo.InvariantCulture)).AppendLine("]");
+            bool originalDraw = assignment.PickGroupId == 0;
+            if (originalDraw && config.Inspector.Enabled)
+            {
+                output.Append("$\\").Append(ProjectInspectorNamespace(config.ProjectId)).AppendLine("\\drawSeen = 1");
+                output.Append("y26 = ").AppendLine(ordinal.ToString(CultureInfo.InvariantCulture));
+                output.Append("z26 = ").AppendLine(assignment.PickGroupId.ToString(CultureInfo.InvariantCulture));
+                output.AppendLine("run = CommandList\\jiggle_forge\\BeginAdaptedDraw");
+            }
+            else if (!originalDraw)
+            {
+                if (config.Inspector.Enabled)
+                {
+                    output.Append("y26 = ").AppendLine(ordinal.ToString(CultureInfo.InvariantCulture));
+                }
+                output.Append("z26 = ").AppendLine(assignment.PickGroupId.ToString(CultureInfo.InvariantCulture));
+                output.AppendLine("run = CommandListBeginPrivateDraw");
+            }
+            if (assignment.InfluenceGroupIds.Count > 0)
+            {
+                output.Append("vs-t72 = ResourceDrawInfluences").Append(ordinal.ToString("D3", CultureInfo.InvariantCulture)).AppendLine();
+            }
+            else
+            {
+                output.AppendLine("vs-t72 = null");
+            }
+            if (draw.DeformationEnabled && !string.IsNullOrWhiteSpace(draw.Mask))
+            {
+                output.Append("vs-t73 = Resource\\").Append(ProjectMaskNamespace(config.ProjectId))
+                    .Append('\\').Append(MaskResourceName(config, draw)).AppendLine();
+            }
+            if (originalDraw)
+            {
+                if (!config.Inspector.Enabled && assignment.InfluenceGroupIds.Contains(0))
+                {
+                    output.AppendLine("vs-t77 = Resource\\jiggle_forge\\MotionStates");
+                    output.AppendLine("vs-t78 = Resource\\jiggle_forge\\GroupParameters");
+                }
+                if (config.Inspector.Enabled)
+                {
+                    output.AppendLine("ps-t118 = Resource\\jiggle_forge\\OriginalDrawContext");
+                }
+            }
+            output.AppendLine();
+        }
+
+        if (hasPrivateState)
+        {
+            output.AppendLine("[Present]");
+            output.AppendLine("if $visibleThisFrame == 1 && $\\jiggle_forge\\runtimeEnabled == 1");
+            // The project-owned resources must be bound here. Shared inputs,
+            // dispatch and cleanup belong to the runtime CustomShader.
+            output.AppendLine("    cs-t2 = ResourceProjectGroupParameters");
+            output.AppendLine("    cs-t4 = ResourceProjectIdentity");
+            output.AppendLine("    cs-u0 = ResourceProjectMotionStates");
+            output.AppendLine("    run = CustomShader\\jiggle_forge\\UpdateProjectMotion");
+            output.AppendLine("else if $runtimeEnabledPrevious == 1");
+            output.AppendLine("    clear = ResourceProjectMotionStates 0.0");
+            output.AppendLine("endif");
+            output.AppendLine("$runtimeEnabledPrevious = $\\jiggle_forge\\runtimeEnabled");
+            output.AppendLine("$visibleThisFrame = 0");
+        }
         return output.ToString().ReplaceLineEndings("\r\n");
     }
 
@@ -208,19 +369,18 @@ public sealed partial class ModRuntimeCompiler
                 ? string.Empty
                 : $" | {draw.Branch.Split('>', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Last()}";
             string label = $"{draw.Id}{alias}{branch} | {draw.SourceFile}:{draw.SourceLine} | [{draw.SourceSection}]";
-            WriteLabel(ordinal, label, checked((uint)assignments[draw.Id].ObjectId));
+            WriteLabel(ordinal, label, checked((uint)assignments[draw.Id].PickGroupId));
         }
         WriteLabel(
             originalPartsOrdinal,
-            "OriginalParts (Original game parts) | global fallback StateIndex 0 / ObjectID 1",
-            objectId: 1u);
+            "OriginalParts (Original game parts) | global GroupId 0",
+            objectId: 0u);
 
-        string inspectorNamespace = $"jiggle_forge_inspector_{config.StateNamespace}";
+        string inspectorNamespace = ProjectInspectorNamespace(config.ProjectId);
         StringBuilder output = new();
         output.AppendLine("; Generated by JiggleForge. Edit JiggleForge.txt instead.");
         output.Append("namespace = ").AppendLine(inspectorNamespace).AppendLine();
         output.AppendLine("[Constants]");
-        output.Append("global $inspectorEnabled = ").AppendLine(config.Inspector.Enabled ? "1" : "0");
         output.AppendLine("global $drawSeen = 0");
         output.AppendLine();
         output.AppendLine("[ResourceInspectorLabels]");
@@ -247,6 +407,7 @@ public sealed partial class ModRuntimeCompiler
         output.AppendLine("cs-t0 = Resource\\jiggle_forge\\CapturedPick");
         output.AppendLine("cs-t1 = ResourceInspectorLabels");
         output.AppendLine("cs-t2 = ResourceInspectorObjectIDs");
+        output.Append("cs-t3 = Resource\\").Append(ProjectNamespace(config.ProjectId)).AppendLine("\\ProjectIdentity");
         output.AppendLine("cs-u0 = ResourceInspectorText");
         output.Append("x31 = ").AppendLine(labelStride.ToString(CultureInfo.InvariantCulture));
         output.Append("y31 = ").AppendLine(drawCount.ToString(CultureInfo.InvariantCulture));
@@ -255,9 +416,10 @@ public sealed partial class ModRuntimeCompiler
         output.AppendLine("post cs-t0 = null");
         output.AppendLine("post cs-t1 = null");
         output.AppendLine("post cs-t2 = null");
+        output.AppendLine("post cs-t3 = null");
         output.AppendLine("post cs-u0 = null").AppendLine();
         output.AppendLine("[Present]");
-        output.AppendLine("if $inspectorEnabled == 1 && $drawSeen == 1 && $\\jiggle_forge\\mouseDown == 1");
+        output.AppendLine("if $drawSeen == 1 && $\\jiggle_forge\\mouseDown == 1");
         output.AppendLine("    run = CustomShaderBuildInspectorText");
         output.AppendLine("    Resource\\ZZMIv1\\Text = ref ResourceInspectorText");
         output.AppendLine("    Resource\\ZZMIv1\\TextParams = ref ResourceInspectorTextParams");

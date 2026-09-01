@@ -11,7 +11,6 @@ public sealed class JiggleConfigSerializerTests
         JiggleProjectConfig source = new()
         {
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
-            StateNamespace = 37,
         };
         source.Physics.HoldDampingRatio = 0.73;
         source.Physics.HoldFrequencyHz = 14.0;
@@ -31,8 +30,6 @@ public sealed class JiggleConfigSerializerTests
             Branch = "else if $swapvar == 2",
             Command = "drawindexed = auto",
             Kind = JiggleDrawKind.Auto,
-            StateIndex = 9473,
-            ObjectId = 9474,
             Group = "Body",
             Mask = "Masks\\Body.dds",
         });
@@ -59,8 +56,6 @@ public sealed class JiggleConfigSerializerTests
             Count = 300,
             FirstIndex = 0,
             BaseVertex = 0,
-            StateIndex = 9474,
-            ObjectId = 9475,
             Group = "Clothes",
         });
         JiggleGroupConfig clothes = new() { Name = "Clothes" };
@@ -72,7 +67,7 @@ public sealed class JiggleConfigSerializerTests
         JiggleProjectConfig result = JiggleConfigSerializer.Parse(text);
 
         Assert.AreEqual(source.ProjectId, result.ProjectId);
-        Assert.AreEqual(37, result.StateNamespace);
+        Assert.AreEqual(1, result.Groups[0].LocalStateId);
         Assert.AreEqual("Body Nude", result.Draws[0].Alias);
         Assert.AreEqual("Masks\\Body.dds", result.Draws[0].Mask);
         Assert.AreEqual("Draw0001", result.Groups[0].Draws[0]);
@@ -98,7 +93,6 @@ public sealed class JiggleConfigSerializerTests
         JiggleProjectConfig source = new()
         {
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
-            StateNamespace = 37,
         };
         source.Draws.Add(new JiggleDrawConfig
         {
@@ -108,8 +102,6 @@ public sealed class JiggleConfigSerializerTests
             SourceLine = 10,
             Command = "drawindexed = auto",
             Kind = JiggleDrawKind.Auto,
-            StateIndex = 100,
-            ObjectId = 101,
         });
         string current = JiggleConfigSerializer.Serialize(source);
         Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
@@ -128,10 +120,9 @@ public sealed class JiggleConfigSerializerTests
         JiggleProjectConfig source = new()
         {
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
-            StateNamespace = 37,
         };
         string legacy = JiggleConfigSerializer.Serialize(source)
-            .Replace("schema = 3", "schema = 2", StringComparison.Ordinal) +
+            .Replace("schema = 4", "schema = 2", StringComparison.Ordinal) +
             "\r\n[OriginalParts]\r\ndeform_enabled = false\r\n";
         string root = Path.Combine(
             Path.GetTempPath(),
@@ -149,7 +140,7 @@ public sealed class JiggleConfigSerializerTests
             Assert.IsTrue(File.Exists(path + ".schema2.bak"));
             string current = File.ReadAllText(path);
             Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
-            StringAssert.Contains(current, "schema = 3");
+            StringAssert.Contains(current, "schema = 4");
         }
         finally
         {
@@ -163,7 +154,6 @@ public sealed class JiggleConfigSerializerTests
         JiggleProjectConfig source = new()
         {
             ProjectId = Guid.Parse("62bfda16-a9ae-4e9a-97de-d89f8dc00cc7"),
-            StateNamespace = 37,
         };
         source.Physics.Radius = 0.41;
         source.Physics.Strength = 0.63;
@@ -234,6 +224,9 @@ public sealed class JiggleConfigSerializerTests
             StringAssert.Contains(current, $"schema = {JiggleProjectConfig.CurrentSchemaVersion}");
             StringAssert.Contains(current, "hold_frequency_hz = 10");
             Assert.IsFalse(current.Contains("grab_spring", StringComparison.Ordinal));
+            Assert.IsFalse(current.Contains("state_namespace", StringComparison.Ordinal));
+            Assert.IsFalse(current.Contains("state_index", StringComparison.Ordinal));
+            Assert.IsFalse(current.Contains("object_id", StringComparison.Ordinal));
             Assert.IsFalse(current.Contains("[OriginalParts]", StringComparison.Ordinal));
         }
         finally

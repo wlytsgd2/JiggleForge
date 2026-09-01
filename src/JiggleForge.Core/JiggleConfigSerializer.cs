@@ -37,6 +37,7 @@ public static class JiggleConfigSerializer
 
     public static string Serialize(JiggleProjectConfig config)
     {
+        EnsureLocalStateIds(config);
         IReadOnlyList<string> errors = JiggleConfigValidator.Validate(config);
         if (errors.Count > 0)
         {
@@ -50,7 +51,6 @@ public static class JiggleConfigSerializer
         output.AppendLine("[Project]");
         Write(output, "schema", config.SchemaVersion);
         Write(output, "project_id", config.ProjectId.ToString("D"));
-        Write(output, "state_namespace", config.StateNamespace);
         output.AppendLine();
 
         output.AppendLine("[Physics]");
@@ -79,8 +79,6 @@ public static class JiggleConfigSerializer
                 Write(output, "base_vertex", draw.BaseVertex!.Value);
             }
 
-            Write(output, "state_index", draw.StateIndex);
-            Write(output, "object_id", draw.ObjectId);
             Write(output, "group", draw.Group);
             Write(output, "mask", NormalizeRelativePath(draw.Mask));
         }
@@ -89,6 +87,7 @@ public static class JiggleConfigSerializer
         {
             output.AppendLine();
             output.Append("[Group:").Append(group.Name).AppendLine("]");
+            Write(output, "local_state", group.LocalStateId);
             output.Append("draws = ").AppendLine(JsonSerializer.Serialize(group.Draws));
             WritePhysics(output, group.Physics ?? config.Physics);
             if (group.GraphX.HasValue && group.GraphY.HasValue)
@@ -219,6 +218,9 @@ public static class JiggleConfigSerializer
                 {
                     switch (key.ToLowerInvariant())
                     {
+                        case "local_state":
+                            group.LocalStateId = int.Parse(value, CultureInfo.InvariantCulture);
+                            break;
                         case "draws":
                             group.Draws.AddRange(ParseStringArray(value));
                             break;
@@ -269,6 +271,7 @@ public static class JiggleConfigSerializer
         }
 
         NormalizeOriginalPartsGroup(config);
+        EnsureLocalStateIds(config);
         foreach (JiggleGroupConfig parsedGroup in config.Groups)
         {
             parsedGroup.Physics ??= config.Physics.Clone();
@@ -341,13 +344,48 @@ public static class JiggleConfigSerializer
         config.OriginalParts.LegacyGroup = string.Empty;
     }
 
+    internal static void EnsureLocalStateIds(JiggleProjectConfig config)
+    {
+        JiggleGroupConfig? original = config.Groups.FirstOrDefault(group =>
+            string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase));
+        if (original is not null)
+        {
+            original.LocalStateId = 0;
+        }
+
+        HashSet<int> used = [];
+        int next = 1;
+        foreach (JiggleGroupConfig group in config.Groups.Where(group =>
+                     !string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)))
+        {
+            if (group.LocalStateId > 0 && used.Add(group.LocalStateId))
+            {
+                next = Math.Max(next, group.LocalStateId + 1);
+                continue;
+            }
+
+            while (used.Contains(next))
+            {
+                next++;
+            }
+
+            group.LocalStateId = next;
+            used.Add(next);
+            next++;
+        }
+    }
+
     private static void ParseProject(JiggleProjectConfig config, string key, string value)
     {
         switch (key.ToLowerInvariant())
         {
             case "schema": config.SchemaVersion = int.Parse(value, CultureInfo.InvariantCulture); break;
             case "project_id": config.ProjectId = Guid.Parse(ParseString(value)); break;
-            case "state_namespace": config.StateNamespace = int.Parse(value, CultureInfo.InvariantCulture); break;
+            case "state_namespace":
+                // Schema 1-3 compatibility. Project-local buffers introduced
+                // by schema 4 no longer use the collision-prone byte namespace.
+                _ = int.Parse(value, CultureInfo.InvariantCulture);
+                break;
             case "adapted_draws_only":
                 // Compatibility with the removed project switch. Validate and
                 // ignore it; the default channel is always enabled in schema 3.
@@ -517,8 +555,12 @@ public static class JiggleConfigSerializer
             case "count": draw.Count = long.Parse(value, CultureInfo.InvariantCulture); break;
             case "first_index": draw.FirstIndex = long.Parse(value, CultureInfo.InvariantCulture); break;
             case "base_vertex": draw.BaseVertex = long.Parse(value, CultureInfo.InvariantCulture); break;
-            case "state_index": draw.StateIndex = int.Parse(value, CultureInfo.InvariantCulture); break;
-            case "object_id": draw.ObjectId = int.Parse(value, CultureInfo.InvariantCulture); break;
+            case "state_index":
+            case "object_id":
+                // Schema 1-3 compatibility. These global identities are
+                // deliberately discarded during migration to schema 4.
+                _ = int.Parse(value, CultureInfo.InvariantCulture);
+                break;
             case "group": draw.Group = ParseString(value); break;
             case "mask": draw.Mask = ParseString(value); break;
             default: throw new InvalidDataException($"Unknown draw key: {key}.");

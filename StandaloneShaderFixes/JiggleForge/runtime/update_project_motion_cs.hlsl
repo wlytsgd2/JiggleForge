@@ -3,13 +3,16 @@
 Buffer<float4> ControllerRecords : register(t0);
 Buffer<float4> CapturedPickRecords : register(t1);
 Buffer<float4> GroupParameterRecords : register(t2);
-Buffer<float4> FrameContextRecords : register(t3);
+Buffer<uint4> ProjectIdentity : register(t4);
+Buffer<float4> FrameContextRecords : register(t5);
 RWBuffer<float4> MotionStateRecords : register(u0);
 
 [numthreads(64, 1, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
-    uint stateIndex = dispatchThreadId.x;
+    uint localIndex = dispatchThreadId.x;
+    uint groupId = localIndex + 1u;
+
     uint controllerCount;
     ControllerRecords.GetDimensions(controllerCount);
     uint capturedCount;
@@ -18,13 +21,18 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
     GroupParameterRecords.GetDimensions(parameterCount);
     uint motionCount;
     MotionStateRecords.GetDimensions(motionCount);
+    uint identityCount;
+    ProjectIdentity.GetDimensions(identityCount);
     uint frameContextCount;
     FrameContextRecords.GetDimensions(frameContextCount);
-    uint parameterBase = stateIndex * 5u;
-    uint motionBase = stateIndex * JF_STATE_RECORD_COUNT;
+
+    uint parameterBase = localIndex * 5u;
+    uint motionBase = localIndex * JF_STATE_RECORD_COUNT;
     if (controllerCount < JF_CONTROLLER_RECORD_COUNT
         || capturedCount < JF_CAPTURED_PICK_RECORD_COUNT
+        || identityCount < 2u
         || frameContextCount < 1u
+        || groupId > ProjectIdentity[1u].x
         || parameterBase + 5u > parameterCount
         || motionBase + JF_STATE_RECORD_COUNT > motionCount)
     {
@@ -37,33 +45,6 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         GroupParameterRecords[parameterBase + 2u],
         GroupParameterRecords[parameterBase + 3u],
         GroupParameterRecords[parameterBase + 4u]);
-    if (parameters.Valid == 0u)
-    {
-        return;
-    }
-
-    JF_InputControllerState controller =
-        JF_DecodeInputControllerState(
-            ControllerRecords[0u],
-            ControllerRecords[1u]);
-    JF_CapturedPick capture = JF_DecodeCapturedPick(
-        CapturedPickRecords[0u],
-        CapturedPickRecords[1u],
-        CapturedPickRecords[2u],
-        CapturedPickRecords[3u],
-        CapturedPickRecords[4u],
-        CapturedPickRecords[5u],
-        CapturedPickRecords[6u],
-        CapturedPickRecords[7u],
-        CapturedPickRecords[8u]);
-    capture.Valid = capture.Valid != 0u && all(capture.ProjectId == 0u);
-    // Schema 4 exposes OriginalParts as GroupId 0. Schema 1-3 Mods registered
-    // global state index 0 with ObjectID 1, so retain that historical internal
-    // identity and translate only the new original-model candidate here.
-    if (stateIndex == 0u && capture.ObjectId == 0u)
-    {
-        capture.ObjectId = 1u;
-    }
     JF_MotionState state = JF_DecodeMotionState(
         MotionStateRecords[motionBase + 0u],
         MotionStateRecords[motionBase + 1u],
@@ -73,22 +54,43 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
         MotionStateRecords[motionBase + 5u],
         MotionStateRecords[motionBase + 6u]);
 
-    JF_InputFrame input;
-    float4 frameContext = FrameContextRecords[0u];
-    input.CursorPixels = controller.CurrentCursorPixels;
-    input.ViewportPixels = frameContext.xy;
-    input.DragHeld = controller.PreviousHeld;
-    input.WheelTowardSequence =
-        (uint)max(controller.WheelSequenceCode, 0);
-    input.WheelAwaySequence =
-        (uint)max(-controller.WheelSequenceCode, 0);
-    input.DeltaSeconds = frameContext.z;
-    JF_StepMotion(
-        state,
-        parameters.ObjectId,
-        input,
-        capture,
-        parameters);
+    if (parameters.Valid != 0u)
+    {
+        JF_InputControllerState controller =
+            JF_DecodeInputControllerState(
+                ControllerRecords[0u],
+                ControllerRecords[1u]);
+        JF_CapturedPick capture = JF_DecodeCapturedPick(
+            CapturedPickRecords[0u],
+            CapturedPickRecords[1u],
+            CapturedPickRecords[2u],
+            CapturedPickRecords[3u],
+            CapturedPickRecords[4u],
+            CapturedPickRecords[5u],
+            CapturedPickRecords[6u],
+            CapturedPickRecords[7u],
+            CapturedPickRecords[8u]);
+        capture.Valid =
+            capture.Valid != 0u
+            && all(capture.ProjectId == ProjectIdentity[0u]);
+
+        JF_InputFrame input;
+        float4 frameContext = FrameContextRecords[0u];
+        input.CursorPixels = controller.CurrentCursorPixels;
+        input.ViewportPixels = frameContext.xy;
+        input.DragHeld = controller.PreviousHeld;
+        input.WheelTowardSequence =
+            (uint)max(controller.WheelSequenceCode, 0);
+        input.WheelAwaySequence =
+            (uint)max(-controller.WheelSequenceCode, 0);
+        input.DeltaSeconds = frameContext.z;
+        JF_StepMotion(
+            state,
+            groupId,
+            input,
+            capture,
+            parameters);
+    }
 
     float4 m0;
     float4 m1;

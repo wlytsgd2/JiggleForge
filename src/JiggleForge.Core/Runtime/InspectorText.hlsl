@@ -3,6 +3,7 @@
 Buffer<float4> Detect : register(t0);
 Buffer<uint> Labels : register(t1);
 Buffer<uint> ObjectIDs : register(t2);
+Buffer<uint4> ProjectIdentity : register(t3);
 RWBuffer<uint> OutputText : register(u0);
 Texture1D<float4> IniParams : register(t120);
 
@@ -26,6 +27,22 @@ void AppendUInt(inout uint cursor, uint value)
     while (divisor > 0u);
 }
 
+uint DecodeProjectWord(float lowPart, float highPart)
+{
+    uint low = (uint)round(clamp(lowPart, 0.0, 65535.0));
+    uint high = (uint)round(clamp(highPart, 0.0, 65535.0));
+    return low | (high << 16u);
+}
+
+uint4 DecodeProjectId(float4 p0, float4 p1)
+{
+    return uint4(
+        DecodeProjectWord(p0.x, p0.y),
+        DecodeProjectWord(p0.z, p0.w),
+        DecodeProjectWord(p1.x, p1.y),
+        DecodeProjectWord(p1.z, p1.w));
+}
+
 [numthreads(1, 1, 1)]
 void main(uint3 threadID : SV_DispatchThreadID)
 {
@@ -39,12 +56,16 @@ void main(uint3 threadID : SV_DispatchThreadID)
     uint valid = Detect[0u].w > 0.5 ? 1u : 0u;
     uint drawNumber = (uint)round(max(Detect[2u].w, 0.0));
     uint objectID = (uint)round(max(Detect[1u].w, 0.0));
+    uint4 capturedProjectId = DecodeProjectId(Detect[7u], Detect[8u]);
+    bool globalOriginalPick = objectID == 0u && all(capturedProjectId == 0u);
+    bool originalPartsFallback = globalOriginalPick && drawNumber == 0u;
+    bool projectMatches = globalOriginalPick || all(capturedProjectId == ProjectIdentity[0u]);
     uint cursor = 0u;
 
-    if (drawNumber == 0u && objectID == 1u)
+    if (originalPartsFallback)
         drawNumber = originalPartsNumber;
 
-    if (valid == 0u || drawNumber < 1u || drawNumber > drawCount || labelStride == 0u ||
+    if (valid == 0u || !projectMatches || drawNumber < 1u || drawNumber > drawCount || labelStride == 0u ||
         ObjectIDs[drawNumber - 1u] != objectID)
     {
         uint message[15] = { 78u, 111u, 32u, 97u, 100u, 97u, 112u, 116u, 101u, 100u, 32u, 100u, 114u, 97u, 119u };

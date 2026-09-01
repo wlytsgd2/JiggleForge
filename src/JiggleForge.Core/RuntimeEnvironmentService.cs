@@ -87,13 +87,16 @@ public sealed partial class RuntimeEnvironmentService
 
         [Constants]
         global $activePickPipeline = 0
-        global $pickObjectID = 1
+        global $pickObjectID = 0
         global $pickSourceDraw = 0
         global $pickRangeAuto = 0
         global $pickRangeCount = 0
         global $pickRangeFirst = 0
         global $pickRangeBase = 0
         global $mouseDown = 0
+        global $runtimeEnabled = 0
+        ; Deprecated compatibility placeholder for older generated Mods.
+        global $projectStateReadSlot = 0
 
         [CommandListEnableAdaptedOnly]
         ; Intentionally empty.
@@ -104,11 +107,35 @@ public sealed partial class RuntimeEnvironmentService
         [CommandListRegisterGroupParameters]
         ; Intentionally empty.
 
+        [CommandListBeginAdaptedDraw]
+        ; Intentionally empty.
+
+        [CommandListEndAdaptedDraw]
+        vs-t72 = null
+        vs-t73 = null
+        vs-t75 = null
+        vs-t76 = null
+        vs-t77 = null
+        vs-t78 = null
+        ps-t118 = ResourceOriginalDrawContext
+
+        [ResourceInputController]
+        type = Buffer
+        format = R32G32B32A32_FLOAT
+        array = 2
+        data = 0 0 0 0 0 0 0 0
+
+        [ResourceFrameContext]
+        type = Buffer
+        format = R32G32B32A32_FLOAT
+        array = 1
+        data = 0 0 0 0
+
         [ResourceCapturedPick]
         type = Buffer
         format = R32G32B32A32_FLOAT
-        array = 7
-        data = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+        array = 9
+        data = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
         [ResourceMotionStates]
         type = Buffer
@@ -121,6 +148,12 @@ public sealed partial class RuntimeEnvironmentService
         format = R32G32B32A32_FLOAT
         array = 5
         data = 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+        [ResourceOriginalDrawContext]
+        type = Buffer
+        format = R32G32B32A32_UINT
+        array = 2
+        data = 0 0 0 0 0 0 1 1
         """;
 
     public RuntimeEnvironmentService(string payloadRoot)

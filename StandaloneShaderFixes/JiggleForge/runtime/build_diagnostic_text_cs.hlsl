@@ -275,7 +275,9 @@ void main(uint3 dispatchThreadId : SV_DispatchThreadID)
             CapturedPickRecords[3u],
             CapturedPickRecords[4u],
             CapturedPickRecords[5u],
-            CapturedPickRecords[6u]);
+            CapturedPickRecords[6u],
+            CapturedPickRecords[7u],
+            CapturedPickRecords[8u]);
     uint stateIndex = capture.ObjectId > 0u
         ? capture.ObjectId - 1u
         : 0u;

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.22 — 2026-09-01
+
+### 简体中文
+
+- 重构适配 Mod 的身份和运动状态：现在使用完整 `ProjectId + GroupId` 定位项目私有状态，同一组共用一个状态，不同作者发布的 Mod 即使组编号相同也不会互相冲突。
+- 配置格式升级到 schema 4，并把重复的执行代码集中到全局运行时；项目 INI 只保留资源、局部参数和必要调用，Draw 检测器关闭后不再保留其测试文件和编号代码。旧适配 Mod 更新后只需在应用中重新点击一次“应用配置”。
+- 项目运动状态改为帧末单缓冲更新，保留原版全局组和旧 ABI 兼容路径；分组、传递依赖、独立物理参数和关闭 Draw 变形继续按项目私有状态运行。
+- Mask 现在直接绑定 Mod 内填写的 DDS，不再复制到 `_JiggleForgeRuntime\Masks`；多个 Draw 使用同一路径时共用一个资源，并在重新应用配置时清理旧副本。正式配置关闭检测器时也不再生成重复的 `y26 = 0`。
+
+### English
+
+- Reworked adapted-Mod identity and motion state around the full `ProjectId + GroupId`. Draws in one group share one private state, while independently published Mods cannot collide even when they reuse the same local group number.
+- Upgraded the configuration format to schema 4 and moved repeated execution logic into the global runtime. Project INIs now retain only resources, local parameters, and required calls; disabling the Draw Inspector removes its temporary files and Draw-number code. Existing adapted Mods only need one new Apply Configuration pass after updating.
+- Switched project motion to a frame-end single-buffer update while retaining the global original-parts group and legacy ABI compatibility. Groups, transitive dependencies, per-group physics, and disabled Draws continue to operate on project-private state.
+- Masks now bind the DDS path inside the Mod directly instead of copying files into `_JiggleForgeRuntime\Masks`. Draws using the same path share one resource, legacy copies are cleaned on the next apply, and production configurations no longer emit the redundant `y26 = 0` assignment when the inspector is off.
+
 ## 0.1.21 — 2026-08-28
 
 ### 简体中文

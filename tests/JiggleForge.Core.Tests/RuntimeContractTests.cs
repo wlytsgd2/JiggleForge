@@ -17,7 +17,9 @@ public sealed class RuntimeContractTests
         string ini = File.ReadAllText(RuntimeIniPath);
 
         AssertSectionArray(ini, "ResourceInputController", 2);
-        AssertSectionArray(ini, "ResourceCapturedPick", 7);
+        AssertSectionArray(ini, "ResourceFrameContext", 1);
+        AssertSectionArray(ini, "ResourceFramePick", 10);
+        AssertSectionArray(ini, "ResourceCapturedPick", 9);
         AssertSectionArray(ini, "ResourceGroupParameters", 327680);
         AssertSectionArray(ini, "ResourceMotionStates", 458752);
         AssertSectionArray(ini, "ResourceDefaultParameters", 5);
@@ -73,7 +75,7 @@ public sealed class RuntimeContractTests
                  })
         {
             string pattern = ReadSection(ini, sectionName);
-            StringAssert.Contains(pattern, @"(?:t119|u7)\b");
+            StringAssert.Contains(pattern, @"(?:t118|t119|u7)\b");
             Assert.IsFalse(
                 pattern.Contains("t119|t120|u7", StringComparison.Ordinal),
                 $"{sectionName} must allow an existing shared t120 declaration.");
@@ -85,6 +87,16 @@ public sealed class RuntimeContractTests
         StringAssert.Contains(
             ReadSection(ini, "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.InsertDeclarations"),
             "dcl_resource_texture1d (float,float,float,float) t120");
+        foreach (string replacementName in new[]
+                 {
+                     "ShaderRegexJiggleForgeInlineBodyPick.Pattern.Replace",
+                     "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern.Replace"
+                 })
+        {
+            string replacement = ReadSection(ini, replacementName);
+            StringAssert.Contains(replacement, "ushr ${jf4}.xyzw, ${jf4}.xyzw, l(16,16,16,16)");
+            StringAssert.Contains(replacement, "store_uav_typed u7.xyzw, l(9,9,9,9)");
+        }
     }
 
     [TestMethod]
@@ -108,10 +120,10 @@ public sealed class RuntimeContractTests
                 RegexOptions.Singleline);
             Assert.IsTrue(bypassClear.Success, $"{replacementSection} must contain a z112 bypass-clear branch.");
             Assert.AreEqual(
-                8,
+                10,
                 Regex.Matches(
                     bypassClear.Groups["clear"].Value,
-                    @"store_uav_typed u7\.xyzw, l\([0-7],[0-7],[0-7],[0-7]\), l\(0,0,0,0\)").Count,
+                    @"store_uav_typed u7\.xyzw, l\((?<i>\d+),\k<i>,\k<i>,\k<i>\), l\(0,0,0,0\)").Count,
                 $"{replacementSection} must invalidate the complete pick packet when z112 is enabled.");
             Assert.IsTrue(
                 replacement.IndexOf("if_nz ${jf0}.x", StringComparison.Ordinal)
@@ -515,6 +527,36 @@ public sealed class RuntimeContractTests
     {
         string ini = File.ReadAllText(RuntimeIniPath);
 
+        StringAssert.Contains(ini, "[CommandListBeginAdaptedDraw]");
+        StringAssert.Contains(ini, "[CommandListEndAdaptedDraw]");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListBeginAdaptedDraw"),
+            "x26 = 3");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListBeginAdaptedDraw"),
+            "$pickObjectID = z26");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListBeginAdaptedDraw"),
+            "vs-t77 = ResourceMotionStates");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListBeginAdaptedDraw"),
+            "vs-t78 = ResourceGroupParameters");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListEndAdaptedDraw"),
+            "vs-t77 = null");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListEndAdaptedDraw"),
+            "vs-t72 = null");
+        StringAssert.Contains(
+            ReadSection(ini, "CommandListEndAdaptedDraw"),
+            "ps-t118 = ResourceOriginalDrawContext");
+        StringAssert.Contains(ini, "global $projectStateReadSlot = 0");
+        Assert.IsFalse(ini.Contains("projectStateSlotAdvancedThisFrame", StringComparison.Ordinal));
+        Assert.IsFalse(
+            ReadSection(ini, "CommandListBeginAdaptedDraw").Contains(
+                "projectStateReadSlot",
+                StringComparison.Ordinal));
+
         string[] publicGlobals =
         [
             "activePickPipeline",
@@ -570,7 +612,8 @@ public sealed class RuntimeContractTests
             "reset_frame_pick_cs.hlsl");
         string shader = File.ReadAllText(resetPath);
 
-        StringAssert.Contains(shader, "[numthreads(8, 1, 1)]");
+        StringAssert.Contains(shader, "[numthreads(16, 1, 1)]");
+        StringAssert.Contains(shader, "JF_FRAME_PICK_RECORD_COUNT = 10u");
         StringAssert.Contains(shader, "FramePickRecords[recordIndex]");
         StringAssert.Contains(shader, "asfloat(0x7f7fffffu)");
         Assert.IsFalse(shader.Contains("[loop]", StringComparison.Ordinal));
@@ -592,7 +635,8 @@ public sealed class RuntimeContractTests
             "update_motion_cs.hlsl",
             "register_draw_parameters_cs.hlsl",
             "register_default_parameters_cs.hlsl",
-            "reset_frame_pick_cs.hlsl"
+            "reset_frame_pick_cs.hlsl",
+            "update_project_motion_cs.hlsl"
         ];
 
         foreach (string entryShader in entryShaders)
@@ -602,6 +646,77 @@ public sealed class RuntimeContractTests
                 $"{entryShader} is missing.");
             StringAssert.Contains(ini, $"./JiggleForge/runtime/{entryShader}");
         }
+    }
+
+    [TestMethod]
+    public void GlobalOriginalGroup_PreservesLegacyStateZeroIdentity()
+    {
+        string shader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "runtime",
+            "update_motion_cs.hlsl"));
+
+        StringAssert.Contains(shader, "stateIndex == 0u && capture.ObjectId == 0u");
+        StringAssert.Contains(shader, "capture.ObjectId = 1u");
+    }
+
+    [TestMethod]
+    public void MotionSolvers_ReadPersistentFrameContextInsteadOfTransientIniParams()
+    {
+        string runtimeDirectory = Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "runtime");
+        foreach (string fileName in new[] { "update_motion_cs.hlsl", "update_project_motion_cs.hlsl" })
+        {
+            string shader = File.ReadAllText(Path.Combine(runtimeDirectory, fileName));
+            StringAssert.Contains(shader, "FrameContextRecords");
+            StringAssert.Contains(shader, "input.DeltaSeconds = frameContext.z");
+            Assert.IsFalse(shader.Contains("JF_INPUT_TIME", StringComparison.Ordinal));
+        }
+
+        string inputShader = File.ReadAllText(Path.Combine(runtimeDirectory, "update_input_cs.hlsl"));
+        StringAssert.Contains(inputShader, "FrameContextRecords[0u]");
+        StringAssert.Contains(inputShader, "input.DeltaSeconds");
+
+        string runtimeIni = File.ReadAllText(RuntimeIniPath);
+        string projectMotionShader = ReadSection(runtimeIni, "CustomShaderUpdateProjectMotion");
+        StringAssert.Contains(projectMotionShader, "cs-t0 = ResourceInputController");
+        StringAssert.Contains(projectMotionShader, "cs-t1 = ResourceCapturedPick");
+        StringAssert.Contains(projectMotionShader, "cs-t5 = ResourceFrameContext");
+        foreach (string cleanup in new[]
+                 {
+                     "post cs-t0 = null",
+                     "post cs-t1 = null",
+                     "post cs-t2 = null",
+                     "post cs-t4 = null",
+                     "post cs-t5 = null",
+                     "post cs-u0 = null",
+                 })
+        {
+            StringAssert.Contains(projectMotionShader, cleanup);
+        }
+    }
+
+    [TestMethod]
+    public void ProjectMotionSolver_UpdatesOnePrivateStateBufferInPlace()
+    {
+        string shader = File.ReadAllText(Path.Combine(
+            RepositoryRoot,
+            "StandaloneShaderFixes",
+            "JiggleForge",
+            "runtime",
+            "update_project_motion_cs.hlsl"));
+
+        StringAssert.Contains(shader, "RWBuffer<float4> MotionStateRecords : register(u0);");
+        StringAssert.Contains(shader, "MotionStateRecords[motionBase + 0u]");
+        StringAssert.Contains(shader, "MotionStateRecords[motionBase + 6u]");
+        Assert.IsFalse(shader.Contains("PreviousMotionStateRecords", StringComparison.Ordinal));
+        Assert.IsFalse(shader.Contains("NextMotionStateRecords", StringComparison.Ordinal));
+        Assert.IsFalse(shader.Contains("register(t3)", StringComparison.Ordinal));
     }
 
     [TestMethod]
@@ -624,14 +739,19 @@ public sealed class RuntimeContractTests
             "JiggleForgeRuntime",
             "draw_state_consumer.hlsl");
         string boundConsumer = File.ReadAllText(boundConsumerPath);
+        StringAssert.Contains(boundConsumer, "JF_RETIRED_PROJECT_INFLUENCE_MAGIC");
+        StringAssert.Contains(boundConsumer, "bool projectFormat = globalMotionRecordCount > 0u;");
         StringAssert.Contains(boundConsumer, "JiggleForgeDirectStateIndex[listIndex]");
-        StringAssert.Contains(boundConsumer, "uint motionBase = stateIndex * 7u;");
-        StringAssert.Contains(boundConsumer, "uint parameterBase = stateIndex * 5u;");
+        StringAssert.Contains(boundConsumer, "uint localIndex = projectLocal ? stateId - 1u : stateId;");
+        StringAssert.Contains(boundConsumer, "motionBase = localIndex * 7u;");
+        StringAssert.Contains(boundConsumer, "parameterBase = localIndex * 5u;");
         StringAssert.Contains(boundConsumer, "JF_MotionState[motionBase + 0u]");
         StringAssert.Contains(boundConsumer, "JF_MotionState[motionBase + 2u]");
         StringAssert.Contains(boundConsumer, "JF_GroupParams[parameterBase + 0u]");
         StringAssert.Contains(boundConsumer, "JF_GroupParams[parameterBase + 1u]");
         StringAssert.Contains(boundConsumer, "JF_GroupParams[parameterBase + 4u]");
+        StringAssert.Contains(boundConsumer, "JF_GlobalMotionState[motionBase + 0u]");
+        StringAssert.Contains(boundConsumer, "JF_GlobalGroupParams[parameterBase + 0u]");
 
         string[] consumerHashes =
         [

@@ -10,6 +10,7 @@ Texture2D<float4> Pick4 : register(t4);
 Texture2D<float4> Pick5 : register(t5);
 Texture2D<float4> Pick6 : register(t6);
 Texture2D<float4> Pick7 : register(t7);
+Buffer<uint4> DrawContext : register(t8);
 RWBuffer<float4> FramePick : register(u0);
 
 [numthreads(1, 1, 1)]
@@ -17,16 +18,18 @@ void main()
 {
     uint framePickCount;
     FramePick.GetDimensions(framePickCount);
-    if (framePickCount < 8u)
+    uint contextCount;
+    DrawContext.GetDimensions(contextCount);
+    if (framePickCount < 10u)
         return;
 
     float4 incoming = Pick0.Load(int3(0, 0, 0));
-    if (incoming.x <= 0.0 || incoming.w <= 0.0)
+    if (incoming.w <= 0.0)
         return;
 
     float4 incomingSource = Pick2.Load(int3(0, 0, 0));
     float4 current = FramePick[0u];
-    if (current.x > 0.0 && current.w > 0.0)
+    if (current.w > 0.0)
     {
         float4 currentSource = FramePick[2u];
         bool samePipeline =
@@ -67,4 +70,14 @@ void main()
     FramePick[5u] = Pick5.Load(int3(0, 0, 0));
     FramePick[6u] = Pick6.Load(int3(0, 0, 0));
     FramePick[7u] = Pick7.Load(int3(0, 0, 0));
+    // Older adapted Mods do not bind the new DrawContext slot. Treat an
+    // absent context as the legacy/global project instead of discarding their
+    // native pick candidate.
+    uint4 projectId = 0u;
+    if (contextCount >= 1u)
+        projectId = DrawContext[0u];
+    uint4 low = projectId & 0xffffu;
+    uint4 high = projectId >> 16u;
+    FramePick[8u] = float4(low.x, high.x, low.y, high.y);
+    FramePick[9u] = float4(low.z, high.z, low.w, high.w);
 }

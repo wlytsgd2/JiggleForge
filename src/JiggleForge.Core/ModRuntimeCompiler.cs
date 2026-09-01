@@ -18,6 +18,7 @@ public sealed partial class ModRuntimeCompiler
             throw new DirectoryNotFoundException($"Mod folder was not found: {root}");
         }
 
+        JiggleConfigSerializer.EnsureLocalStateIds(config);
         IReadOnlyList<string> validationErrors = JiggleConfigValidator.Validate(config);
         if (validationErrors.Count > 0)
         {
@@ -26,8 +27,14 @@ public sealed partial class ModRuntimeCompiler
 
         Dictionary<string, byte[]?> originalFiles = new(StringComparer.OrdinalIgnoreCase);
         Dictionary<string, string> generatedText = new(StringComparer.OrdinalIgnoreCase);
-        Dictionary<string, byte[]> generatedBinary = new(StringComparer.OrdinalIgnoreCase);
-        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments = BuildAssignments(config);
+        HashSet<string> deletedPaths = new(StringComparer.OrdinalIgnoreCase);
+        RuntimeProjectLayout layout = BuildRuntimeLayout(config);
+        if (layout.MaximumGroupId > JiggleProjectConfig.MaximumProjectGroupId)
+        {
+            throw new InvalidDataException(
+                $"This project requires group ID {layout.MaximumGroupId}, but the runtime supports at most " +
+                $"{JiggleProjectConfig.MaximumProjectGroupId} project groups.");
+        }
         int patchedIniCount = 0;
 
         foreach (IGrouping<string, JiggleDrawConfig> fileGroup in config.Draws.GroupBy(
@@ -54,8 +61,7 @@ public sealed partial class ModRuntimeCompiler
                 string updated = UpdatePatchedIni(
                     text,
                     fileGroup.ToArray(),
-                    assignments,
-                    config.StateNamespace);
+                    config);
                 generatedText[iniPath] = updated;
                 continue;
             }
@@ -63,8 +69,7 @@ public sealed partial class ModRuntimeCompiler
             string patched = PatchIni(
                 text,
                 fileGroup.OrderBy(draw => draw.SourceLine).ToArray(),
-                config.StateNamespace,
-                assignments);
+                config);
             generatedText[iniPath] = patched;
             patchedIniCount++;
         }
@@ -75,22 +80,58 @@ public sealed partial class ModRuntimeCompiler
         string runtimeRoot = Path.Combine(root, "_JiggleForgeRuntime");
         string runtimeMaskRoot = Path.Combine(runtimeRoot, "Masks");
         string masksIniPath = Path.Combine(runtimeRoot, "Masks.generated.ini");
-        generatedText[masksIniPath] = BuildMasksIni(root, runtimeMaskRoot, config, generatedBinary);
+        string projectIniPath = Path.Combine(runtimeRoot, "Project.generated.ini");
         string inspectorIniPath = Path.Combine(runtimeRoot, "Inspector.generated.ini");
         string inspectorShaderPath = Path.Combine(runtimeRoot, "InspectorText.hlsl");
-        generatedText[inspectorIniPath] = BuildInspectorIni(config, assignments);
-        generatedText[inspectorShaderPath] = LoadInspectorShader();
+
+        if (ModRuntimeRequirements.RequiresMaskRuntime(config))
+        {
+            generatedText[masksIniPath] = BuildMasksIni(root, runtimeRoot, config);
+        }
+        else
+        {
+            deletedPaths.Add(masksIniPath);
+        }
+        if (Directory.Exists(runtimeMaskRoot))
+        {
+            foreach (string existingMask in Directory.EnumerateFiles(runtimeMaskRoot, "*", SearchOption.AllDirectories))
+            {
+                deletedPaths.Add(existingMask);
+            }
+        }
+
+        if (ModRuntimeRequirements.RequiresProjectRuntime(config))
+        {
+            generatedText[projectIniPath] = BuildProjectIni(config, layout);
+        }
+        else
+        {
+            deletedPaths.Add(projectIniPath);
+        }
+
+        if (config.Inspector.Enabled)
+        {
+            generatedText[inspectorIniPath] = BuildInspectorIni(config, layout.Assignments);
+            generatedText[inspectorShaderPath] = LoadInspectorShader();
+        }
+        else
+        {
+            deletedPaths.Add(inspectorIniPath);
+            deletedPaths.Add(inspectorShaderPath);
+        }
 
         foreach ((string path, string _) in generatedText)
         {
             originalFiles.TryAdd(path, File.Exists(path) ? File.ReadAllBytes(path) : null);
         }
-        foreach ((string path, byte[] _) in generatedBinary)
+        foreach (string path in deletedPaths)
         {
             originalFiles.TryAdd(path, File.Exists(path) ? File.ReadAllBytes(path) : null);
         }
 
-        ApplyGeneratedFiles(generatedText, generatedBinary, originalFiles);
+        ApplyGeneratedFiles(generatedText, deletedPaths, originalFiles);
+        DeleteDirectoryIfEmpty(runtimeMaskRoot);
+        DeleteDirectoryIfEmpty(runtimeRoot);
         return new RuntimeApplyResult(root, patchedIniCount, config.Draws.Count, masksIniPath);
     }
 
@@ -103,14 +144,49 @@ public sealed record RuntimeApplyResult(
     string MasksIniPath);
 
 internal sealed record RuntimeDrawAssignment(
-    int ObjectId,
-    IReadOnlyList<int> StateIndices,
-    IReadOnlyList<PhysicsSettings> StatePhysics);
+    int PickGroupId,
+    IReadOnlyList<int> InfluenceGroupIds);
 
-internal sealed record RuntimeGroupLeader(int ObjectId, int StateIndex);
+internal sealed record RuntimeProjectGroup(
+    int GroupId,
+    string Name,
+    PhysicsSettings Physics,
+    bool IsImplicit);
 
-internal sealed record RuntimePhysicsBinding(
-    string StateResourceName,
-    string PhysicsResourceName,
-    int StateIndex,
-    PhysicsSettings Physics);
+internal sealed record RuntimeProjectLayout(
+    IReadOnlyDictionary<string, RuntimeDrawAssignment> Assignments,
+    IReadOnlyList<RuntimeProjectGroup> Groups,
+    int MaximumGroupId);
+
+internal static class ModRuntimeRequirements
+{
+    public static bool IsOriginalDraw(
+        JiggleProjectConfig config,
+        JiggleDrawConfig draw) =>
+        config.Groups.Any(group =>
+            string.Equals(
+                group.Name,
+                OriginalPartsConfig.GroupName,
+                StringComparison.OrdinalIgnoreCase) &&
+            group.Draws.Contains(draw.Id, StringComparer.OrdinalIgnoreCase));
+
+    public static bool RequiresDrawRuntime(
+        JiggleProjectConfig config,
+        JiggleDrawConfig draw,
+        bool inspectorEnabled) =>
+        inspectorEnabled ||
+        !IsOriginalDraw(config, draw) ||
+        !draw.DeformationEnabled ||
+        !string.IsNullOrWhiteSpace(draw.Mask);
+
+    public static bool RequiresProjectRuntime(JiggleProjectConfig config) =>
+        config.Draws.Any(draw => RequiresDrawRuntime(config, draw, config.Inspector.Enabled));
+
+    public static bool RequiresPrivateState(JiggleProjectConfig config) =>
+        config.Draws.Any(draw => !IsOriginalDraw(config, draw));
+
+    public static bool RequiresMaskRuntime(JiggleProjectConfig config) =>
+        config.Draws.Any(draw =>
+            draw.DeformationEnabled &&
+            !string.IsNullOrWhiteSpace(draw.Mask));
+}

@@ -10,6 +10,8 @@ namespace JiggleForge;
 
 public sealed partial class MainWindow
 {
+    private static readonly Version ProjectInfluenceFormatMigrationVersion = new(0, 1, 22);
+
     private readonly ApplicationUpdateService applicationUpdateService = new(
         GetCurrentApplicationVersion(),
         ApplicationLayout.InstallationDirectory);
@@ -196,6 +198,18 @@ public sealed partial class MainWindow
             Text = AppLanguageService.Format("UpdateVersionComparison", applicationUpdateService.CurrentVersionText, release.VersionText),
             FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
         });
+        if (applicationUpdateService.CurrentVersion < ProjectInfluenceFormatMigrationVersion &&
+            release.Version >= ProjectInfluenceFormatMigrationVersion)
+        {
+            content.Children.Add(new InfoBar
+            {
+                IsOpen = true,
+                IsClosable = false,
+                Severity = InfoBarSeverity.Warning,
+                Title = L("AdaptedModMigrationTitle"),
+                Message = L("AdaptedModMigrationMessage"),
+            });
+        }
         content.Children.Add(new TextBlock
         {
             Text = L("WhatsNew"),

@@ -15,14 +15,14 @@ The runtime installation is global. A Mod still needs to be adapted separately.
 ## 2. Adapt a Mod
 
 1. Drag the replacement Mod folder into the application.
-2. The first import scans the Mod's INI files and creates `JiggleForge.txt` and private generated resources in the Mod folder.
+2. The first import scans the Mod's INI files, records every Draw in `JiggleForge.txt`, and places them all under **Ungrouped**. Each ungrouped Draw still receives an independent implicit runtime state, so the Draws do not affect one another. Generated files remain feature-driven: a Draw moved to `OriginalParts` with no mask, deformation-disable, or inspector requirement keeps only stable marker comments.
 3. Review the Draw list. Rename aliases only when they help you identify the part; the original Draw identity remains stable.
 4. Place Draws into groups. Use the dependency page to connect groups that should share deformation.
 5. Assign a DDS mask when only part of a Draw should deform. Without a mask, the default weight is `1.0`.
 6. Adjust the global/default or per-group physics values.
 7. Click **Apply configuration**.
 
-The original Mod draw commands remain in the source INI. JiggleForge adds the generated runtime sections and does not require the source Mod to remain in its original location after the project has been generated.
+The original Mod draw commands remain in the source INI. Stable marker comments identify each Draw. Runtime command lists and files are generated only for enabled features such as private groups, masks, per-Draw deformation disablement, or the temporary Draw inspector.
 
 ## 3. Test in the game
 

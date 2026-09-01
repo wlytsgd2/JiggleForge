@@ -17,16 +17,9 @@ public static class JiggleConfigValidator
             errors.Add("Project ID cannot be empty.");
         }
 
-        if (config.StateNamespace is < 0 or > 255)
-        {
-            errors.Add("State namespace must be between 0 and 255.");
-        }
-
         ValidatePhysics(config.Physics, "Physics", errors);
 
         HashSet<string> drawIds = new(StringComparer.OrdinalIgnoreCase);
-        HashSet<int> stateIndices = [];
-        HashSet<int> objectIds = [];
         foreach (JiggleDrawConfig draw in config.Draws)
         {
             if (string.IsNullOrWhiteSpace(draw.Id) || !drawIds.Add(draw.Id))
@@ -44,16 +37,6 @@ public static class JiggleConfigValidator
                 errors.Add($"Draw {draw.Id} has an invalid source line.");
             }
 
-            if (!stateIndices.Add(draw.StateIndex))
-            {
-                errors.Add($"State index is duplicated: {draw.StateIndex}.");
-            }
-
-            if (!objectIds.Add(draw.ObjectId))
-            {
-                errors.Add($"Object ID is duplicated: {draw.ObjectId}.");
-            }
-
             if (!string.IsNullOrWhiteSpace(draw.Mask) &&
                 (Path.IsPathRooted(draw.Mask) || HasParentTraversal(draw.Mask)))
             {
@@ -68,12 +51,36 @@ public static class JiggleConfigValidator
         }
 
         HashSet<string> groupNames = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<int> localStateIds = [];
         Dictionary<string, string> assignedDraws = new(StringComparer.OrdinalIgnoreCase);
         foreach (JiggleGroupConfig group in config.Groups)
         {
             if (string.IsNullOrWhiteSpace(group.Name) || !groupNames.Add(group.Name))
             {
                 errors.Add($"Group name is empty or duplicated: {group.Name}.");
+            }
+
+            bool isOriginal = string.Equals(
+                group.Name,
+                OriginalPartsConfig.GroupName,
+                StringComparison.OrdinalIgnoreCase);
+            if (isOriginal && group.LocalStateId != 0)
+            {
+                errors.Add($"The fixed {OriginalPartsConfig.GroupName} group must use local state 0.");
+            }
+            else if (!isOriginal && group.LocalStateId <= 0)
+            {
+                errors.Add($"Group {group.Name} must use a positive local state ID.");
+            }
+            else if (group.LocalStateId > JiggleProjectConfig.MaximumProjectGroupId)
+            {
+                errors.Add(
+                    $"Group {group.Name} exceeds the maximum local state ID " +
+                    $"{JiggleProjectConfig.MaximumProjectGroupId}.");
+            }
+            else if (!localStateIds.Add(group.LocalStateId))
+            {
+                errors.Add($"Local state ID is duplicated: {group.LocalStateId}.");
             }
 
             if (group.GraphX.HasValue != group.GraphY.HasValue ||

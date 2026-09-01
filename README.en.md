@@ -100,7 +100,7 @@ A Draw represents one actual rendering path found in the source Mod. It does not
 - Multiple Draws forming one continuous component can share a group.
 - Left and right legs should use separate groups when they need independent responses.
 - A Draw with deformation disabled can still be shown by the inspector, but it does not generate or receive deformation.
-- `OriginalParts` is the fixed group used by the default channel (`StateIndex 0 / ObjectID 1`); original characters and unadapted parts always remain eligible for deformation.
+- `OriginalParts` is the fixed global group 0 used by the default channel; original characters and unadapted parts always remain eligible for deformation.
 
 The Draw Inspector is intended for configuration and diagnostics. Disable it for regular gameplay after the parts have been identified.
 

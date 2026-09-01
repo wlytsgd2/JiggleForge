@@ -61,6 +61,7 @@ $runtimeShaders = @(
     'update_input_cs.hlsl',
     'build_diagnostic_text_cs.hlsl',
     'update_motion_cs.hlsl',
+    'update_project_motion_cs.hlsl',
     'register_draw_parameters_cs.hlsl',
     'register_default_parameters_cs.hlsl'
 )
@@ -78,6 +79,20 @@ foreach ($runtimeShader in $runtimeShaders) {
     if ($LASTEXITCODE -ne 0) {
         throw "FXC failed for $runtimeShader with exit code $LASTEXITCODE."
     }
+}
+
+$inspectorShaderSource = Join-Path $projectRoot `
+    'src\JiggleForge.Core\Runtime\InspectorText.hlsl'
+$inspectorShaderOutput = Join-Path $temporaryRoot 'InspectorText.hlsl.cso'
+& $fxc `
+    /nologo `
+    /WX `
+    /T cs_5_0 `
+    /E main `
+    /Fo $inspectorShaderOutput `
+    $inspectorShaderSource
+if ($LASTEXITCODE -ne 0) {
+    throw "FXC failed for InspectorText.hlsl with exit code $LASTEXITCODE."
 }
 
 $framePickResetSource = Join-Path $projectRoot `
@@ -105,7 +120,8 @@ $consumerShaders = @(
     '160b58ea1824c794',
     'a0b37a7c7c2a1905',
     'ad24b1c214866fd7',
-    'd0a1a756bd3bde31'
+    'd0a1a756bd3bde31',
+    '29837c29e23201fd'
 )
 foreach ($consumerHash in $consumerShaders) {
     $consumerSource = Join-Path $projectRoot `
@@ -125,7 +141,8 @@ foreach ($consumerHash in $consumerShaders) {
         '160b58ea1824c794',
         'a0b37a7c7c2a1905',
         'ad24b1c214866fd7',
-        'd0a1a756bd3bde31'
+        'd0a1a756bd3bde31',
+        '29837c29e23201fd'
     )
     if ($consumerHash -notin $partialOutputHashes) {
         $consumerArguments = @('/WX') + $consumerArguments

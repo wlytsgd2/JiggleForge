@@ -47,10 +47,14 @@ public sealed class ModProjectServiceTests
         Assert.AreEqual(JiggleDrawKind.Numeric, config.Draws[0].Kind);
         Assert.AreEqual(-4, config.Draws[0].BaseVertex);
         Assert.AreEqual("else if $swapvar == 1", config.Draws[1].Branch);
-        Assert.AreEqual(config.Draws[0].StateIndex + 1, config.Draws[0].ObjectId);
+        Assert.AreEqual(0, config.Groups.Single(group =>
+            string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)).LocalStateId);
         Assert.IsTrue(config.Inspector.Enabled);
         Assert.IsTrue(config.Groups.Any(group =>
             string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase)));
+        Assert.AreEqual(1, config.Groups.Count);
+        Assert.IsTrue(config.Draws.All(draw => string.IsNullOrEmpty(draw.Group)));
+        Assert.AreEqual(0, config.Groups.Single().Draws.Count);
     }
 
     [TestMethod]
@@ -131,27 +135,65 @@ public sealed class ModProjectServiceTests
         Assert.AreEqual(2, result.DrawCount);
         StringAssert.Contains(patched, "JIGGLEFORGE_VISIBLE_RANGE BEGIN Draw0001");
         StringAssert.Contains(patched, "JIGGLEFORGE_VISIBLE_RANGE BEGIN Draw0002");
-        StringAssert.Contains(patched, "run = CommandList\\jiggle_forge\\RegisterGroupParameters");
-        StringAssert.Contains(patched, "if $\\jiggle_forge\\activePickPipeline > 0");
+        Assert.IsFalse(patched.Contains("RegisterGroupParameters", StringComparison.Ordinal));
+        StringAssert.Contains(patched, $"run = CommandList\\jiggle_forge_project_{config.ProjectId:N}\\BeginDraw0001");
+        Assert.IsFalse(patched.Contains("vs-t77 =", StringComparison.Ordinal));
+        Assert.IsFalse(patched.Contains("vs-t78 =", StringComparison.Ordinal));
+        Assert.IsFalse(patched.Contains("$\\jiggle_forge\\projectStateReadSlot", StringComparison.Ordinal));
         Assert.IsFalse(patched.Contains("$\\jiggle_forge\\activePickProfile", StringComparison.Ordinal));
-        StringAssert.Contains(patched, "[ResourceJiggleForgeDrawPhysics001]");
-        StringAssert.Contains(patched, "data = 0 2 0.12 0.7 1 2 0.75 0.1 0.02 10 0.84 5 0 5 0.02 0 0.15 1 -1 1");
+        Assert.IsFalse(patched.Contains("DrawInfluences001", StringComparison.Ordinal));
+        Assert.IsFalse(patched.Contains("DrawContext001", StringComparison.Ordinal));
         Assert.IsFalse(patched.Contains("CommandList\\jiggle_forge\\RegisterParams", StringComparison.Ordinal));
         Assert.IsFalse(patched.Contains("cs-t74 =", StringComparison.Ordinal));
         Assert.IsTrue(File.Exists(Path.Combine(root!, JiggleProjectConfig.DefaultFileName)));
-        Assert.IsTrue(File.Exists(Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini")));
+        Assert.IsFalse(File.Exists(Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini")));
+        string projectIniPath = Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini");
+        Assert.IsTrue(File.Exists(projectIniPath));
+        string initialProjectIni = File.ReadAllText(projectIniPath);
+        StringAssert.Contains(initialProjectIni, "[ResourceProjectGroupParameters]");
+        StringAssert.Contains(initialProjectIni, "[ResourceProjectMotionStates]");
+        Assert.IsFalse(initialProjectIni.Contains("ResourceProjectMotionStates0", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("ResourceProjectMotionStates1", StringComparison.Ordinal));
+        StringAssert.Contains(initialProjectIni, "UpdateProjectMotion");
+        Assert.IsFalse(initialProjectIni.Contains(
+            "cs-t0 = Resource\\jiggle_forge\\InputController",
+            StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains(
+            "cs-t1 = Resource\\jiggle_forge\\CapturedPick",
+            StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("cs-t0 = null", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("cs-t1 = null", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("cs-t2 = null", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("cs-t4 = null", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("cs-u0 = null", StringComparison.Ordinal));
+        string present = GetResourceBody(initialProjectIni, "Present");
+        Assert.IsFalse(present.Contains("vs-t75 = null", StringComparison.Ordinal));
+        StringAssert.Contains(present, "cs-u0 = ResourceProjectMotionStates");
+        Assert.IsFalse(initialProjectIni.Contains("$\\jiggle_forge\\projectStateReadSlot", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("global $stateReadSlot", StringComparison.Ordinal));
+        Assert.IsFalse(initialProjectIni.Contains("ResourceDrawContext", StringComparison.Ordinal));
+        string privateDrawBegin = GetResourceBody(initialProjectIni, "CommandListBeginPrivateDraw");
+        StringAssert.Contains(privateDrawBegin, "run = CommandList\\jiggle_forge\\BeginAdaptedDraw");
+        Assert.IsFalse(privateDrawBegin.Contains("x26 = 3", StringComparison.Ordinal));
+        StringAssert.Contains(privateDrawBegin, "vs-t75 = ResourceProjectMotionStates");
+        StringAssert.Contains(privateDrawBegin, "vs-t76 = ResourceProjectGroupParameters");
+        StringAssert.Contains(privateDrawBegin, "ps-t118 = ResourceProjectIdentity");
+        string firstDrawBegin = GetResourceBody(initialProjectIni, "CommandListBeginDraw0001");
+        StringAssert.Contains(firstDrawBegin, "run = CommandListBeginPrivateDraw");
+        Assert.IsFalse(firstDrawBegin.Contains("x26 = 3", StringComparison.Ordinal));
+        StringAssert.Contains(firstDrawBegin, "vs-t72 = ResourceDrawInfluences001");
+        Assert.IsFalse(firstDrawBegin.Contains("ps-t118", StringComparison.Ordinal));
         string inspectorIniPath = Path.Combine(root!, "_JiggleForgeRuntime", "Inspector.generated.ini");
         string inspectorShaderPath = Path.Combine(root!, "_JiggleForgeRuntime", "InspectorText.hlsl");
         Assert.IsTrue(File.Exists(inspectorIniPath));
         Assert.IsTrue(File.Exists(inspectorShaderPath));
         string inspectorIni = File.ReadAllText(inspectorIniPath);
-        StringAssert.Contains(inspectorIni, "global $inspectorEnabled = 1");
         StringAssert.Contains(inspectorIni, "global $drawSeen = 0");
         StringAssert.Contains(inspectorIni, "ResourceInspectorObjectIDs");
         StringAssert.Contains(
             inspectorIni,
             "cs-t0 = Resource\\jiggle_forge\\CapturedPick");
-        StringAssert.Contains(inspectorIni, $"data = {config.Draws[0].ObjectId} {config.Draws[1].ObjectId}");
+        StringAssert.Contains(inspectorIni, "data = 1 2 0");
         byte[] inspectorShader = File.ReadAllBytes(inspectorShaderPath);
         Assert.IsFalse(
             inspectorShader.Length >= 3 &&
@@ -178,14 +220,12 @@ public sealed class ModProjectServiceTests
             string.Empty);
         File.WriteAllText(iniPath, legacyPatched, Encoding.UTF8);
 
-        config.Draws[0].Group = "Body";
-        config.Draws[1].Group = "Clothes";
         JiggleGroupConfig body = new() { Name = "Body" };
-        body.Draws.Add("Draw0001");
         JiggleGroupConfig clothes = new() { Name = "Clothes" };
-        clothes.Draws.Add("Draw0002");
         config.Groups.Add(body);
         config.Groups.Add(clothes);
+        MoveDrawToGroup(config, config.Draws[0], body);
+        MoveDrawToGroup(config, config.Draws[1], clothes);
         config.Edges.Add(new JiggleEdgeConfig { From = "Body", To = "Clothes" });
         config.Physics.Radius = 0.123;
         config.Physics.Strength = 0.456;
@@ -195,20 +235,24 @@ public sealed class ModProjectServiceTests
         config.Physics.WheelMaxDepth = 0.14;
         new ModRuntimeCompiler().Apply(root!, config);
         string grouped = File.ReadAllText(iniPath);
-        StringAssert.Contains(grouped, $"array = 2\r\ndata = {config.Draws[0].StateIndex} {config.Draws[1].StateIndex}");
-        StringAssert.Contains(grouped, "run = CommandList\\jiggle_forge\\RegisterGroupParameters");
-        StringAssert.Contains(grouped, "vs-t75 = Resource\\jiggle_forge\\MotionStates");
-        StringAssert.Contains(grouped, "vs-t76 = Resource\\jiggle_forge\\GroupParameters");
+        string projectIni = File.ReadAllText(projectIniPath);
+        StringAssert.Contains(projectIni, "[ResourceDrawInfluences002]");
+        Assert.IsFalse(grouped.Contains("RegisterGroupParameters", StringComparison.Ordinal));
+        Assert.IsFalse(grouped.Contains("ProjectMotionStates0", StringComparison.Ordinal));
+        Assert.IsFalse(grouped.Contains("ProjectGroupParameters", StringComparison.Ordinal));
+        StringAssert.Contains(projectIni, "ProjectMotionStates");
+        Assert.IsFalse(projectIni.Contains("ProjectMotionStates0", StringComparison.Ordinal));
+        StringAssert.Contains(projectIni, "ProjectGroupParameters");
         Assert.IsFalse(
             grouped.Contains(
                 "$\\jiggle_forge\\runtimeEnabled",
                 StringComparison.Ordinal));
         Assert.IsFalse(grouped.Contains("x82 =", StringComparison.Ordinal));
         StringAssert.Contains(
-            grouped,
-            "data = 0 2 0.123 0.456 1 1.8 0.75 0.1 0.02 10 0.84 5 0 5 0.01 -0.12 0.14 1 -1 1");
+            projectIni,
+            $"{body.LocalStateId} 2 0.123 0.456 1 1.8 0.75 0.1 0.02 10 0.84 5 0 5 0.01 -0.12 0.14 1 -1 1");
 
-        File.Delete(Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini"));
+        File.Delete(projectIniPath);
         ModProjectInspection missingRuntime = service.Inspect(root!);
         Assert.AreEqual(ModImportState.RuntimeRepairRequired, missingRuntime.State);
         new ModRuntimeCompiler().Apply(root!, missingRuntime.Configuration!);
@@ -216,7 +260,172 @@ public sealed class ModProjectServiceTests
 
         config.Inspector.Enabled = false;
         new ModRuntimeCompiler().Apply(root!, config);
-        StringAssert.Contains(File.ReadAllText(inspectorIniPath), "global $inspectorEnabled = 0");
+        Assert.IsFalse(File.Exists(inspectorIniPath));
+        Assert.IsFalse(File.Exists(inspectorShaderPath));
+        Assert.IsFalse(
+            File.ReadAllText(iniPath).Contains("drawSeen = 1", StringComparison.Ordinal));
+        projectIni = File.ReadAllText(projectIniPath);
+        Assert.IsFalse(projectIni.Contains("drawSeen = 1", StringComparison.Ordinal));
+        Assert.IsFalse(
+            GetResourceBody(projectIni, "CommandListBeginPrivateDraw")
+                .Contains("y26 =", StringComparison.Ordinal));
+        Assert.AreEqual(ModImportState.Ready, service.Inspect(root!).State);
+
+        config.Inspector.Enabled = true;
+        new ModRuntimeCompiler().Apply(root!, config);
+        Assert.IsTrue(File.Exists(inspectorIniPath));
+        Assert.IsTrue(File.Exists(inspectorShaderPath));
+        projectIni = File.ReadAllText(projectIniPath);
+        StringAssert.Contains(GetResourceBody(projectIni, "CommandListBeginPrivateDraw"), "drawSeen = 1");
+        StringAssert.Contains(GetResourceBody(projectIni, "CommandListBeginDraw0001"), "y26 = 1");
+    }
+
+    [TestMethod]
+    public void OriginalDrawWithoutInspectorProducesOnlyStableMarkersUntilAFeatureIsAdded()
+    {
+        string iniPath = Path.Combine(root!, "Example.ini");
+        File.WriteAllText(
+            iniPath,
+            "[CommandListBody]\r\ndrawindexed = auto\r\n",
+            Encoding.UTF8);
+
+        ModProjectService service = new();
+        JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
+        config.Inspector.Enabled = false;
+
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string initialPrivate = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
+        StringAssert.Contains(initialPrivate, "run = CommandList\\jiggle_forge_project_");
+        string initialProjectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        StringAssert.Contains(initialProjectIni, "[ResourceProjectMotionStates]");
+
+        JiggleGroupConfig original = config.Groups.Single(group =>
+            string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase));
+        MoveDrawToGroup(config, config.Draws[0], original);
+
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string markerOnly = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
+        StringAssert.Contains(markerOnly, "drawindexed = auto");
+        Assert.IsFalse(markerOnly.Contains("run =", StringComparison.OrdinalIgnoreCase));
+        Assert.AreEqual(OriginalPartsConfig.GroupName, config.Draws[0].Group);
+        CollectionAssert.Contains(
+            config.Groups.Single(group => group.Name == OriginalPartsConfig.GroupName).Draws,
+            "Draw0001");
+        Assert.IsFalse(Directory.Exists(Path.Combine(root!, "_JiggleForgeRuntime")));
+        Assert.AreEqual(ModImportState.Ready, service.Inspect(root!).State);
+
+        string sourceMaskDirectory = Path.Combine(root!, "Masks");
+        Directory.CreateDirectory(sourceMaskDirectory);
+        string maskPath = Path.Combine(sourceMaskDirectory, "Body.dds");
+        File.WriteAllBytes(maskPath, [1, 2, 3, 4]);
+        config.Draws[0].Mask = "Masks\\Body.dds";
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string projectIniPath = Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini");
+        string projectIni = File.ReadAllText(projectIniPath);
+        string maskedBegin = GetResourceBody(projectIni, "CommandListBeginDraw0001");
+        StringAssert.Contains(maskedBegin, "vs-t72 = ResourceDrawInfluences001");
+        StringAssert.Contains(maskedBegin, "vs-t73 = Resource\\jiggle_forge_masks_");
+        StringAssert.Contains(maskedBegin, "vs-t77 = Resource\\jiggle_forge\\MotionStates");
+        Assert.IsFalse(projectIni.Contains("ResourceProjectIdentity", StringComparison.Ordinal));
+        Assert.IsFalse(projectIni.Contains("ResourceProjectMotionStates", StringComparison.Ordinal));
+        Assert.IsFalse(maskedBegin.Contains("x26 =", StringComparison.Ordinal));
+        string masksIniPath = Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini");
+        Assert.IsTrue(File.Exists(masksIniPath));
+        StringAssert.Contains(File.ReadAllText(masksIniPath), "filename = ..\\Masks\\Body.dds");
+        Assert.IsFalse(Directory.Exists(Path.Combine(root!, "_JiggleForgeRuntime", "Masks")));
+
+        config.Draws[0].Mask = string.Empty;
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string markerOnlyAgain = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
+        Assert.IsFalse(markerOnlyAgain.Contains("run =", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(Directory.Exists(Path.Combine(root!, "_JiggleForgeRuntime")));
+        Assert.AreEqual(ModImportState.Ready, service.Inspect(root!).State);
+    }
+
+    [TestMethod]
+    public void DrawsUsingTheSameMaskShareOneDirectResourceWithoutCopies()
+    {
+        string iniPath = Path.Combine(root!, "Example.ini");
+        File.WriteAllText(iniPath, """
+            [CommandListBody]
+            drawindexed = 300, 0, 0
+            drawindexed = 300, 300, 0
+            """, Encoding.UTF8);
+        string sourceMaskDirectory = Path.Combine(root!, "Textures", "Masks");
+        Directory.CreateDirectory(sourceMaskDirectory);
+        File.WriteAllBytes(Path.Combine(sourceMaskDirectory, "Shared.dds"), [1, 2, 3, 4]);
+        string legacyMaskDirectory = Path.Combine(root!, "_JiggleForgeRuntime", "Masks");
+        Directory.CreateDirectory(legacyMaskDirectory);
+        File.WriteAllBytes(Path.Combine(legacyMaskDirectory, "Draw0001.dds"), [4, 3, 2, 1]);
+
+        ModProjectService service = new();
+        JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
+        config.Inspector.Enabled = false;
+        foreach (JiggleDrawConfig draw in config.Draws)
+        {
+            draw.Mask = "Textures\\Masks\\Shared.dds";
+        }
+
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string masksIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Masks.generated.ini"));
+        Assert.AreEqual(1, Regex.Matches(masksIni, @"(?m)^\[ResourceMaskDraw").Count);
+        StringAssert.Contains(masksIni, "filename = ..\\Textures\\Masks\\Shared.dds");
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        Assert.AreEqual(2, Regex.Matches(
+            projectIni,
+            @"vs-t73 = Resource\\jiggle_forge_masks_[^\\]+\\MaskDraw0001").Count);
+        Assert.IsFalse(Directory.Exists(Path.Combine(root!, "_JiggleForgeRuntime", "Masks")));
+    }
+
+    [TestMethod]
+    public void DrawsInOneGroupShareOneProjectPrivateState()
+    {
+        string iniPath = Path.Combine(root!, "Example.ini");
+        File.WriteAllText(iniPath, """
+            [CommandListBody]
+            drawindexed = 300, 0, 0
+            drawindexed = 300, 300, 0
+            """, Encoding.UTF8);
+
+        ModProjectService service = new();
+        JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
+        JiggleGroupConfig body = new() { Name = "Body" };
+        config.Groups.Add(body);
+        foreach (JiggleDrawConfig draw in config.Draws)
+        {
+            MoveDrawToGroup(config, draw, body);
+        }
+
+        new ModRuntimeCompiler().Apply(root!, config);
+
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        string patched = File.ReadAllText(iniPath);
+        StringAssert.Contains(projectIni, $"namespace = jiggle_forge_project_{config.ProjectId:N}");
+        StringAssert.Contains(
+            GetResourceBody(projectIni, "ResourceProjectMotionStates"),
+            $"array = {body.LocalStateId * 7}");
+        Assert.IsFalse(projectIni.Contains("ResourceProjectMotionStates0", StringComparison.Ordinal));
+        Assert.IsFalse(projectIni.Contains("ResourceProjectMotionStates1", StringComparison.Ordinal));
+        foreach (string resource in new[] { "ResourceDrawInfluences001", "ResourceDrawInfluences002" })
+        {
+            StringAssert.Contains(
+                GetResourceBody(projectIni, resource),
+                $"array = 1\r\ndata = {body.LocalStateId}");
+        }
+        Assert.AreEqual(2, Regex.Matches(
+            projectIni,
+            Regex.Escape($"z26 = {body.LocalStateId}")).Count);
+        Assert.IsFalse(patched.Contains("ResourceJiggleForgeDrawState", StringComparison.Ordinal));
+        Assert.IsFalse(patched.Contains("RegisterGroupParameters", StringComparison.Ordinal));
     }
 
     [TestMethod]
@@ -236,10 +445,9 @@ public sealed class ModProjectServiceTests
         for (int index = 0; index < groupNames.Length; index++)
         {
             JiggleDrawConfig draw = config.Draws[index];
-            draw.Group = groupNames[index];
             JiggleGroupConfig group = new() { Name = groupNames[index] };
-            group.Draws.Add(draw.Id);
             config.Groups.Add(group);
+            MoveDrawToGroup(config, draw, group);
         }
 
         config.Edges.Add(new JiggleEdgeConfig { From = "A", To = "B" });
@@ -247,21 +455,25 @@ public sealed class ModProjectServiceTests
 
         new ModRuntimeCompiler().Apply(root!, config);
         string patched = File.ReadAllText(iniPath);
-        string stateA = config.Draws[0].StateIndex.ToString();
-        string stateB = config.Draws[1].StateIndex.ToString();
-        string stateC = config.Draws[2].StateIndex.ToString();
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        string stateA = config.Groups.Single(group => group.Name == "A").LocalStateId.ToString();
+        string stateB = config.Groups.Single(group => group.Name == "B").LocalStateId.ToString();
+        string stateC = config.Groups.Single(group => group.Name == "C").LocalStateId.ToString();
 
-        StringAssert.Contains(GetStateResourceBody(patched, 1), $"array = 1\r\ndata = {stateA}");
-        StringAssert.Contains(GetStateResourceBody(patched, 2), $"array = 2\r\ndata = {stateA} {stateB}");
-        StringAssert.Contains(GetStateResourceBody(patched, 3), $"array = 3\r\ndata = {stateA} {stateB} {stateC}");
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences001"), $"array = 1\r\ndata = {stateA}");
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences002"), $"array = 2\r\ndata = {stateA} {stateB}");
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences003"), $"array = 3\r\ndata = {stateA} {stateB} {stateC}");
 
         config.Edges.Add(new JiggleEdgeConfig { From = "C", To = "A" });
         new ModRuntimeCompiler().Apply(root!, config);
         patched = File.ReadAllText(iniPath);
+        projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
         string allStates = $"array = 3\r\ndata = {stateA} {stateB} {stateC}";
-        StringAssert.Contains(GetStateResourceBody(patched, 1), allStates);
-        StringAssert.Contains(GetStateResourceBody(patched, 2), allStates);
-        StringAssert.Contains(GetStateResourceBody(patched, 3), allStates);
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences001"), allStates);
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences002"), allStates);
+        StringAssert.Contains(GetResourceBody(projectIni, "ResourceDrawInfluences003"), allStates);
     }
 
     [TestMethod]
@@ -276,8 +488,6 @@ public sealed class ModProjectServiceTests
 
         ModProjectService service = new();
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
-        config.Draws[0].Group = "Body";
-        config.Draws[1].Group = "Clothes";
         JiggleGroupConfig body = new()
         {
             Name = "Body",
@@ -285,7 +495,6 @@ public sealed class ModProjectServiceTests
         };
         body.Physics.Radius = 0.11;
         body.Physics.Strength = 0.22;
-        body.Draws.Add(config.Draws[0].Id);
         JiggleGroupConfig clothes = new()
         {
             Name = "Clothes",
@@ -293,27 +502,25 @@ public sealed class ModProjectServiceTests
         };
         clothes.Physics.Radius = 0.33;
         clothes.Physics.Strength = 0.44;
-        clothes.Draws.Add(config.Draws[1].Id);
         config.Groups.Add(body);
         config.Groups.Add(clothes);
+        MoveDrawToGroup(config, config.Draws[0], body);
+        MoveDrawToGroup(config, config.Draws[1], clothes);
         config.Edges.Add(new JiggleEdgeConfig { From = "Body", To = "Clothes" });
 
         new ModRuntimeCompiler().Apply(root!, config);
-        string patched = File.ReadAllText(iniPath);
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
 
         StringAssert.Contains(
-            patched,
-            "[ResourceJiggleForgeDrawPhysics002_001]\r\n" +
-            "type = Buffer\r\nformat = R32G32B32A32_FLOAT\r\narray = 5\r\n" +
-            "data = 0 2 0.11 0.22");
+            GetResourceBody(projectIni, "ResourceProjectGroupParameters"),
+            $"{body.LocalStateId} 2 0.11 0.22");
         StringAssert.Contains(
-            patched,
-            "[ResourceJiggleForgeDrawPhysics002_002]\r\n" +
-            "type = Buffer\r\nformat = R32G32B32A32_FLOAT\r\narray = 5\r\n" +
-            "data = 0 2 0.33 0.44");
-        string drawBody = GetDrawMarkerBody(patched, "Draw0002");
-        StringAssert.Contains(drawBody, "cs-t72 = ResourceJiggleForgeDrawParamState002_001");
-        StringAssert.Contains(drawBody, "cs-t72 = ResourceJiggleForgeDrawParamState002_002");
+            GetResourceBody(projectIni, "ResourceProjectGroupParameters"),
+            $"{clothes.LocalStateId} 2 0.33 0.44");
+        StringAssert.Contains(
+            GetResourceBody(projectIni, "ResourceDrawInfluences002"),
+            $"data = {body.LocalStateId} {clothes.LocalStateId}");
     }
 
     [TestMethod]
@@ -328,50 +535,55 @@ public sealed class ModProjectServiceTests
 
         ModProjectService service = new();
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
-        config.Draws[0].Group = "Body";
-        config.Draws[1].Group = "Body";
         JiggleGroupConfig body = new() { Name = "Body" };
-        body.Draws.Add(config.Draws[0].Id);
-        body.Draws.Add(config.Draws[1].Id);
         config.Groups.Add(body);
+        MoveDrawToGroup(config, config.Draws[0], body);
+        MoveDrawToGroup(config, config.Draws[1], body);
         config.Draws[0].DeformationEnabled = false;
 
         new ModRuntimeCompiler().Apply(root!, config);
         string disabled = File.ReadAllText(iniPath);
         string disabledBody = GetDrawMarkerBody(disabled, "Draw0001");
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        string disabledBegin = GetResourceBody(projectIni, "CommandListBeginDraw0001");
+        string privateBegin = GetResourceBody(projectIni, "CommandListBeginPrivateDraw");
         StringAssert.Contains(disabledBody, "drawindexed = 300, 0, 0");
-        StringAssert.Contains(disabledBody, "$\\jiggle_forge\\pickPriority = 3");
-        StringAssert.Contains(disabledBody, "x26 = $\\jiggle_forge\\pickPriority");
-        StringAssert.Contains(disabledBody, "y26 = $\\jiggle_forge\\pickSourceDraw");
-        StringAssert.Contains(disabledBody, "z26 = $\\jiggle_forge\\pickObjectID");
+        Assert.IsFalse(privateBegin.Contains("x26 = 3", StringComparison.Ordinal));
+        StringAssert.Contains(disabledBegin, "y26 = 1");
+        StringAssert.Contains(disabledBegin, $"z26 = {body.LocalStateId}");
+        StringAssert.Contains(disabledBegin, "run = CommandListBeginPrivateDraw");
         Assert.IsFalse(disabledBody.Contains("PickVisibleRange", StringComparison.Ordinal));
-        StringAssert.Contains(disabledBody, "drawSeen = 1");
-        StringAssert.Contains(disabledBody, $"$\\jiggle_forge\\pickObjectID = {config.Draws[0].ObjectId}");
-        StringAssert.Contains(disabledBody, "vs-t72 = null");
+        StringAssert.Contains(privateBegin, "drawSeen = 1");
+        StringAssert.Contains(disabledBegin, "vs-t72 = null");
         Assert.IsFalse(disabledBody.Contains("RegisterParams", StringComparison.Ordinal));
         Assert.IsFalse(disabledBody.Contains("vs-t72 = ResourceJiggleForgeDrawState001", StringComparison.Ordinal));
-        string enabledSibling = GetDrawMarkerBody(disabled, "Draw0002");
-        StringAssert.Contains(enabledSibling, "$\\jiggle_forge\\pickPriority = 3");
+        string enabledSibling = GetResourceBody(projectIni, "CommandListBeginDraw0002");
+        StringAssert.Contains(enabledSibling, "run = CommandListBeginPrivateDraw");
         Assert.IsFalse(enabledSibling.Contains("PickVisibleRange", StringComparison.Ordinal));
-        StringAssert.Contains(enabledSibling, $"$\\jiggle_forge\\pickObjectID = {config.Draws[1].ObjectId}");
-        StringAssert.Contains(GetStateResourceBody(disabled, 2), $"data = {config.Draws[1].StateIndex}");
+        StringAssert.Contains(enabledSibling, $"z26 = {body.LocalStateId}");
+        Assert.IsFalse(projectIni.Contains("ResourceDrawInfluences001", StringComparison.Ordinal));
 
         config.Draws[0].DeformationEnabled = true;
         new ModRuntimeCompiler().Apply(root!, config);
         string enabledBody = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
-        StringAssert.Contains(enabledBody, "$\\jiggle_forge\\pickPriority = 3");
-        StringAssert.Contains(enabledBody, "x26 = $\\jiggle_forge\\pickPriority");
-        StringAssert.Contains(enabledBody, "y26 = $\\jiggle_forge\\pickSourceDraw");
-        StringAssert.Contains(enabledBody, "z26 = $\\jiggle_forge\\pickObjectID");
+        StringAssert.Contains(enabledBody, "run = CommandList\\jiggle_forge\\EndAdaptedDraw");
         Assert.IsFalse(enabledBody.Contains("PickVisibleRange", StringComparison.Ordinal));
-        StringAssert.Contains(enabledBody, "RegisterGroupParameters");
-        StringAssert.Contains(enabledBody, "vs-t72");
-        StringAssert.Contains(enabledBody, "drawSeen = 1");
+        projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        string enabledBegin = GetResourceBody(projectIni, "CommandListBeginDraw0001");
+        StringAssert.Contains(enabledBegin, "y26 = 1");
+        StringAssert.Contains(enabledBegin, $"z26 = {body.LocalStateId}");
+        StringAssert.Contains(enabledBegin, "vs-t72");
+        StringAssert.Contains(GetResourceBody(projectIni, "CommandListBeginPrivateDraw"), "drawSeen = 1");
+        StringAssert.Contains(
+            GetResourceBody(projectIni, "ResourceDrawInfluences001"),
+            $"data = {body.LocalStateId}");
 
         config.Draws[0].DeformationEnabled = false;
         new ModRuntimeCompiler().Apply(root!, config);
         string disabledAgain = GetDrawMarkerBody(File.ReadAllText(iniPath), "Draw0001");
-        StringAssert.Contains(disabledAgain, "$\\jiggle_forge\\pickPriority = 3");
+        StringAssert.Contains(disabledAgain, $"run = CommandList\\jiggle_forge_project_{config.ProjectId:N}\\BeginDraw0001");
         Assert.IsFalse(disabledAgain.Contains("PickVisibleRange", StringComparison.Ordinal));
         Assert.IsFalse(disabledAgain.Contains("RegisterParams", StringComparison.Ordinal));
     }
@@ -411,34 +623,32 @@ public sealed class ModProjectServiceTests
 
         ModProjectService service = new();
         JiggleProjectConfig config = service.CreateInitialConfiguration(service.Inspect(root!));
-        config.Draws[0].Group = OriginalPartsConfig.GroupName;
-        config.Draws[1].Group = "Clothes";
-
         JiggleGroupConfig original = config.Groups.Single(group =>
             string.Equals(group.Name, OriginalPartsConfig.GroupName, StringComparison.OrdinalIgnoreCase));
-        original.Draws.Add(config.Draws[0].Id);
         JiggleGroupConfig clothes = new() { Name = "Clothes" };
-        clothes.Draws.Add(config.Draws[1].Id);
         config.Groups.Add(clothes);
+        MoveDrawToGroup(config, config.Draws[0], original);
+        MoveDrawToGroup(config, config.Draws[1], clothes);
         config.Edges.Add(new JiggleEdgeConfig
         {
             From = OriginalPartsConfig.GroupName,
             To = "Clothes",
         });
+        config.Inspector.Enabled = false;
 
         new ModRuntimeCompiler().Apply(root!, config);
         string patched = File.ReadAllText(iniPath);
-        string bodyDraw = GetDrawMarkerBody(patched, config.Draws[0].Id);
-        StringAssert.Contains(bodyDraw, "$\\jiggle_forge\\pickObjectID = 1");
-        StringAssert.Contains(GetStateResourceBody(patched, 1), "array = 1\r\ndata = 0");
+        string projectIni = File.ReadAllText(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Project.generated.ini"));
+        string bodyDraw = GetDrawMarkerBody(patched, "Draw0001");
+        Assert.IsFalse(bodyDraw.Contains("run =", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(projectIni.Contains("CommandListBeginDraw0001", StringComparison.Ordinal));
+        Assert.IsFalse(projectIni.Contains("ResourceDrawInfluences001", StringComparison.Ordinal));
         StringAssert.Contains(
-            GetStateResourceBody(patched, 2),
-            $"array = 2\r\ndata = 0 {config.Draws[1].StateIndex}");
-
-        string inspector = File.ReadAllText(
-            Path.Combine(root!, "_JiggleForgeRuntime", "Inspector.generated.ini"));
-        StringAssert.Contains(inspector, "z31 = 3");
-        StringAssert.Contains(inspector, "data = 1 ");
+            GetResourceBody(projectIni, "ResourceDrawInfluences002"),
+            $"array = 2\r\ndata = 0 {clothes.LocalStateId}");
+        Assert.IsFalse(File.Exists(
+            Path.Combine(root!, "_JiggleForgeRuntime", "Inspector.generated.ini")));
     }
 
     [TestMethod]
@@ -510,13 +720,27 @@ public sealed class ModProjectServiceTests
         Assert.AreEqual(OriginalPartsConfig.GroupName, migrated.Edges[0].From);
     }
 
-    private static string GetStateResourceBody(string ini, int ordinal)
+    private static string GetResourceBody(string ini, string resourceName)
     {
         Match match = Regex.Match(
             ini,
-            $@"(?ms)^\[ResourceJiggleForgeDrawState{ordinal:D3}\]\s*\r?\n(?<body>.*?)(?=^\[|\z)");
-        Assert.IsTrue(match.Success, $"State resource {ordinal:D3} was not generated.");
+            $@"(?ms)^\[{Regex.Escape(resourceName)}\]\s*\r?\n(?<body>.*?)(?=^\[|\z)");
+        Assert.IsTrue(match.Success, $"Resource {resourceName} was not generated.");
         return match.Groups["body"].Value;
+    }
+
+    private static void MoveDrawToGroup(
+        JiggleProjectConfig config,
+        JiggleDrawConfig draw,
+        JiggleGroupConfig target)
+    {
+        foreach (JiggleGroupConfig group in config.Groups)
+        {
+            group.Draws.RemoveAll(drawId =>
+                string.Equals(drawId, draw.Id, StringComparison.OrdinalIgnoreCase));
+        }
+        draw.Group = target.Name;
+        target.Draws.Add(draw.Id);
     }
 
     private static string GetDrawMarkerBody(string ini, string drawId)

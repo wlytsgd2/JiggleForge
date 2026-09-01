@@ -49,6 +49,7 @@ struct JF_InputFrame
 struct JF_CapturedPick
 {
     uint Valid;
+    uint4 ProjectId;
     uint ObjectId;
     uint Generation;
     uint SourceDraw;

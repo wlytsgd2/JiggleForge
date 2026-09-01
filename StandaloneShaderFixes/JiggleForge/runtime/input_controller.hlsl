@@ -4,12 +4,13 @@
 #include "motion_model.hlsl"
 
 static const uint JF_CONTROLLER_RECORD_COUNT = 2u;
-static const uint JF_CAPTURED_PICK_RECORD_COUNT = 7u;
+static const uint JF_CAPTURED_PICK_RECORD_COUNT = 9u;
 static const uint JF_MAXIMUM_EXACT_GENERATION = 0x007fffffu;
 
 struct JF_PickRecord
 {
     uint Valid;
+    uint4 ProjectId;
     uint ObjectId;
     uint SourceDraw;
     float3 WorldPosition;
@@ -33,6 +34,30 @@ struct JF_InputControllerState
     int WheelSequenceCode;
     uint CurrentPickValid;
 };
+
+uint JF_DecodeProjectWord(float lowPart, float highPart)
+{
+    uint low = (uint)clamp(round(JF_FiniteOr(lowPart, 0.0f)), 0.0f, 65535.0f);
+    uint high = (uint)clamp(round(JF_FiniteOr(highPart, 0.0f)), 0.0f, 65535.0f);
+    return low | (high << 16u);
+}
+
+uint4 JF_DecodeProjectId(float4 p0, float4 p1)
+{
+    return uint4(
+        JF_DecodeProjectWord(p0.x, p0.y),
+        JF_DecodeProjectWord(p0.z, p0.w),
+        JF_DecodeProjectWord(p1.x, p1.y),
+        JF_DecodeProjectWord(p1.z, p1.w));
+}
+
+void JF_EncodeProjectId(uint4 projectId, out float4 p0, out float4 p1)
+{
+    uint4 low = projectId & 0xffffu;
+    uint4 high = projectId >> 16u;
+    p0 = float4(low.x, high.x, low.y, high.y);
+    p1 = float4(low.z, high.z, low.w, high.w);
+}
 
 JF_InputControllerState JF_DecodeInputControllerState(
     float4 c0,
@@ -76,10 +101,13 @@ JF_CapturedPick JF_DecodeCapturedPick(
     float4 q3,
     float4 q4,
     float4 q5,
-    float4 q6)
+    float4 q6,
+    float4 q7,
+    float4 q8)
 {
     JF_CapturedPick result;
     result.Valid = 0u;
+    result.ProjectId = 0u;
     result.ObjectId = 0u;
     result.Generation = 0u;
     result.SourceDraw = 0u;
@@ -128,6 +156,7 @@ JF_CapturedPick JF_DecodeCapturedPick(
         q6.xyz,
         float3(0.0f, 0.0f, 1.0f));
     result.HoldSeconds = clamp(JF_FiniteOr(q6.w, 0.0f), 0.0f, 10.0f);
+    result.ProjectId = JF_DecodeProjectId(q7, q8);
     return result;
 }
 
@@ -139,7 +168,9 @@ void JF_EncodeCapturedPick(
     out float4 q3,
     out float4 q4,
     out float4 q5,
-    out float4 q6)
+    out float4 q6,
+    out float4 q7,
+    out float4 q8)
 {
     q0 = float4(
         capture.WorldPosition,
@@ -156,6 +187,7 @@ void JF_EncodeCapturedPick(
         capture.PressCursorPixels.x);
     q5 = float4(capture.Barycentric, capture.PressCursorPixels.y);
     q6 = float4(capture.SurfaceNormal, capture.HoldSeconds);
+    JF_EncodeProjectId(capture.ProjectId, q7, q8);
 }
 
 uint JF_NextCaptureGeneration(uint currentGeneration)
@@ -172,6 +204,7 @@ JF_CapturedPick JF_FreezePick(
 {
     JF_CapturedPick result;
     result.Valid = 0u;
+    result.ProjectId = 0u;
     result.ObjectId = 0u;
     result.Generation = generation;
     result.SourceDraw = 0u;
@@ -190,6 +223,7 @@ JF_CapturedPick JF_FreezePick(
     if (currentPick.Valid != 0u)
     {
         result.ObjectId = currentPick.ObjectId;
+        result.ProjectId = currentPick.ProjectId;
         result.SourceDraw = currentPick.SourceDraw;
         result.WorldPosition = JF_FiniteOr3(
             currentPick.WorldPosition,

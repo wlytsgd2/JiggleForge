@@ -9,7 +9,7 @@ internal static class Program
     private const int MotionScenarioCount = 6;
     private const int MotionRecordsPerScenario = 7;
     private const int InputScenarioCount = 5;
-    private const int InputRecordsPerScenario = 9;
+    private const int InputRecordsPerScenario = 11;
     private const int ComponentsPerRecord = 4;
     private static readonly Vector2 Viewport = new(1000.0f, 1000.0f);
 
@@ -75,7 +75,7 @@ internal static class Program
             }
 
             Console.WriteLine(
-                "Runtime CPU/GPU parity passed for 11 scenarios and 87 float4 records.");
+                "Runtime CPU/GPU parity passed for 11 scenarios and 97 float4 records.");
             return 0;
         }
         catch (Exception exception)
@@ -425,6 +425,10 @@ internal static class Program
             TriangleIndices = new Vector3(10.0f, 20.0f, 30.0f),
             Barycentric = new Vector3(0.2f, 0.3f, 0.5f),
             SurfaceNormal = new Vector3(0.0f, 0.6f, 0.8f),
+            ProjectId0 = 0x7fc00001u,
+            ProjectId1 = 0xffffffffu,
+            ProjectId2 = 0x80000000u,
+            ProjectId3 = 0x1234abcdu,
         };
 
     private static Vector4[] Encode(CpuMotionState state)
@@ -448,6 +452,16 @@ internal static class Program
     private static Vector4[] EncodeInputState(CpuCaptureState state)
     {
         CpuPick pick = state.Pick;
+        Vector4 project0 = new(
+            pick.ProjectId0 & 0xffffu,
+            pick.ProjectId0 >> 16,
+            pick.ProjectId1 & 0xffffu,
+            pick.ProjectId1 >> 16);
+        Vector4 project1 = new(
+            pick.ProjectId2 & 0xffffu,
+            pick.ProjectId2 >> 16,
+            pick.ProjectId3 & 0xffffu,
+            pick.ProjectId3 >> 16);
         return
         [
             new Vector4(
@@ -477,6 +491,8 @@ internal static class Program
             new Vector4(
                 pick.SurfaceNormal,
                 state.HoldSeconds),
+            project0,
+            project1,
         ];
     }
 

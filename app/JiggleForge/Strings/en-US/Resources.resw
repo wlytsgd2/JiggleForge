@@ -295,6 +295,8 @@
   <data name="NoReleaseNotes" xml:space="preserve"><value>No release notes are available for this version.</value></data>
   <data name="UpdateVersionComparison" xml:space="preserve"><value>Current version: v{0}&#x0A;Latest version: v{1}</value></data>
   <data name="WhatsNew" xml:space="preserve"><value>What's new</value></data>
+  <data name="AdaptedModMigrationTitle" xml:space="preserve"><value>Previously adapted Mods must be reapplied once</value></data>
+  <data name="AdaptedModMigrationMessage" xml:space="preserve"><value>This update simplifies the Mod influence-list data and private motion-state layout. After updating the app and global runtime, open each previously adapted Mod in JiggleForge and click Apply Configuration once. Do not delete any files manually. Then press F10 in game.</value></data>
   <data name="UpdateCommunityText" xml:space="preserve"><value>QQ group: 451901293&#x0A;Join us for questions, suggestions, update news, or simply to chat.</value></data>
   <data name="NewVersionDialogTitle" xml:space="preserve"><value>A new JiggleForge version is available</value></data>
   <data name="UpdateNow" xml:space="preserve"><value>Update now</value></data>
@@ -337,6 +339,7 @@
   <data name="CoreProjectMaskBindingsMissing" xml:space="preserve"><value>Runtime Mask bindings are missing and can be regenerated from JiggleForge.txt.</value></data>
   <data name="CoreProjectInspectorFilesMissing" xml:space="preserve"><value>Draw Inspector runtime files are missing and can be regenerated from JiggleForge.txt.</value></data>
   <data name="CoreProjectReady" xml:space="preserve"><value>The existing JiggleForge project is ready.</value></data>
+  <data name="CoreProjectStateResourcesMissing" xml:space="preserve"><value>The project-specific motion-state resources are missing and must be regenerated.</value></data>
   <data name="CoreProjectConfigurationInvalid" xml:space="preserve"><value>Could not read the JiggleForge project configuration. The file may be damaged or contain unsupported content.</value></data>
   <data name="CoreProjectLegacyManifestFound" xml:space="preserve"><value>A legacy GraphManifest.json was found. Its graph, Masks, and Draw names can be migrated into JiggleForge.txt.</value></data>
   <data name="CoreProjectConfigurationMissing" xml:space="preserve"><value>JiggleForge runtime markers exist in the source Mod, but JiggleForge.txt is missing and must be reconstructed.</value></data>

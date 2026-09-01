@@ -107,7 +107,7 @@ JiggleForge 将任意受支持角色及替换 Mod 的 Draw 映射为可独立配
 
 ## Draw 与场景
 
-- `StateIndex + ObjectID` 是运行时身份，不由显示名称决定。
+- 新版适配项目使用完整 `ProjectId + GroupId` 作为运行时身份，不由显示名称决定；组 0 是原版全局状态，普通项目组使用正数本地 ID。
 - 数值型 Draw 使用明确的 index count、first index 和 base vertex。
 - `drawindexed = auto` 使用调用时实际绑定的 VB/IB 和视图。
 - 同一 Draw 的主体、轮廓、半透明和材质重绘必须读取同一状态。
@@ -120,8 +120,8 @@ JiggleForge 将任意受支持角色及替换 Mod 的 Draw 映射为可独立配
 
 - 第一次导入时识别 Draw 并写入补丁；
 - 再次打开时恢复或迁移配置；
-- 将组和依赖图编译为状态索引列表；
-- 为每个状态登记独立参数；
+- 将组和依赖图编译为项目内影响组列表；
+- 生成每项目私有的参数与双缓冲运动状态；
 - 生成 Mask 与 Draw 检测器资源；
 - 原地更新 Mod，同时保留原始绘制命令和条件结构。
 

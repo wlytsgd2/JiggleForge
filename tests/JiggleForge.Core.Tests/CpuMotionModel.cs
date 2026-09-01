@@ -62,6 +62,14 @@ internal readonly record struct CpuPick(
     public Vector3 TriangleIndices { get; init; }
 
     public Vector3 Barycentric { get; init; }
+
+    public uint ProjectId0 { get; init; }
+
+    public uint ProjectId1 { get; init; }
+
+    public uint ProjectId2 { get; init; }
+
+    public uint ProjectId3 { get; init; }
 }
 
 internal sealed class CpuCaptureState

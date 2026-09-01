@@ -200,6 +200,8 @@
   <data name="NoReleaseNotes" xml:space="preserve"><value>此版本没有附加更新说明。</value></data>
   <data name="UpdateVersionComparison" xml:space="preserve"><value>当前版本：v{0}&#x0A;最新版本：v{1}</value></data>
   <data name="WhatsNew" xml:space="preserve"><value>更新内容</value></data>
+  <data name="AdaptedModMigrationTitle" xml:space="preserve"><value>已适配 Mod 需要重新应用一次配置</value></data>
+  <data name="AdaptedModMigrationMessage" xml:space="preserve"><value>本次更新简化了 Mod 的影响组数据和私有运动状态结构。更新应用和全局运行时后，请在 JiggleForge 中依次打开以前适配过的 Mod，并点击一次“应用配置”；不需要手动删除任何文件。完成后回到游戏按 F10。</value></data>
   <data name="UpdateCommunityText" xml:space="preserve"><value>QQ 交流群：451901293&#x0A;无论有任何问题，任何建议，还是想不落下更新，或者单纯喜欢水群，欢迎加入！</value></data>
   <data name="NewVersionDialogTitle" xml:space="preserve"><value>发现 JiggleForge 新版本</value></data>
   <data name="UpdateNow" xml:space="preserve"><value>立即更新</value></data>
@@ -337,6 +339,7 @@
   <data name="CoreProjectMaskBindingsMissing" xml:space="preserve"><value>缺少运行时 Mask 绑定，可以根据 JiggleForge.txt 重新生成。</value></data>
   <data name="CoreProjectInspectorFilesMissing" xml:space="preserve"><value>缺少 Draw 检测器运行文件，可以根据 JiggleForge.txt 重新生成。</value></data>
   <data name="CoreProjectReady" xml:space="preserve"><value>现有 JiggleForge 项目已就绪。</value></data>
+  <data name="CoreProjectStateResourcesMissing" xml:space="preserve"><value>缺少项目独立的运动状态资源，需要重新生成。</value></data>
   <data name="CoreProjectConfigurationInvalid" xml:space="preserve"><value>无法读取 JiggleForge 项目配置。配置文件可能已损坏或包含不支持的内容。</value></data>
   <data name="CoreProjectLegacyManifestFound" xml:space="preserve"><value>发现旧版 GraphManifest.json，可以把其中的依赖图、Mask 和 Draw 名称迁移到 JiggleForge.txt。</value></data>
   <data name="CoreProjectConfigurationMissing" xml:space="preserve"><value>原 Mod 中存在 JiggleForge 运行标记，但缺少 JiggleForge.txt，需要重建配置。</value></data>

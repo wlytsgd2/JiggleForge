@@ -6,7 +6,7 @@
 
 - A Draw identifies one adapted execution path from the source Mod.
 - A group gives one or more Draws shared physics parameters.
-- `OriginalParts` is the fixed default-channel group (`StateIndex 0 / ObjectID 1`) used by original and unadapted parts. It is always enabled.
+- `OriginalParts` is the fixed global group 0 used by original and unadapted parts. It is always enabled.
 - A Draw with deformation disabled can still remain visible to the inspector, but it does not register a motion state or consume group dependencies.
 
 ## Dependencies

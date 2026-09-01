@@ -9,8 +9,7 @@ public sealed partial class ModRuntimeCompiler
     private static string PatchIni(
         string source,
         IReadOnlyList<JiggleDrawConfig> draws,
-        int stateNamespace,
-        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments)
+        JiggleProjectConfig config)
     {
         Match[] matches = DrawRegex().Matches(source)
             .Where(match => match.Groups["auto"].Success ||
@@ -28,7 +27,6 @@ public sealed partial class ModRuntimeCompiler
         {
             Match match = matches[index];
             JiggleDrawConfig draw = draws[index];
-            RuntimeDrawAssignment assignment = assignments[draw.Id];
             string currentCommand = match.Value.Trim().TrimEnd('\r');
             if (!string.Equals(currentCommand, draw.Command, StringComparison.OrdinalIgnoreCase))
             {
@@ -36,135 +34,56 @@ public sealed partial class ModRuntimeCompiler
                     $"{draw.SourceFile}:{draw.SourceLine} changed after analysis. Expected '{draw.Command}', found '{currentCommand}'.");
             }
 
-            string resourceName = $"ResourceJiggleForgeDrawState{DrawOrdinal(draw.Id):D3}";
-            IReadOnlyList<RuntimePhysicsBinding> physicsBindings =
-                BuildPhysicsBindings(draw, assignment, resourceName);
-            string maskNamespace = $"jiggle_forge_masks_{stateNamespace}";
-            string maskName = $"Mask{draw.Id}";
+            string projectNamespace = ProjectNamespace(config.ProjectId);
             string indent = match.Groups["indent"].Value;
 
             output.Append(source, cursor, match.Index - cursor);
             output.Append(BuildDrawBlock(
                 draw,
-                assignment,
                 match,
-                resourceName,
-                physicsBindings,
-                maskNamespace,
-                maskName,
-                stateNamespace,
+                projectNamespace,
+                config,
                 indent));
             cursor = match.Index + match.Length;
 
         }
 
         output.Append(source, cursor, source.Length - cursor);
-        output.AppendLine();
-        output.Append(BuildStateResourcesBlock(draws, assignments, stateNamespace));
         return output.ToString().ReplaceLineEndings("\r\n");
     }
 
     private static string BuildDrawBlock(
         JiggleDrawConfig draw,
-        RuntimeDrawAssignment assignment,
         Match match,
-        string resourceName,
-        IReadOnlyList<RuntimePhysicsBinding> physicsBindings,
-        string maskNamespace,
-        string maskName,
-        int stateNamespace,
+        string projectNamespace,
+        JiggleProjectConfig config,
         string indent)
     {
         StringBuilder block = new();
         block.Append(indent).Append("; ").Append(ModProjectService.PatchMarker)
-            .Append(" BEGIN ").Append(draw.Id)
-            .Append(" StateIndex=").Append(draw.StateIndex)
-            .Append(" ObjectID=").Append(draw.ObjectId).AppendLine();
-        block.Append(indent).Append("; JIGGLEFORGE_STUDIO SOURCE ")
-            .Append(draw.SourceFile.Replace('|', '_')).Append('|')
-            .Append(draw.SourceLine).Append('|')
-            .Append(draw.SourceSection.Replace('|', '_')).AppendLine();
-        block.Append(indent).Append("$\\jiggle_forge_inspector_")
-            .Append(stateNamespace).Append("\\drawSeen = 1").AppendLine();
-        if (!draw.DeformationEnabled)
+            .Append(" BEGIN ").Append(draw.Id).AppendLine();
+        bool requiresRuntime = ModRuntimeRequirements.RequiresDrawRuntime(
+            config,
+            draw,
+            config.Inspector.Enabled);
+        if (requiresRuntime)
         {
-            block.Append(indent).Append("vs-t72 = null").AppendLine();
-            block.Append(indent).Append("vs-t73 = null").AppendLine();
-            AppendPickCommands(block, indent, draw, assignment);
-            block.Append(match.Value.TrimEnd('\r', '\n')).AppendLine();
-            AppendPickObjectReset(block, indent);
-            block.Append(indent).Append("; ").Append(ModProjectService.PatchMarker).Append(" END");
-            return block.ToString();
+            block.Append(indent).Append("run = CommandList\\").Append(projectNamespace)
+                .Append("\\BeginDraw").Append(DrawOrdinal(draw.Id).ToString("D4", CultureInfo.InvariantCulture)).AppendLine();
         }
-
-        block.Append(indent).Append("vs-t72 = ").Append(resourceName).AppendLine();
-        block.Append(indent).Append("vs-t73 = Resource\\").Append(maskNamespace).Append('\\').Append(maskName).AppendLine();
-        foreach (RuntimePhysicsBinding binding in physicsBindings)
-        {
-            AppendPhysicsRegistration(
-                block,
-                indent,
-                binding);
-        }
-        AppendPickCommands(block, indent, draw, assignment);
-        AppendConsumerBindings(block, indent);
         block.Append(match.Value.TrimEnd('\r', '\n')).AppendLine();
-        AppendConsumerReset(block, indent);
-        block.Append(indent).Append("vs-t72 = null").AppendLine();
-        block.Append(indent).Append("vs-t73 = null").AppendLine();
-        AppendPickObjectReset(block, indent);
+        if (requiresRuntime)
+        {
+            block.Append(indent).Append("run = CommandList\\jiggle_forge\\EndAdaptedDraw").AppendLine();
+        }
         block.Append(indent).Append("; ").Append(ModProjectService.PatchMarker).Append(" END");
         return block.ToString();
-    }
-
-    private static void AppendPickCommands(
-        StringBuilder block,
-        string indent,
-        JiggleDrawConfig draw,
-        RuntimeDrawAssignment assignment)
-    {
-        block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickPriority = 3").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = ").Append(assignment.ObjectId).AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = ").Append(DrawOrdinal(draw.Id)).AppendLine();
-        // Inline pixel-shader picking reads the live IniParams register rather
-        // than the named variables themselves. Keep the register synchronized
-        // for the DrawIndexed that immediately follows this block.
-        block.Append(indent).Append("    x26 = $\\jiggle_forge\\pickPriority").AppendLine();
-        block.Append(indent).Append("    y26 = $\\jiggle_forge\\pickSourceDraw").AppendLine();
-        block.Append(indent).Append("    z26 = $\\jiggle_forge\\pickObjectID").AppendLine();
-        block.Append(indent).Append("endif").AppendLine();
-    }
-
-    private static void AppendPickObjectReset(StringBuilder block, string indent)
-    {
-        block.Append(indent).Append("if $\\jiggle_forge\\activePickPipeline > 0").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickPriority = 1").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickObjectID = 1").AppendLine();
-        block.Append(indent).Append("    $\\jiggle_forge\\pickSourceDraw = 0").AppendLine();
-        block.Append(indent).Append("    x26 = $\\jiggle_forge\\pickPriority").AppendLine();
-        block.Append(indent).Append("    y26 = $\\jiggle_forge\\pickSourceDraw").AppendLine();
-        block.Append(indent).Append("    z26 = $\\jiggle_forge\\pickObjectID").AppendLine();
-        block.Append(indent).Append("endif").AppendLine();
-    }
-
-    private static void AppendConsumerBindings(StringBuilder block, string indent)
-    {
-        block.Append(indent).Append("vs-t75 = Resource\\jiggle_forge\\MotionStates").AppendLine();
-        block.Append(indent).Append("vs-t76 = Resource\\jiggle_forge\\GroupParameters").AppendLine();
-    }
-
-    private static void AppendConsumerReset(StringBuilder block, string indent)
-    {
-        block.Append(indent).Append("vs-t75 = null").AppendLine();
-        block.Append(indent).Append("vs-t76 = null").AppendLine();
     }
 
     private static string UpdatePatchedIni(
         string source,
         IReadOnlyCollection<JiggleDrawConfig> draws,
-        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments,
-        int stateNamespace)
+        JiggleProjectConfig config)
     {
         HashSet<string> expected = draws.Select(draw => draw.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         HashSet<string> patchedBlocks = new(StringComparer.OrdinalIgnoreCase);
@@ -178,7 +97,6 @@ public sealed partial class ModRuntimeCompiler
 
             JiggleDrawConfig draw = draws.Single(candidate =>
                 string.Equals(candidate.Id, drawId, StringComparison.OrdinalIgnoreCase));
-            RuntimeDrawAssignment assignment = assignments[drawId];
             string body = match.Groups["body"].Value;
             Match[] drawCommands = DrawRegex().Matches(body).Cast<Match>().ToArray();
             if (drawCommands.Length != 1)
@@ -187,21 +105,13 @@ public sealed partial class ModRuntimeCompiler
             }
 
             patchedBlocks.Add(drawId);
-            string resourceName = $"ResourceJiggleForgeDrawState{DrawOrdinal(drawId):D3}";
-            IReadOnlyList<RuntimePhysicsBinding> physicsBindings =
-                BuildPhysicsBindings(draw, assignment, resourceName);
-            string maskNamespace = $"jiggle_forge_masks_{stateNamespace}";
-            string maskName = $"Mask{draw.Id}";
+            string projectNamespace = ProjectNamespace(config.ProjectId);
             Match drawCommand = drawCommands[0];
             return BuildDrawBlock(
                 draw,
-                assignment,
                 drawCommand,
-                resourceName,
-                physicsBindings,
-                maskNamespace,
-                maskName,
-                stateNamespace,
+                projectNamespace,
+                config,
                 drawCommand.Groups["indent"].Value);
         });
 
@@ -214,16 +124,9 @@ public sealed partial class ModRuntimeCompiler
         }
 
         int resourceBlockMatches = StateResourcesBlockRegex().Matches(updated).Count;
-        string rebuiltResources = BuildStateResourcesBlock(
-            draws,
-            assignments,
-            stateNamespace).TrimEnd();
         if (resourceBlockMatches == 1)
         {
-            return StateResourcesBlockRegex().Replace(
-                updated,
-                rebuiltResources,
-                count: 1);
+            return StateResourcesBlockRegex().Replace(updated, string.Empty, count: 1).TrimEnd();
         }
         if (resourceBlockMatches > 1)
         {
@@ -234,10 +137,7 @@ public sealed partial class ModRuntimeCompiler
         int incompleteTailMatches = StateResourcesTailRegex().Matches(updated).Count;
         if (incompleteTailMatches == 1)
         {
-            return StateResourcesTailRegex().Replace(
-                updated,
-                rebuiltResources,
-                count: 1);
+            return StateResourcesTailRegex().Replace(updated, string.Empty, count: 1).TrimEnd();
         }
         if (incompleteTailMatches > 1)
         {
@@ -245,122 +145,7 @@ public sealed partial class ModRuntimeCompiler
                 $"Found more than one incomplete generated state resource tail: {incompleteTailMatches}.");
         }
 
-        return updated.TrimEnd() + "\r\n\r\n" + rebuiltResources;
-    }
-
-    private static void AppendPhysicsRegistration(
-        StringBuilder output,
-        string indent,
-        RuntimePhysicsBinding binding)
-    {
-        output.Append(indent).Append("cs-t72 = ").Append(binding.StateResourceName).AppendLine();
-        output.Append(indent).Append("cs-t75 = ").Append(binding.PhysicsResourceName).AppendLine();
-        output.Append(indent).Append("run = CommandList\\jiggle_forge\\RegisterGroupParameters").AppendLine();
-        output.Append(indent).Append("cs-t72 = null").AppendLine();
-        output.Append(indent).Append("cs-t75 = null").AppendLine();
-    }
-
-    private static string PhysicsResourceName(string drawId) =>
-        $"ResourceJiggleForgeDrawPhysics{DrawOrdinal(drawId):D3}";
-
-    private static IReadOnlyList<RuntimePhysicsBinding> BuildPhysicsBindings(
-        JiggleDrawConfig draw,
-        RuntimeDrawAssignment assignment,
-        string mainStateResourceName)
-    {
-        if (assignment.StateIndices.Count != assignment.StatePhysics.Count)
-        {
-            throw new InvalidDataException(
-                $"Draw {draw.Id} has mismatched state and physics assignment counts.");
-        }
-
-        if (assignment.StateIndices.Count == 1)
-        {
-            return
-            [
-                new RuntimePhysicsBinding(
-                    mainStateResourceName,
-                    PhysicsResourceName(draw.Id),
-                    assignment.StateIndices[0],
-                    assignment.StatePhysics[0]),
-            ];
-        }
-
-        List<RuntimePhysicsBinding> bindings = [];
-        for (int index = 0; index < assignment.StateIndices.Count; index++)
-        {
-            string suffix = $"{DrawOrdinal(draw.Id):D3}_{index + 1:D3}";
-            bindings.Add(new RuntimePhysicsBinding(
-                $"ResourceJiggleForgeDrawParamState{suffix}",
-                $"ResourceJiggleForgeDrawPhysics{suffix}",
-                assignment.StateIndices[index],
-                assignment.StatePhysics[index]));
-        }
-        return bindings;
-    }
-
-    private static string BuildStateResourcesBlock(
-        IEnumerable<JiggleDrawConfig> draws,
-        IReadOnlyDictionary<string, RuntimeDrawAssignment> assignments,
-        int stateNamespace)
-    {
-        List<string> resources = [];
-        foreach (JiggleDrawConfig draw in draws)
-        {
-            RuntimeDrawAssignment assignment = assignments[draw.Id];
-            string mainStateResourceName =
-                $"ResourceJiggleForgeDrawState{DrawOrdinal(draw.Id):D3}";
-            resources.Add(BuildStateResource(mainStateResourceName, assignment.StateIndices));
-            foreach (RuntimePhysicsBinding binding in BuildPhysicsBindings(
-                         draw,
-                         assignment,
-                         mainStateResourceName))
-            {
-                if (!string.Equals(
-                        binding.StateResourceName,
-                        mainStateResourceName,
-                        StringComparison.Ordinal))
-                {
-                    resources.Add(BuildStateResource(
-                        binding.StateResourceName,
-                        [binding.StateIndex]));
-                }
-                resources.Add(BuildPhysicsResource(
-                    binding.PhysicsResourceName,
-                    binding.Physics));
-            }
-        }
-
-        StringBuilder output = new();
-        output.AppendLine($"; {ModProjectService.PatchMarker} STATE RESOURCES BEGIN");
-        output.AppendLine($"; JIGGLEFORGE_STUDIO PROJECT {stateNamespace}");
-        output.AppendLine(string.Join("\r\n\r\n", resources));
-        output.AppendLine($"; {ModProjectService.PatchMarker} STATE RESOURCES END");
-        return output.ToString().ReplaceLineEndings("\r\n");
-    }
-
-    private static string BuildStateResource(
-        string resourceName,
-        IReadOnlyCollection<int> stateIndices) =>
-        $"[{resourceName}]\r\n" +
-        "type = Buffer\r\n" +
-        "format = R32_UINT\r\n" +
-        $"array = {stateIndices.Count}\r\n" +
-        $"data = {string.Join(' ', stateIndices)}";
-
-    private static string BuildPhysicsResource(string resourceName, PhysicsSettings physics)
-    {
-        static string F(double value) => value.ToString("R", CultureInfo.InvariantCulture);
-
-        return $"[{resourceName}]\r\n" +
-               "type = Buffer\r\n" +
-               "format = R32G32B32A32_FLOAT\r\n" +
-               "array = 5\r\n" +
-               $"data = 0 2 {F(physics.Radius)} {F(physics.Strength)} " +
-               $"{F(physics.Falloff)} {F(physics.VolumeResponse)} {F(physics.DragScale)} {F(physics.MaxOffset)} " +
-               $"{F(physics.TargetFollowSeconds)} {F(physics.HoldFrequencyHz)} {F(physics.HoldDampingRatio)} {F(physics.ReleaseFrequencyHz)} " +
-               $"{F(physics.ReleaseDampingRatio)} {F(physics.ReleaseImpulse)} {F(physics.WheelDepthStep)} {F(physics.WheelMinDepth)} " +
-               $"{F(physics.WheelMaxDepth)} 1 -1 1";
+        return updated.TrimEnd();
     }
 
 }

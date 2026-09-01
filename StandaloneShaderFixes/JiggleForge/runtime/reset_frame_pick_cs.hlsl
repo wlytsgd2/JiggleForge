@@ -1,10 +1,10 @@
-// Clears the transient eight-record pick packet after the controller has
+// Clears the transient ten-record pick packet after the controller has
 // consumed it. Each lane owns one record, so no record-copy or loop state is
 // carried over from the previous frame.
 
 RWBuffer<float4> FramePickRecords : register(u0);
 
-static const uint JF_FRAME_PICK_RECORD_COUNT = 8u;
+static const uint JF_FRAME_PICK_RECORD_COUNT = 10u;
 
 float4 JF_EmptyPickRecord(uint recordIndex)
 {
@@ -17,7 +17,7 @@ float4 JF_EmptyPickRecord(uint recordIndex)
     return 0.0f;
 }
 
-[numthreads(8, 1, 1)]
+[numthreads(16, 1, 1)]
 void main(uint3 dispatchThreadId : SV_DispatchThreadID)
 {
     uint availableRecords;

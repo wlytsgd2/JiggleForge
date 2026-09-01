@@ -3,7 +3,7 @@
 
 #include "input_controller.hlsl"
 
-static const uint JF_SOURCE_FRAME_PICK_RECORD_COUNT = 8u;
+static const uint JF_SOURCE_FRAME_PICK_RECORD_COUNT = 10u;
 
 JF_PickRecord JF_DecodeSourceFramePick(
     float4 s0,
@@ -13,10 +13,13 @@ JF_PickRecord JF_DecodeSourceFramePick(
     float4 s4,
     float4 s5,
     float4 s6,
-    float4 s7)
+    float4 s7,
+    float4 s8,
+    float4 s9)
 {
     JF_PickRecord result;
     result.Valid = 0u;
+    result.ProjectId = 0u;
     result.ObjectId = 0u;
     result.SourceDraw = 0u;
     result.WorldPosition = 0.0f;
@@ -31,13 +34,13 @@ JF_PickRecord JF_DecodeSourceFramePick(
     result.Barycentric = 0.0f;
     bool identityValid =
         JF_IsFinite(s0.x)
-        && s0.x > 0.0f
         && s0.w > 0.5f;
     bool basisValid = s6.w > 0.5f && s7.w > 0.5f;
     result.Valid = identityValid && basisValid;
     if (result.Valid != 0u)
     {
         result.ObjectId = (uint)max(round(s0.x), 0.0f);
+        result.ProjectId = JF_DecodeProjectId(s8, s9);
         result.Depth = JF_FiniteOr(s0.y, 0.0f);
         result.Priority = JF_FiniteOr(s0.z, 0.0f);
         result.WorldPosition = JF_FiniteOr3(s1.xyz, 0.0f);

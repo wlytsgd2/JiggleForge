@@ -31,11 +31,12 @@
 1. 主体 VS 根据当前场景执行世界坐标拾取。
 2. 所有候选结果写入本帧拾取缓冲，并按可见性、深度、优先级和流水号选出一个目标。
 3. `update_input_cs.hlsl` 处理拖动开始、保持和释放边沿，并冻结抓取时的世界坐标、屏幕右方向和屏幕上方向。
-4. `update_motion_cs.hlsl` 为每个 `StateIndex` 更新独立运动状态。
-5. 场景 VS 通过 `draw_state_consumer.hlsl` 读取当前 Draw 的状态列表。
-6. `deformation_field.hlsl` 在世界空间计算平滑形变，并用同一形变的 Jacobian 变换原始法线、切线和副切线。
-7. 半透明、轮廓、近摄像机和附加材质 pass 只消费已有状态，不参与鼠标拾取。
-8. 帧末清理瞬时拾取记录；运动状态持续到休眠或被下一次抓取更新。
+4. `update_motion_cs.hlsl` 更新全局原版组 0 和旧版适配 Mod 的兼容状态。
+5. 每个新版适配项目在自己的帧末 `Present` 中绑定项目参数、私有运动状态与完整 GUID，然后调用共享的 `update_project_motion_cs.hlsl` 原位更新各组状态。
+6. 场景 VS 通过 `draw_state_consumer.hlsl` 读取当前 Draw 的影响组列表；组 0 读取全局缓冲，正数组读取当前项目的私有缓冲。
+7. `deformation_field.hlsl` 在世界空间计算平滑形变，并用同一形变的 Jacobian 变换原始法线、切线和副切线。
+8. 半透明、轮廓、近摄像机和附加材质 pass 只消费已有状态，不参与鼠标拾取。
+9. 帧末清理瞬时拾取记录；运动状态持续到休眠或被下一次抓取更新。
 
 拾取与绘制允许跨一帧衔接。冻结的抓取记录使用 generation 标识，避免同一按键保持期间被后续 pass 覆盖。
 
@@ -44,7 +45,8 @@
 | 资源 | 记录数 | 用途 |
 | --- | ---: | --- |
 | `ResourceInputController` | 2 | 当前拖动输入和控制器边沿 |
-| `ResourceCapturedPick` | 7 | 冻结的抓取目标、三角形法线和按住时间 |
+| `ResourceFramePick` | 10 | 本帧候选，最后两条以 8 个 16 位有限数值无损保存项目 GUID |
+| `ResourceCapturedPick` | 9 | 冻结的抓取目标、三角形法线、按住时间和完整项目 GUID |
 | `ResourceGroupParameters` | 65536 × 5 | 每个状态的物理参数 |
 | `ResourceMotionStates` | 65536 × 7 | 每个状态的运动状态 |
 | `ResourceDefaultParameters` | 5 | 未适配原版部件的默认参数 |
@@ -54,17 +56,24 @@
 
 ## Draw 与依赖
 
-应用为每个适配 Draw 生成：
+应用按实际启用的功能生成 `_JiggleForgeRuntime/Project.generated.ini`。首次适配的 Draw 显示在“未分组”，但每个 Draw 都拥有独立的隐式私有状态。若后来将所有 Draw 移入 `OriginalParts`，并保持允许变形、没有 Mask 且检测器关闭，则该文件和整个 `_JiggleForgeRuntime` 都不存在。需要时，其中包括：
 
-- 一个稳定的 `StateIndex/ObjectID`；
-- 当前 Draw 要消费的状态索引列表；
-- 当前组的五条参数记录；
-- 可选的 UV Mask；
-- 精确的数值型或 `drawindexed = auto` 拾取范围。
+- 完整 128 位 `ProjectId`；
+- 每个普通组稳定的项目内 `GroupId`（`OriginalParts` 固定为全局组 0）；
+- 每组五条参数记录；
+- 每项目一份私有运动状态缓冲；各组线程先把自己的七条记录完整读取到局部变量，完成计算后再原位写回；
+- 每个 Draw 的 `PickGroupId` 和编译后的 `InfluenceGroups`；
+- 项目级 `BeginPrivateDraw` 公共入口，统一设置可见标记、调用全局 `BeginAdaptedDraw`，并绑定私有运动状态、组参数和项目身份；
+- 每个 Draw 的 `BeginDrawNNNN` 轻量入口，只设置 Draw 编号、`z26 = PickGroupId`、影响组和可选 Mask，再调用 `BeginPrivateDraw`；
+- 可选的 UV Mask。
 
-依赖图在应用侧计算传递闭包并去重。运行时只遍历编译后的状态列表，不解析组名和图结构。
+原 Mod INI 不再保存上述运行细节。每个 Draw 始终保留两条无执行成本的定位注释；只有实际需要运行功能时，注释内部才形成 `BeginDrawNNNN` → 原 `drawindexed` → 全局 `EndAdaptedDraw` 边界。普通组共用 `ResourceProjectIdentity`，`GroupId` 由 `z26` 传给拾取流程，因此不需要每 Draw Context。位于 `OriginalParts` 的 Draw 不生成入口；只有添加 Mask、关闭变形或开启检测器时才生成最小入口。
 
-原版和未适配部件使用 `StateIndex 0 / ObjectID 1`，并始终允许全局默认候选成为新的抓取目标。
+依赖图在应用侧计算传递闭包并去重。运行时只遍历编译后的组 ID 列表，不解析组名和图结构。每个 `ResourceDrawInfluencesNNN` 的 `data` 只保存实际组 ID，不含格式标记或数量字段；`array` 就是数量。列表中的 `0` 表示还要读取原版全局状态，正数表示当前项目的私有组；不写 `0` 就不受原版状态影响。关闭变形的 Draw 不生成空列表资源，而是直接把 `vs-t72` 绑定为 `null`。
+
+运行时身份是 `ProjectId + GroupId`，而不是发布者手工分配的全局编号。不同 Mod 可以安全地重复使用组 1。原版和未适配部件使用全零 ProjectId 与全局组 0，并始终允许全局默认候选成为新的抓取目标。全局求解器会在边界把新组 0 映射到旧 ABI 的内部 ObjectID 1；Schema 1–3 的旧适配 Mod 因此仍可通过原 `t75/t76` 全局状态 ABI 运行。
+
+项目状态采用单缓冲是安全的，因为项目更新只在帧末执行，每个 Compute 线程只读写一个组独占的七条记录，当前求解器不会读取其他组的运动状态。这样无需在分散于不同 INI 文件的 `Present` 之间协调0/1槽位切换。全局 `$projectStateReadSlot` 仅作为旧生成文件的固定兼容占位保留，新项目不读取它。
 
 ## 物理模型
 
@@ -93,7 +102,7 @@
 
 ## 诊断
 
-运行时诊断默认关闭。开启后，`build_diagnostic_text_cs.hlsl` 显示控制器、抓取、状态和参数摘要。Draw 检测器属于各 Mod 的生成资源，由应用单独启用或关闭。
+运行时诊断默认关闭。开启后，`build_diagnostic_text_cs.hlsl` 显示控制器、抓取、状态和参数摘要。Draw 检测器属于各 Mod 的临时测试资源，由应用单独启用或关闭。关闭后不会保留检测器 INI、HLSL、`drawSeen` 或有意义的 Draw 编号；正式变形流程的 `SourceDraw` 固定为 0。
 
 ## 验证
 

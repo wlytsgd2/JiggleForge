@@ -2,14 +2,13 @@ namespace JiggleForge.Core;
 
 public sealed class JiggleProjectConfig
 {
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
+    public const int MaximumProjectGroupId = 1024;
     public const string DefaultFileName = "JiggleForge.txt";
 
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
     public Guid ProjectId { get; set; } = Guid.NewGuid();
-
-    public int StateNamespace { get; set; }
 
     public OriginalPartsConfig OriginalParts { get; set; } = new();
 
@@ -122,10 +121,6 @@ public sealed class JiggleDrawConfig
 
     public long? BaseVertex { get; set; }
 
-    public int StateIndex { get; set; }
-
-    public int ObjectId { get; set; }
-
     public string Group { get; set; } = string.Empty;
 
     public string Mask { get; set; } = string.Empty;
@@ -134,6 +129,12 @@ public sealed class JiggleDrawConfig
 public sealed class JiggleGroupConfig
 {
     public required string Name { get; set; }
+
+    /// <summary>
+    /// Project-local motion-state identity. Zero is reserved for the global
+    /// OriginalParts state; normal project groups use positive IDs.
+    /// </summary>
+    public int LocalStateId { get; set; }
 
     public List<string> Draws { get; } = [];
 

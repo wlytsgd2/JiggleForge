@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -49,7 +48,7 @@ public sealed partial class ModProjectService
                 }
 
                 string masksIni = Path.Combine(root, "_JiggleForgeRuntime", "Masks.generated.ini");
-                if (!File.Exists(masksIni))
+                if (ModRuntimeRequirements.RequiresMaskRuntime(config) && !File.Exists(masksIni))
                 {
                     return new ModProjectInspection
                     {
@@ -60,17 +59,32 @@ public sealed partial class ModProjectService
                     };
                 }
 
-                string inspectorIni = Path.Combine(root, "_JiggleForgeRuntime", "Inspector.generated.ini");
-                string inspectorShader = Path.Combine(root, "_JiggleForgeRuntime", "InspectorText.hlsl");
-                if (!File.Exists(inspectorIni) || !File.Exists(inspectorShader))
+                string projectIni = Path.Combine(root, "_JiggleForgeRuntime", "Project.generated.ini");
+                if (ModRuntimeRequirements.RequiresProjectRuntime(config) && !File.Exists(projectIni))
                 {
                     return new ModProjectInspection
                     {
                         ModPath = root,
                         State = ModImportState.RuntimeRepairRequired,
                         Configuration = config,
-                        Messages = [UserMessage.Of("CoreProjectInspectorFilesMissing")],
+                        Messages = [UserMessage.Of("CoreProjectStateResourcesMissing")],
                     };
+                }
+
+                if (config.Inspector.Enabled)
+                {
+                    string inspectorIni = Path.Combine(root, "_JiggleForgeRuntime", "Inspector.generated.ini");
+                    string inspectorShader = Path.Combine(root, "_JiggleForgeRuntime", "InspectorText.hlsl");
+                    if (!File.Exists(inspectorIni) || !File.Exists(inspectorShader))
+                    {
+                        return new ModProjectInspection
+                        {
+                            ModPath = root,
+                            State = ModImportState.RuntimeRepairRequired,
+                            Configuration = config,
+                            Messages = [UserMessage.Of("CoreProjectInspectorFilesMissing")],
+                        };
+                    }
                 }
 
                 return new ModProjectInspection
@@ -134,18 +148,16 @@ public sealed partial class ModProjectService
         }
 
         Guid projectId = Guid.NewGuid();
-        byte[] idBytes = SHA256.HashData(projectId.ToByteArray());
-        int stateNamespace = idBytes[0];
         JiggleProjectConfig config = new()
         {
             ProjectId = projectId,
-            StateNamespace = stateNamespace,
             Physics = defaultPhysics?.Clone() ?? new PhysicsSettings(),
         };
         config.Inspector.Enabled = true;
         config.Groups.Add(new JiggleGroupConfig
         {
             Name = OriginalPartsConfig.GroupName,
+            LocalStateId = 0,
             Physics = config.Physics.Clone(),
         });
 
@@ -153,8 +165,7 @@ public sealed partial class ModProjectService
         foreach (JiggleDrawConfig discovered in inspection.DiscoveredDraws)
         {
             ordinal++;
-            int stateIndex = (stateNamespace * 256) + ordinal;
-            config.Draws.Add(new JiggleDrawConfig
+            JiggleDrawConfig draw = new()
             {
                 Id = $"Draw{ordinal:D4}",
                 SourceFile = discovered.SourceFile,
@@ -166,9 +177,9 @@ public sealed partial class ModProjectService
                 Count = discovered.Count,
                 FirstIndex = discovered.FirstIndex,
                 BaseVertex = discovered.BaseVertex,
-                StateIndex = stateIndex,
-                ObjectId = stateIndex + 1,
-            });
+                Group = string.Empty,
+            };
+            config.Draws.Add(draw);
         }
 
         return config;

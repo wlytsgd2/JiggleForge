@@ -9,7 +9,7 @@ public sealed partial class ModRuntimeCompiler
 {
     private static void ApplyGeneratedFiles(
         IReadOnlyDictionary<string, string> generatedText,
-        IReadOnlyDictionary<string, byte[]> generatedBinary,
+        IReadOnlyCollection<string> deletedPaths,
         IReadOnlyDictionary<string, byte[]?> originals)
     {
         List<string> committed = [];
@@ -32,18 +32,13 @@ public sealed partial class ModRuntimeCompiler
                 File.Move(temporary, path, overwrite: true);
                 committed.Add(path);
             }
-            foreach ((string path, byte[] data) in generatedBinary)
+            foreach (string path in deletedPaths)
             {
-                string? parent = Path.GetDirectoryName(path);
-                if (!string.IsNullOrWhiteSpace(parent))
+                if (File.Exists(path))
                 {
-                    Directory.CreateDirectory(parent);
+                    File.Delete(path);
+                    committed.Add(path);
                 }
-
-                string temporary = path + ".jiggleForge_tmp";
-                File.WriteAllBytes(temporary, data);
-                File.Move(temporary, path, overwrite: true);
-                committed.Add(path);
             }
         }
         catch
@@ -91,6 +86,14 @@ public sealed partial class ModRuntimeCompiler
         }
 
         return ordinal;
+    }
+
+    private static void DeleteDirectoryIfEmpty(string path)
+    {
+        if (Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any())
+        {
+            Directory.Delete(path, recursive: false);
+        }
     }
 
 }

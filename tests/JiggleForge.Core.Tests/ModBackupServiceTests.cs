@@ -105,8 +105,6 @@ public sealed class ModBackupServiceTests
             SourceSection = "CommandListBody",
             Command = "drawindexed = auto",
             Kind = JiggleDrawKind.Auto,
-            StateIndex = 2,
-            ObjectId = 2,
         });
 
         ModBackupService service = new();
@@ -148,8 +146,6 @@ public sealed class ModBackupServiceTests
             SourceSection = "CommandListBody",
             Command = "drawindexed = auto",
             Kind = JiggleDrawKind.Auto,
-            StateIndex = 1,
-            ObjectId = 1,
         });
         return config;
     }
