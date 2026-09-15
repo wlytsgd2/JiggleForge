@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.23 — 2026-09-15
+
+### 简体中文
+
+- 适配本次游戏更新后的角色选择/剧情/服装界面不透明轮廓 VS：`aa59281029db3a5a` 更新为 `3dc9820c6068ed8b`。
+- 适配本次游戏更新后的菜单界面不透明轮廓/附加材质 VS：`160b58ea1824c794` 更新为 `59238ab48197031d`。
+- 两个新版 VS 的材质常量缓冲区由 118 个 `float4` 扩展为 126 个；变形注入已按照新的常量索引和分量读取重新移植，轮廓继续只接收主体状态而不参与鼠标拾取。
+- 应用安装、更新、完整卸载、手动安装包和开发 Hash 对照表已同步更新；安装新运行时会清理旧轮廓替换文件。
+
+### English
+
+- Updated the opaque outline VS used by character selection, story, and outfit scenes from `aa59281029db3a5a` to `3dc9820c6068ed8b` for the current game update.
+- Updated the menu opaque outline/additional-material VS from `160b58ea1824c794` to `59238ab48197031d`.
+- Both new shaders expand their material constant buffer from 118 to 126 `float4` entries. The deformation injection was rebased onto the new indices and component reads; these outline passes remain receiver-only and do not participate in mouse picking.
+- Application install, update, full removal, the manual package, and the developer hash matrix now use the new shaders. Installing the new runtime also removes the obsolete outline replacements.
+
 ## 0.1.22 — 2026-09-01
 
 ### 简体中文

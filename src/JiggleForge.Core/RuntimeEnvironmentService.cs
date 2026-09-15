@@ -45,13 +45,13 @@ public sealed partial class RuntimeEnvironmentService
         "26214fb5eedfcbdd",
         "c280f6945b23a42a",
         "6883e4375b728e90",
-        "aa59281029db3a5a",
+        "3dc9820c6068ed8b",
         "29837c29e23201fd",
         "1f6ab42231416fdb",
         "699981e2a62dd9b4",
         "402766e2987d7821",
         "a0b37a7c7c2a1905",
-        "160b58ea1824c794",
+        "59238ab48197031d",
         "ad24b1c214866fd7",
         "d0a1a756bd3bde31",
     ];
@@ -60,6 +60,8 @@ public sealed partial class RuntimeEnvironmentService
     [
         "1b6d08acd285344c",
         "a6030ebb8c49cf02",
+        "aa59281029db3a5a",
+        "160b58ea1824c794",
     ];
 
     private const string RuntimeFolderName = "JiggleForgeShaderFix";

@@ -761,9 +761,9 @@ public sealed class RuntimeContractTests
             "402766e2987d7821",
             "6883e4375b728e90",
             "1f6ab42231416fdb",
-            "aa59281029db3a5a",
+            "3dc9820c6068ed8b",
             "29837c29e23201fd",
-            "160b58ea1824c794",
+            "59238ab48197031d",
             "a0b37a7c7c2a1905",
             "ad24b1c214866fd7",
             "d0a1a756bd3bde31"

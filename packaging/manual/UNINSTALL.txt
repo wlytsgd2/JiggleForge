@@ -32,7 +32,9 @@ $hashes = @(
     'ad24b1c214866fd7',
     'd0a1a756bd3bde31',
     '1b6d08acd285344c',
-    'a6030ebb8c49cf02'
+    'a6030ebb8c49cf02',
+    '3dc9820c6068ed8b',
+    '59238ab48197031d'
 )
 
 if (-not (Test-Path -LiteralPath '.\Mods' -PathType Container) -or
