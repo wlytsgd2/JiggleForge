@@ -10,6 +10,8 @@ z112 = 0
 
 `z112` is the INI shorthand for `IniParams[112].z`. It addresses the z component of entry 112 in the shared `t120` parameter texture; it is not a VS or PS resource-slot number.
 
+Starting with v0.1.24, `x112` in the same entry is reserved by the global runtime to publish the F7-disabled state to VS and PS. Mod authors must leave `x112` untouched and continue using `z112` for per-Draw bypass. Global disabling skips the injected picking work entirely; per-Draw bypass retains the occluding pick-clear behavior described below.
+
 - `0`: run JiggleForge normally; this is the default.
 - `1`: the target Draw neither receives deformation nor becomes the picking result.
 

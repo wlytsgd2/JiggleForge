@@ -196,6 +196,7 @@ void main(
   r1.xyz = cb1[2].xyz * v0.zzz + r1.xyz;
   r1.xyz = cb1[3].xyz + r1.xyz;
   float3 jiggleForgeBasePosition = r1.xyz;
+  // Skip JiggleForge work for F7-off (x112) as well as per-Draw bypass (z112).
   bool jfDrawBypassed = JF_IsDrawBypassed();
   float3 jiggleForgeTotalDisplacement = float3(0.0, 0.0, 0.0);
   [branch]

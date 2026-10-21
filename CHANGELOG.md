@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.24 — 2026-10-21
+
+### 简体中文
+
+- 优化 F7 关闭路径：通过运行时保留的 `x112` 标志，让替换 VS 提前跳过屏幕基向量、Mask 采样和变形状态计算，让注入 PS 提前跳过鼠标像素匹配与拾取写入。关闭后仍保留少量判断、额外着色器接口和 INI 调度开销。
+- 修复近距离角色材质 PS 使用 `linear noperspective sample` 位置输入时无法开始拖动的问题；拾取正则同时支持普通输入和逐采样输入，并保留原有插值方式，无需更换 VS hash。
+- 保持已适配 Mod、公开 `z112` 单 Draw 旁路及默认鼠标左键/`X` 拖动的兼容性。应用包与手动包使用相同运行时；从 v0.1.23 更新无需重新应用 Mod 配置。更新全局运行时后请重启游戏。
+
+### English
+
+- Optimized the F7-disabled path using the runtime-owned `x112` flag. Replacement vertex shaders bypass screen-basis construction, mask sampling and deformation-state evaluation early; injected pixel shaders skip cursor matching and pick writes. Small flag checks, additional shader interfaces and INI processing remain.
+- Fixed starting a close-camera grab when the material PS uses `linear noperspective sample` position inputs. Inline picking now supports both pixel and sample interpolation while preserving the original mode; no VS hash changes are required.
+- Preserved existing adapted Mods, the public per-Draw `z112` bypass and the default left-button/`X` drag keys. Application and manual packages contain the same runtime. Updating from v0.1.23 requires no Mod regeneration; restart the game after updating the global runtime.
+
 ## 0.1.23 — 2026-09-15
 
 ### 简体中文

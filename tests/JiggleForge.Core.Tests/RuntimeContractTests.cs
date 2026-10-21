@@ -53,15 +53,53 @@ public sealed class RuntimeContractTests
 
         StringAssert.Contains(
             pattern,
-            @"dcl_input_ps_siv linear noperspective v9\.xy, position");
+            @"dcl_input_ps_siv linear noperspective(?P<jf_existing_sample>(?: sample)?) v9\.xy, position");
         StringAssert.Contains(
             replacement,
-            "dcl_input_ps_siv linear noperspective v9.xyzw, position");
+            "dcl_input_ps_siv linear noperspective${jf_existing_sample} v9.xyzw, position");
         Assert.IsFalse(
             declarations.Contains("v9", StringComparison.Ordinal),
             "The existing-position branch must reuse v9 instead of declaring it twice.");
-        StringAssert.Contains(declarations, "dcl_input_ps linear v11.xyz");
-        StringAssert.Contains(declarations, "dcl_input_ps linear v12.xyz");
+        StringAssert.Contains(replacement, "dcl_input_ps linear${jf_existing_sample} v11.xyz");
+        StringAssert.Contains(replacement, "dcl_input_ps linear${jf_existing_sample} v12.xyz");
+        Assert.IsFalse(declarations.Contains("dcl_input_ps", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow(" sample")]
+    public void InlinePicking_ExistingPositionPreservesPixelOrSampleInterpolation(string interpolation)
+    {
+        string ini = File.ReadAllText(RuntimeIniPath);
+        // PCRE's Python-style named groups are equivalent to .NET named groups
+        // for this pattern; exercise the actual runtime pattern and replacement.
+        string pattern = ReadSection(ini, "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern")
+            .Trim().Replace("(?P<", "(?<", StringComparison.Ordinal);
+        string replacement = ReadSection(ini, "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern.Replace")
+            .Trim().Replace("\\n", "\n", StringComparison.Ordinal);
+        string shader = $"ps_5_0\ndcl_globalFlags refactoringAllowed\n"
+            + "dcl_constantbuffer CB0[209], immediateIndexed\n"
+            + $"dcl_input_ps linear{interpolation} v2.xyzw\n"
+            + $"dcl_input_ps linear{interpolation} v3.xyzw\n"
+            + $"dcl_input_ps linear{interpolation} v4.xyzw\n"
+            + $"dcl_input_ps_siv linear noperspective{interpolation} v9.xy, position\n"
+            + "dcl_input_ps_sgv constant v10.x, is_front_face\ndcl_output o0.xyzw\n"
+            + "mov o0.xyzw, v2.xyzw\nret\n";
+        Match match = Regex.Match(shader, pattern, RegexOptions.None, TimeSpan.FromSeconds(2));
+        Assert.IsTrue(match.Success, $"The {interpolation.Trim()} material must be pickable.");
+        string injected = match.Result(replacement);
+        StringAssert.Contains(injected,
+            $"dcl_input_ps_siv linear noperspective{interpolation} v9.xyzw, position");
+        StringAssert.Contains(injected, $"dcl_input_ps linear{interpolation} v11.xyz");
+        StringAssert.Contains(injected, $"dcl_input_ps linear{interpolation} v12.xyz");
+        StringAssert.Contains(injected, "dcl_input_ps_sgv constant v10.x, is_front_face");
+        Assert.AreEqual(1, Regex.Matches(injected, @"dcl_input_ps_siv[^\n]* v9\.").Count);
+        Assert.IsTrue(injected.IndexOf("v12.xyz", StringComparison.Ordinal)
+            < injected.IndexOf("mov o0.xyzw, v2.xyzw", StringComparison.Ordinal));
+        Assert.IsTrue(injected.IndexOf("mov o0.xyzw, v2.xyzw", StringComparison.Ordinal)
+            < injected.IndexOf("retc_nz ${jf2}.y", StringComparison.Ordinal));
+        StringAssert.Contains(injected, "store_uav_typed u7.xyzw");
+        Assert.IsFalse(Regex.IsMatch(injected, @"\$\{jf_existing_"));
     }
 
     [TestMethod]
@@ -885,6 +923,28 @@ public sealed class RuntimeContractTests
 
         string present = ReadSection(ini, "Present");
         StringAssert.Contains(present, "if $runtimeEnabled == 1");
+        StringAssert.Contains(ReadSection(ini, "Constants"), "x112 = 1");
+        Assert.IsTrue(
+            present.IndexOf("x112 = 1 - $runtimeEnabled", StringComparison.Ordinal)
+            < present.IndexOf("if $runtimeEnabled == 1", StringComparison.Ordinal));
+        StringAssert.Contains(present, "x112 = 1 - $runtimeEnabled");
+        string consumer = File.ReadAllText(Path.Combine(
+            globalShaderFixRoot, "JiggleForgeRuntime", "draw_state_consumer.hlsl"));
+        StringAssert.Contains(consumer, "IniParams[112].x > 0.5 || IniParams[112].z > 0.5");
+        foreach (string name in new[]
+                 {
+                     "ShaderRegexJiggleForgeInlineBodyPick.Pattern.Replace",
+                     "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern.Replace"
+                 })
+        {
+            string replacement = ReadSection(ini, name);
+            StringAssert.Contains(replacement, "ge ${jf2}.y, ${jf2}.x, l(0.500000)");
+            int earlyReturn = replacement.IndexOf("retc_nz ${jf2}.y", StringComparison.Ordinal);
+            Assert.IsTrue(earlyReturn >= 0);
+            Assert.IsTrue(earlyReturn < replacement.IndexOf("t119.xyzw", StringComparison.Ordinal),
+                "F7-off must exit before cursor reads or pick UAV writes, even for old adapted Mods.");
+            Assert.IsTrue(earlyReturn < replacement.IndexOf("store_uav_typed", StringComparison.Ordinal));
+        }
         StringAssert.Contains(present, "else if $runtimeEnabledPrevious == 1");
         StringAssert.Contains(present, "$runtimeNoticeUntil = time + 2.0");
         StringAssert.Contains(present, "run = CommandList\\ZZMIv1\\PrintText");

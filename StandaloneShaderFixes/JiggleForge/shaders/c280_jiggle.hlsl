@@ -152,6 +152,7 @@ void main(
   r0.xyz = cb1[2].xyz * v0.zzz + r0.xyz;
   r0.xyz = cb1[3].xyz + r0.xyz;
   float3 jiggleForgeBasePosition = r0.xyz;
+  // Skip JiggleForge work for F7-off (x112) as well as per-Draw bypass (z112).
   bool jfDrawBypassed = JF_IsDrawBypassed();
   float3 jiggleForgeScreenRight = float3(1.0, 0.0, 0.0);
   float3 jiggleForgeScreenUp = float3(0.0, 1.0, 0.0);

@@ -7,7 +7,9 @@ static const uint JF_RETIRED_PROJECT_INFLUENCE_MAGIC = 0x4a464734u;
 
 bool JF_IsDrawBypassed()
 {
-  return IniParams[112].z > 0.5;
+  // The global switch must gate screen-basis, mask and state work as early as
+  // the public per-Draw bypass, including when an old Mod still binds states.
+  return IniParams[112].x > 0.5 || IniParams[112].z > 0.5;
 }
 
 void JF_AccumulateState(
