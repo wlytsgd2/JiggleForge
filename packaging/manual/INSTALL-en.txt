@@ -28,12 +28,13 @@ Not included
 Installation
 ------------
 
-1. Close the game, or be ready to press F10 after installation.
+1. Close the game completely.
 2. Find the ZZMI root that the game actually uses. It must contain both Mods
    and ShaderFixes.
 3. Copy the Mods and ShaderFixes folders from this package into the ZZMI root
    and merge them with the existing folders.
-4. Start the game, or return to it and press F10.
+4. Restart the game. After shader or picking-regex updates, do not use F10 as
+   a substitute for a full restart.
 5. Place the pointer over a supported character surface, hold either the left
    mouse button or X key, and move the mouse.
 

@@ -103,6 +103,111 @@ public sealed class RuntimeContractTests
     }
 
     [TestMethod]
+    [DataRow(false, false)]
+    [DataRow(false, true)]
+    [DataRow(true, false)]
+    [DataRow(true, true)]
+    public void InlinePicking_RejectsOrderedDitherDiscardBeforeInjection(
+        bool existingPosition,
+        bool hexZero)
+    {
+        string zero = hexZero ? "0x00000000" : "0.000000";
+        string position = existingPosition ? "v9" : "v8";
+        // Reduced from the captured afterimage PS. Register/buffer numbers are
+        // deliberately different: the exclusion recognises a data-flow chain,
+        // not the known hash, constant-buffer layout or temporary allocation.
+        string instructions = $"ftou r7.zw, {position}.xxxy\n"
+            + "bfi r7.z, l(2), l(2), r7.z, l(0)\n"
+            + "bfi r7.z, l(2), l(0), r7.w, r7.z\n"
+            + "mad r7.y, cb6[81].z, cb6[81].w, -icb[r7.z + 0].x\n"
+            + $"lt r7.y, r7.y, l({zero})\n"
+            + "discard_nz r7.y\n";
+        string shader = InlineMaterialFixture(existingPosition, instructions, usesDitherTable: true);
+        Regex pattern = InlinePickingPattern(existingPosition);
+
+        Assert.IsFalse(pattern.IsMatch(shader),
+            "Ordered-dither fragments must not acquire forceEarlyDepthStencil or the inline picker.");
+        // PCRE disassembly is indented inside if-blocks; indentation must not
+        // make the unsafe program become eligible for patching again.
+        string indented = InlineMaterialFixture(existingPosition,
+            "if_nz r0.x\n  " + instructions.Replace("\n", "\n  ", StringComparison.Ordinal)
+            + "endif\n", usesDitherTable: true);
+        Assert.IsFalse(pattern.IsMatch(indented));
+    }
+
+    [TestMethod]
+    [DataRow(false, "add", false)]
+    [DataRow(true, "add", false)]
+    [DataRow(false, "add", true)]
+    [DataRow(true, "add", true)]
+    [DataRow(false, "mad", true)]
+    [DataRow(true, "mad", true)]
+    [DataRow(false, "commuted-add", true)]
+    [DataRow(true, "commuted-add", true)]
+    public void InlinePicking_RejectsDitherWithPrecomputedOpacityOrHoistedCoordinates(
+        bool existingPosition,
+        string arithmetic,
+        bool hoistedCoordinates)
+    {
+        string position = existingPosition ? "v9" : "v8";
+        string coordinate = $"ftou r7.zw, {position}.xxxy\n";
+        string threshold = arithmetic switch
+        {
+            "add" => "add r7.y, r0.x, -icb[r7.z + 0].x\n",
+            "commuted-add" => "add r7.y, -icb[r7.z + 0].x, r0.x\n",
+            _ => "mad r7.y, cb6[81].z, cb6[81].w, -icb[r7.z + 0].x\n"
+        };
+        // The new captures use add instead of mad, or share the coordinate
+        // conversion outside multiple if-blocks. The threshold/compare/discard
+        // relationship remains the same in each compiler variant.
+        string instructions = (hoistedCoordinates ? coordinate : "")
+            + "if_nz r0.x\n"
+            + (hoistedCoordinates ? "" : coordinate)
+            + "bfi r7.z, l(2), l(2), r7.z, l(0)\n"
+            + "bfi r7.z, l(2), l(0), r7.w, r7.z\n"
+            + threshold
+            + "lt r7.y, r7.y, l(0)\n"
+            + "discard_nz r7.y\nendif\n";
+
+        Assert.IsFalse(InlinePickingPattern(existingPosition).IsMatch(
+            InlineMaterialFixture(existingPosition, instructions, usesDitherTable: true)),
+            "Dither rejection must not depend on mad or adjacent coordinate conversion.");
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void InlinePicking_DitherExclusionKeepsNormalAndAlphaTestedMaterials(bool existingPosition)
+    {
+        Regex pattern = InlinePickingPattern(existingPosition);
+        Assert.IsTrue(pattern.IsMatch(InlineMaterialFixture(existingPosition, "")),
+            "Normal opaque materials must remain eligible for inline picking.");
+        Assert.IsTrue(pattern.IsMatch(InlineMaterialFixture(existingPosition,
+            "lt r0.x, v0.w, l(0.500000)\ndiscard_nz r0.x\n")),
+            "An ordinary alpha-test discard is not the screen-space dither exclusion.");
+        Assert.IsTrue(pattern.IsMatch(InlineMaterialFixture(existingPosition,
+            "mov r0.xyzw, icb[0].xyzw\n", usesDitherTable: true)),
+            "Declaring an immediate constant table alone must not exclude a material.");
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void InlinePicking_DitherExclusionRequiresTheComparedValueToBeDiscarded(bool existingPosition)
+    {
+        string position = existingPosition ? "v9" : "v8";
+        string unrelatedDiscard = $"ftou r7.zw, {position}.xxxy\n"
+            + "bfi r7.z, l(2), l(2), r7.z, l(0)\n"
+            + "bfi r7.z, l(2), l(0), r7.w, r7.z\n"
+            + "mad r7.y, cb6[81].z, cb6[81].w, -icb[r7.z + 0].x\n"
+            + "lt r7.y, r7.y, l(0)\n"
+            + "discard_nz r0.x\n";
+        Assert.IsTrue(InlinePickingPattern(existingPosition).IsMatch(
+            InlineMaterialFixture(existingPosition, unrelatedDiscard, usesDitherTable: true)),
+            "Similar instructions must not be excluded unless their threshold result drives discard.");
+    }
+
+    [TestMethod]
     public void InlinePicking_SharesStandardIniParamsT120ButKeepsPrivateInjectionGuards()
     {
         string ini = File.ReadAllText(RuntimeIniPath);
@@ -965,6 +1070,40 @@ public sealed class RuntimeContractTests
         Assert.IsFalse(
             ini.Contains("CustomShaderDiscardFallbackPick", StringComparison.Ordinal),
             "The legacy compatibility hook must not reference a missing or state-changing shader.");
+    }
+
+    private static Regex InlinePickingPattern(bool existingPosition)
+    {
+        string section = existingPosition
+            ? "ShaderRegexJiggleForgeInlineBodyPickExistingPosition.Pattern"
+            : "ShaderRegexJiggleForgeInlineBodyPick.Pattern";
+        string pattern = ReadSection(File.ReadAllText(RuntimeIniPath), section)
+            .Trim().Replace("(?P<", "(?<", StringComparison.Ordinal);
+        return new Regex(pattern, RegexOptions.None, TimeSpan.FromSeconds(2));
+    }
+
+    private static string InlineMaterialFixture(
+        bool existingPosition,
+        string instructions,
+        bool usesDitherTable = false)
+    {
+        string declarations = usesDitherTable
+            ? "dcl_immediateConstantBuffer { { 0.058824, 0, 0, 0}, { 0.529412, 0, 0, 0} }\n"
+            : "";
+        string position = existingPosition
+            ? "dcl_input_ps_siv linear noperspective sample v9.xy, position\n"
+            : usesDitherTable
+                ? "dcl_input_ps_siv linear noperspective v8.xy, position\n"
+                : "";
+        return "ps_5_0\ndcl_globalFlags refactoringAllowed\n" + declarations
+            + "dcl_constantbuffer CB0[209], immediateIndexed\n"
+            + "dcl_constantbuffer CB6[103], immediateIndexed\n"
+            + "dcl_input_ps linear sample v0.xyzw\n"
+            + "dcl_input_ps linear sample v2.xyzw\n"
+            + "dcl_input_ps linear sample v3.xyzw\n"
+            + "dcl_input_ps linear sample v4.xyzw\n"
+            + position + "dcl_output o0.xyzw\ndcl_temps 12\n"
+            + instructions + "mov o0.xyzw, v2.xyzw\nret\n";
     }
 
     private static void AssertSectionArray(

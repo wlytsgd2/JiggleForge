@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.25 — 2026-10-23
+
+### 简体中文
+
+- 修复部分战斗技能出现纯黑残影、错误遮挡的问题：拾取正则不再注入具有特定抖动裁剪指令链的 PS，避免强制提前深度写入改变原有效果。
+- 筛选同时支持预计算透明度和不同指令排列，不依赖已知 PS hash；普通不透明材质及常规透明度测试仍可参与拾取。被排除的抖动裁剪 pass 不再直接提供拾取数据。
+- 保留 v0.1.24 的近距离拾取修复、F7 开关、默认鼠标左键/`X` 拖动和已适配 Mod 接口；无需重新应用 Mod 配置，也不重置已保存参数。
+- 不包含实验性的去虚化补丁，不修改 RabbitFX。应用包与手动包使用同一套已测试运行时，安装后请完整重启游戏。
+
+### English
+
+- Fixed black afterimages and incorrect occlusion during some combat skills by excluding PS programs with a specific ordered-dither discard instruction chain from inline picking. This prevents forced early depth writes from changing the original effect.
+- The filter supports precomputed opacity and different instruction arrangements without relying on known PS hashes. Ordinary opaque and alpha-tested materials remain eligible for picking; excluded dither passes no longer provide direct pick data.
+- Preserved v0.1.24 close-camera picking, the F7 toggle, default left-button/`X` dragging, and the adapted-Mod interface. No Mod regeneration or saved-parameter reset is required.
+- Excludes the experimental camera-fade patch and does not modify RabbitFX. Application and manual packages contain the same tested runtime; fully restart the game after installation.
+
 ## 0.1.24 — 2026-10-21
 
 ### 简体中文
