@@ -19,6 +19,7 @@
     <SelfContained>true</SelfContained>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimePayloadSource Condition="'$(RuntimePayloadSource)' == ''">$(MSBuildThisFileDirectory)..\..\StandaloneShaderFixes</RuntimePayloadSource>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260710003" />
@@ -44,23 +45,27 @@
              Link="Assets\JiggleForge-Silver.ico"
              CopyToOutputDirectory="PreserveNewest"
              CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="..\..\StandaloneShaderFixes\JiggleForge.ini"
+    <Content Include="$(RuntimePayloadSource)\JiggleForge.ini"
              Link="RuntimePayload\JiggleForge.ini"
              CopyToOutputDirectory="Always"
              CopyToPublishDirectory="Always" />
-    <Content Include="..\..\StandaloneShaderFixes\JiggleForge\**\*"
-             Exclude="..\..\StandaloneShaderFixes\JiggleForge\WheelBridge.exe"
+    <Content Include="$(RuntimePayloadSource)\JiggleForge\**\*"
+             Exclude="$(RuntimePayloadSource)\JiggleForge\WheelBridge.exe"
              Link="RuntimePayload\JiggleForge\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="Always"
              CopyToPublishDirectory="Always" />
-    <Content Include="..\..\StandaloneShaderFixes\ShaderFixes\*-vs_replace.txt"
+    <Content Include="$(RuntimePayloadSource)\ShaderFixes\*-vs_replace.txt"
              Link="RuntimePayload\ShaderFixes\%(Filename)%(Extension)"
              CopyToOutputDirectory="Always"
              CopyToPublishDirectory="Always" />
-    <Content Include="..\..\StandaloneShaderFixes\ShaderFixes\JiggleForgeRuntime\**\*"
+    <Content Include="$(RuntimePayloadSource)\ShaderFixes\JiggleForgeRuntime\**\*"
              Link="RuntimePayload\ShaderFixes\JiggleForgeRuntime\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="Always"
              CopyToPublishDirectory="Always" />
+    <Content Include="..\..\experiments\binding-weight\lab\**\*"
+             Link="Lab\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest"
+             CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="CopyWheelBridgeToBuildOutput"
           Condition="'$(DesignTimeBuild)' != 'true'">

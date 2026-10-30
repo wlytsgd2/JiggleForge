@@ -389,4 +389,13 @@
   <data name="ApplyRuntimeToggleKeyButton.Content" xml:space="preserve"><value>应用开关键</value></data>
   <data name="RuntimeToggleKeyDescription.Text" xml:space="preserve"><value>按一次关闭，再按一次开启；默认键为 F7。切换时游戏左上角会短暂显示英文状态。关闭后停止变形，并跳过 JiggleForge 的拾取、物理、校准和适配 Draw GPU 工作；修改键位后回到游戏按 F10 生效。</value></data>
   <data name="RuntimeToggleKeyUpdated" xml:space="preserve"><value>游戏内总开关键已更新。回到游戏按 F10 生效。</value></data>
+  <data name="BoneWeightToggle.Header" xml:space="preserve"><value>使用骨骼权重限制变形</value></data>
+  <data name="BoneWeightToggle.OnContent" xml:space="preserve"><value>开启</value></data>
+  <data name="BoneWeightToggle.OffContent" xml:space="preserve"><value>关闭（原 JiggleForge 距离场）</value></data>
+  <data name="BoneWeightDescription.Text" xml:space="preserve"><value>开启时按共同骨骼的当前顶点权重限制变形；关闭时不进行骨骼搜索或权重缓冲准备，使用原 JiggleForge 距离场。两种模式都使用“最大位移”参数，没有额外上限；隐藏鼠标时停止交互的保护仍保留。</value></data>
+  <data name="ApplyBoneWeightButton.Content" xml:space="preserve"><value>应用骨骼权重设置</value></data>
+  <data name="BoneWeightUpdated" xml:space="preserve"><value>骨骼权重设置已保存。请完整重启游戏使运行时设置生效。</value></data>
+  <data name="OpenPhysicsLabButton.Content" xml:space="preserve"><value>在实验室预览当前参数</value></data>
+  <data name="PhysicsLabInvalidParameters" xml:space="preserve"><value>当前物理参数无效，请检查数值和滚轮深度范围。</value></data>
+  <data name="PhysicsLabMissing" xml:space="preserve"><value>离线实验室文件缺失，请完整解压测试包。</value></data>
 </root>

@@ -21,7 +21,7 @@ public sealed partial class MainWindow
 
     private void InitializeApplicationUpdateView()
     {
-        ApplicationVersionText.Text = AppLanguageService.Format("ApplicationVersion", applicationUpdateService.CurrentVersionText);
+        ApplicationVersionText.Text = AppLanguageService.Format("ApplicationVersion", GetCurrentApplicationVersion());
         ApplicationUpdateStatusText.Text = L("AutoCheckStableRelease");
         RenderApplicationUpdateControls();
     }
@@ -380,6 +380,8 @@ public sealed partial class MainWindow
 
     private static string GetCurrentApplicationVersion()
     {
+        string? informational = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(informational)) return informational.Split('+')[0];
         Version? version = Assembly.GetEntryAssembly()?.GetName().Version;
         if (version is null)
         {

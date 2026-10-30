@@ -81,8 +81,15 @@ public sealed partial class MainWindow : Window
         }
         IReadOnlyList<string> dragKeys = GetSelectedDragKeys();
         string runtimeToggleKey = GetSelectedRuntimeToggleKey();
+        bool boneWeightEnabled = BoneWeightToggle.IsOn;
         SaveDragKeyPreference(dragKeys);
         SaveRuntimeToggleKeyPreference(runtimeToggleKey);
+        if (runtimeEnvironmentService.SupportsBoneWeights)
+        {
+            try { SaveBoneWeightPreference(BoneWeightToggle.IsOn); }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            { ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Warning); }
+        }
         if (RuntimeEnvironmentService.IsWheelBridgeRunning() &&
             !await RunWheelOperationOnUiThreadAsync(
                 () => runtimeEnvironmentService.StopWheelBridge(requestElevation: true),
@@ -92,7 +99,7 @@ public sealed partial class MainWindow : Window
         }
 
         await RunRuntimeOperationAsync(
-            () => runtimeEnvironmentService.Install(runtimePath, dragKeys, defaultPhysics, runtimeToggleKey),
+            () => runtimeEnvironmentService.Install(runtimePath, dragKeys, defaultPhysics, runtimeToggleKey, boneWeightEnabled),
             L("RuntimeInstalled"));
     }
 
@@ -310,6 +317,7 @@ public sealed partial class MainWindow : Window
                 SaveRuntimeToggleKeyPreference(runtimeStatus.RuntimeToggleKey);
             }
             RenderRuntimeStatus(runtimeStatus);
+            if (runtimeStatus.BoneWeightEnabled is bool enabled) BoneWeightToggle.IsOn = enabled;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or InvalidDataException)
         {
@@ -381,6 +389,7 @@ public sealed partial class MainWindow : Window
         ApplyDragKeyButton.IsEnabled = status.RuntimeInstalled;
         RuntimeToggleKeyComboBox.IsEnabled = true;
         ApplyRuntimeToggleKeyButton.IsEnabled = status.RuntimeInstalled;
+        ApplyBoneWeightButton.IsEnabled = status.BoneWeightEnabled.HasValue && runtimeEnvironmentService.SupportsBoneWeights;
         RefreshRuntimeButton.IsEnabled = true;
     }
 
@@ -400,6 +409,7 @@ public sealed partial class MainWindow : Window
             StopWheelButton.IsEnabled = false;
             ApplyDragKeyButton.IsEnabled = false;
             ApplyRuntimeToggleKeyButton.IsEnabled = false;
+            ApplyBoneWeightButton.IsEnabled = false;
             RefreshRuntimeButton.IsEnabled = false;
         }
         else if (runtimeStatus is not null)

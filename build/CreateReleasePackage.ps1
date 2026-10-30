@@ -1,6 +1,8 @@
 param(
     [string]$Configuration = 'Release',
-    [string]$RuntimeIdentifier = 'win-x64'
+    [string]$RuntimeIdentifier = 'win-x64',
+    [string]$VersionOverride,
+    [string]$RuntimePayloadSource
 )
 
 $ErrorActionPreference = 'Stop'
@@ -11,6 +13,17 @@ $updaterProjectPath = Join-Path $repositoryRoot 'src\JiggleForge.Updater\JiggleF
 $wheelBridgeProjectPath = Join-Path $repositoryRoot 'src\JiggleForge.WheelBridge\JiggleForge.WheelBridge.csproj'
 [xml]$project = Get-Content -LiteralPath $projectPath -Raw
 $version = [string]$project.Project.PropertyGroup.Version
+if ($VersionOverride) {
+    if ($VersionOverride -notmatch '^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?$') { throw 'Invalid VersionOverride.' }
+    $version = $VersionOverride
+}
+if (-not $RuntimePayloadSource) { $RuntimePayloadSource = Join-Path $repositoryRoot 'StandaloneShaderFixes' }
+$RuntimePayloadSource = (Resolve-Path -LiteralPath $RuntimePayloadSource).Path
+$versionProperties = @()
+if ($VersionOverride) {
+    $numericVersion = ($version -split '-')[0] + '.0'
+    $versionProperties = @("--property:Version=$version", "--property:AssemblyVersion=$numericVersion", "--property:FileVersion=$numericVersion")
+}
 if ([string]::IsNullOrWhiteSpace($version)) {
     throw 'JiggleForge.csproj does not define Version.'
 }
@@ -19,7 +32,7 @@ $artifactRoot = Join-Path $repositoryRoot 'artifacts'
 $publishDirectory = Join-Path $artifactRoot "JiggleForge-v$version"
 $applicationDirectory = Join-Path $publishDirectory 'App'
 $runtimeDirectory = Join-Path $publishDirectory 'Runtime'
-$buildArtifactsDirectory = Join-Path $artifactRoot '_release-build'
+$buildArtifactsDirectory = Join-Path $artifactRoot "_release-build-$version"
 $configurationPivot = $Configuration.ToLowerInvariant()
 $zipPath = Join-Path $artifactRoot "JiggleForge-win-x64-v$version.zip"
 $checksumPath = "$zipPath.sha256"
@@ -63,12 +76,14 @@ dotnet publish $projectPath `
     --self-contained true `
     --artifacts-path $buildArtifactsDirectory `
     --property:NuGetAudit=false `
+    "--property:RuntimePayloadSource=$RuntimePayloadSource" `
+    @versionProperties `
     --output $applicationDirectory
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed with exit code $LASTEXITCODE"
 }
 
-$sourceRuntimeIni = Join-Path $repositoryRoot 'StandaloneShaderFixes\JiggleForge.ini'
+$sourceRuntimeIni = Join-Path $RuntimePayloadSource 'JiggleForge.ini'
 $publishedRuntimePayload = Join-Path $applicationDirectory 'RuntimePayload'
 $publishedRuntimeIni = Join-Path $publishedRuntimePayload 'JiggleForge.ini'
 if (-not (Test-Path -LiteralPath $publishedRuntimeIni -PathType Leaf)) {
@@ -121,6 +136,10 @@ Copy-Item -LiteralPath (Join-Path $repositoryRoot 'CHANGELOG.md') -Destination $
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'LICENSE') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'BRANDING.md') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'THIRD-PARTY-NOTICES.md') -Destination $publishDirectory
+if ($VersionOverride -match '-beta\.') {
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot 'experiments\binding-weight\TEST-BUILD.zh-CN.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.zh-CN.md')
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot 'experiments\binding-weight\TEST-BUILD.en.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.en.md')
+}
 New-Item -ItemType Directory -Path (Join-Path $publishDirectory 'docs') -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\user-guide') `
     -Destination (Join-Path $publishDirectory 'docs') `

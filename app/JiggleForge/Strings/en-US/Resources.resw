@@ -389,4 +389,13 @@
   <data name="ApplyRuntimeToggleKeyButton.Content" xml:space="preserve"><value>Apply switch key</value></data>
   <data name="RuntimeToggleKeyDescription.Text" xml:space="preserve"><value>Press once to disable and again to enable; the default key is F7. A short English status message appears at the top left when switching. While disabled, deformation stops and JiggleForge skips picking, physics, calibration, and adapted-draw GPU work. Press F10 in game after changing the key.</value></data>
   <data name="RuntimeToggleKeyUpdated" xml:space="preserve"><value>The in-game master switch key was updated. Press F10 in game.</value></data>
+  <data name="BoneWeightToggle.Header" xml:space="preserve"><value>Use bone weights to limit deformation</value></data>
+  <data name="BoneWeightToggle.OnContent" xml:space="preserve"><value>On</value></data>
+  <data name="BoneWeightToggle.OffContent" xml:space="preserve"><value>Off (original JiggleForge distance field)</value></data>
+  <data name="BoneWeightDescription.Text" xml:space="preserve"><value>On limits deformation using the current vertex's shared-bone weights. Off skips bone searches and weight-buffer preparation, using the original JiggleForge distance field. Both modes use the Maximum offset parameter without an extra cap. The hidden-cursor protection remains active.</value></data>
+  <data name="ApplyBoneWeightButton.Content" xml:space="preserve"><value>Apply bone-weight setting</value></data>
+  <data name="BoneWeightUpdated" xml:space="preserve"><value>Bone-weight setting saved. Fully restart the game to apply it.</value></data>
+  <data name="OpenPhysicsLabButton.Content" xml:space="preserve"><value>Preview current parameters in the lab</value></data>
+  <data name="PhysicsLabInvalidParameters" xml:space="preserve"><value>Invalid physics parameters. Check the values and wheel-depth range.</value></data>
+  <data name="PhysicsLabMissing" xml:space="preserve"><value>The offline lab is missing. Fully extract the test package.</value></data>
 </root>

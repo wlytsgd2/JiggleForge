@@ -70,7 +70,10 @@ public sealed partial class RuntimeEnvironmentService
             backups,
             IsWheelBridgeRunning(),
             dragKeys,
-            runtimeToggleKey);
+            runtimeToggleKey)
+        {
+            BoneWeightEnabled = ReadBoneWeightEnabled(runtimeIniTarget),
+        };
     }
 
     private static bool RuntimeIniMatches(string source, string target)
@@ -112,7 +115,7 @@ public sealed partial class RuntimeEnvironmentService
             targetText,
             new PhysicsSettings(),
             requireResource: false);
-        return string.Equals(sourceText, targetText, StringComparison.Ordinal);
+        return string.Equals(NormalizeBoneWeightOption(sourceText), NormalizeBoneWeightOption(targetText), StringComparison.Ordinal);
     }
 
     private static bool SourceTreeMatches(string sourceRoot, string targetRoot)

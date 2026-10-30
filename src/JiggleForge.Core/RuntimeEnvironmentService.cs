@@ -197,4 +197,5 @@ public sealed record RuntimeEnvironmentStatus(
     public bool Ready => PayloadAvailable && RuntimeCurrent && CurrentShaderCount == RequiredShaderCount;
 
     public string? DragKey => DragKeys?.FirstOrDefault();
+    public bool? BoneWeightEnabled { get; init; }
 }

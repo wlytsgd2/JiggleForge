@@ -747,10 +747,13 @@
                             </StackPanel>
                         </ScrollViewer>
                         <Border Grid.Row="1" Style="{StaticResource PageFooterStyle}">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button local:Localization.Key="OpenPhysicsLabButton" Content="实验室预览" Click="OpenProjectPhysicsLab_Click" />
                             <Button local:Localization.Key="SavePhysicsButton" Content="保存参数"
                                     Style="{StaticResource AccentButtonStyle}"
                                     Click="ApplyConfiguration_Click"
                                     HorizontalAlignment="Right" />
+                            </StackPanel>
                         </Border>
                     </Grid>
 
@@ -894,10 +897,18 @@
                                     </StackPanel>
                                 </Border>
 
+                                <Border x:Name="BoneWeightCard" Style="{StaticResource PageCardStyle}" Visibility="Collapsed">
+                                    <StackPanel Spacing="10">
+                                        <ToggleSwitch x:Name="BoneWeightToggle" local:Localization.Key="BoneWeightToggle" Header="使用骨骼权重限制变形" OnContent="开启" OffContent="关闭" />
+                                        <TextBlock local:Localization.Key="BoneWeightDescription" Text="骨骼开关只影响权重筛选。两种模式都使用最大位移参数，没有额外上限。隐藏鼠标时停止交互的保护仍保留。" TextWrapping="Wrap" />
+                                        <Button x:Name="ApplyBoneWeightButton" local:Localization.Key="ApplyBoneWeightButton" Content="应用骨骼权重设置" Click="ApplyBoneWeight_Click" IsEnabled="False" />
+                                    </StackPanel>
+                                </Border>
                                 <Border Style="{StaticResource PageCardStyle}">
                                     <StackPanel Spacing="14">
                                         <StackPanel Spacing="3">
                                             <TextBlock local:Localization.Key="DefaultPhysicsTitle" Text="全局默认物理参数" FontSize="18" FontWeight="SemiBold" />
+                                            <Button local:Localization.Key="OpenPhysicsLabButton" Content="实验室预览" Click="OpenDefaultPhysicsLab_Click" />
                                             <TextBlock local:Localization.Key="DefaultPhysicsDescription" Text="首次生成 Mod 与没有适配 Mod 的原版角色共用这套默认值。已经生成的 Mod 保留自己的独立参数。"
                                                        TextWrapping="Wrap"
                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

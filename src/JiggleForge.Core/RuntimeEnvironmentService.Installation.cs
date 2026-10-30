@@ -12,24 +12,28 @@ public sealed partial class RuntimeEnvironmentService
         string zzmiRoot,
         string? dragKey = null,
         PhysicsSettings? defaultPhysics = null,
-        string runtimeToggleKey = DefaultRuntimeToggleKey)
+        string runtimeToggleKey = DefaultRuntimeToggleKey,
+        bool? boneWeightEnabled = null)
     {
         Install(
             zzmiRoot,
             dragKey is null ? DefaultDragKeys : [dragKey],
             defaultPhysics,
-            runtimeToggleKey);
+            runtimeToggleKey,
+            boneWeightEnabled);
     }
 
     public void Install(
         string zzmiRoot,
         IReadOnlyCollection<string> dragKeys,
         PhysicsSettings? defaultPhysics = null,
-        string runtimeToggleKey = DefaultRuntimeToggleKey)
+        string runtimeToggleKey = DefaultRuntimeToggleKey,
+        bool? boneWeightEnabled = null)
     {
         IReadOnlyList<string> validatedDragKeys = ValidateDragKeys(dragKeys);
         string validatedRuntimeToggleKey = ValidateRuntimeToggleKey(runtimeToggleKey);
         string root = NormalizeRoot(zzmiRoot);
+        boneWeightEnabled ??= ReadBoneWeightEnabled(Path.Combine(root, "Mods", RuntimeFolderName, "JiggleForge.ini"));
         RuntimeEnvironmentStatus status = Inspect(root);
         if (!status.PayloadAvailable)
         {
@@ -72,6 +76,8 @@ public sealed partial class RuntimeEnvironmentService
         CopyTree(Path.Combine(payloadRoot, "JiggleForge"), Path.Combine(targetRoot, "JiggleForge"));
         WriteDragKeys(runtimeIniTarget, validatedDragKeys);
         WriteRuntimeToggleKey(runtimeIniTarget, validatedRuntimeToggleKey);
+        if (SupportsBoneWeights)
+            WriteBoneWeightEnabled(runtimeIniTarget, boneWeightEnabled ?? true);
         if (defaultPhysics is not null)
         {
             WriteDefaultPhysics(runtimeIniTarget, defaultPhysics);

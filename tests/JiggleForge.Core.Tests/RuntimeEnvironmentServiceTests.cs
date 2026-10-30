@@ -95,6 +95,35 @@ public sealed class RuntimeEnvironmentServiceTests
     }
 
     [TestMethod]
+    public void BoneWeightOptionIsPreservedAndDoesNotMakeRuntimeOutdated()
+    {
+        File.AppendAllText(Path.Combine(payload!, "JiggleForge.ini"), "\n[Constants]\n; JIGGLEFORGE_BONE_WEIGHT_BEGIN\nglobal $boneWeightEnabled = 1\ny115 = 0\n; JIGGLEFORGE_BONE_WEIGHT_END\n");
+        RuntimeEnvironmentService service = new(payload!);
+        Assert.IsTrue(service.SupportsBoneWeights);
+        string mod = Path.Combine(zzmi!, "Mods", "Unrelated.ini");
+        File.WriteAllText(mod, "; do not change");
+        service.Install(zzmi!, boneWeightEnabled: false);
+        Assert.AreEqual(false, service.Inspect(zzmi!).BoneWeightEnabled);
+        Assert.IsTrue(service.Inspect(zzmi!).RuntimeCurrent);
+        service.Install(zzmi!); // Existing selection survives update/reinstall.
+        Assert.AreEqual(false, service.Inspect(zzmi!).BoneWeightEnabled);
+        service.SetBoneWeightEnabled(zzmi!, true);
+        Assert.AreEqual(true, service.Inspect(zzmi!).BoneWeightEnabled);
+        Assert.IsTrue(service.Inspect(zzmi!).RuntimeCurrent);
+        Assert.AreEqual("; do not change", File.ReadAllText(mod));
+    }
+
+    [TestMethod]
+    public void StablePayloadDoesNotOfferUnsupportedBoneOption()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        Assert.IsFalse(service.SupportsBoneWeights);
+        service.Install(zzmi!);
+        Assert.IsNull(service.Inspect(zzmi!).BoneWeightEnabled);
+        Assert.ThrowsExactly<InvalidOperationException>(() => service.SetBoneWeightEnabled(zzmi!, true));
+    }
+
+    [TestMethod]
     public void InstallReportsCurrentRuntimeAndPreservesExistingShaderFix()
     {
         string firstHash = RuntimeEnvironmentService.RequiredShaderHashes[0];

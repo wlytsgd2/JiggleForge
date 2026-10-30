@@ -119,6 +119,8 @@ public sealed partial class MainWindow : Window
         SelectDragKeys(LoadDragKeyPreference());
         SelectRuntimeToggleKey(LoadRuntimeToggleKeyPreference());
         LoadDefaultPhysicsEditor(defaultPhysics);
+        BoneWeightToggle.IsOn = LoadBoneWeightPreference();
+        BoneWeightCard.Visibility = runtimeEnvironmentService.SupportsBoneWeights ? Visibility.Visible : Visibility.Collapsed;
         InitializeApplicationUpdateView();
     }
 
