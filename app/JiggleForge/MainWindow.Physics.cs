@@ -213,6 +213,13 @@ public sealed partial class MainWindow : Window
 
     private async Task ApplyRecommendedPhysicsDefaultsMigrationAsync()
     {
+        // This opt-in experiment must not replay the stable one-time defaults
+        // migration or rewrite an existing user's global/installed settings.
+        if (runtimeEnvironmentService.SupportsWeightSize)
+        {
+            return;
+        }
+
         if (!physicsDefaultsMigration.IsRequired)
         {
             return;
@@ -269,7 +276,7 @@ public sealed partial class MainWindow : Window
 
     private void ResetDefaultPhysics_Click(object sender, RoutedEventArgs e)
     {
-        LoadDefaultPhysicsEditor(new PhysicsSettings());
+        LoadDefaultPhysicsEditor(runtimeEnvironmentService.CreateDefaultPhysics());
         DefaultPhysicsSaveStatusText.Text = L("RecommendedDefaultsLoaded");
         DefaultPhysicsSaveStatusText.Visibility = Visibility.Visible;
     }

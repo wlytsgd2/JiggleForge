@@ -124,6 +124,78 @@ public sealed class RuntimeEnvironmentServiceTests
     }
 
     [TestMethod]
+    public void WeightSizeCapabilityAndDefaultsRequireThePayloadMarker()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        Assert.IsFalse(service.SupportsWeightSize);
+        Assert.AreEqual(new PhysicsSettings().MaxOffset, service.CreateDefaultPhysics().MaxOffset);
+
+        AppendWeightSizeFixture();
+        Assert.IsTrue(service.SupportsWeightSize);
+        Assert.AreEqual(0.05, service.CreateDefaultPhysics().MaxOffset);
+        Assert.AreEqual(new PhysicsSettings().Radius, service.CreateDefaultPhysics().Radius);
+        PhysicsSettings modified = service.CreateDefaultPhysics();
+        modified.MaxOffset = 0.02;
+        Assert.AreEqual(0.05, service.CreateDefaultPhysics().MaxOffset);
+    }
+
+    [TestMethod]
+    public void WeightSizeCapabilityRequiresACompleteMarkerBlock()
+    {
+        RuntimeEnvironmentService service = new(payload!);
+        string path = Path.Combine(payload!, "JiggleForge.ini");
+        File.AppendAllText(path, "\n; JIGGLEFORGE_WEIGHT_SIZE_BEGIN\nglobal $sizeAdaptationEnabled = 1\n");
+        Assert.IsFalse(service.SupportsWeightSize);
+        File.Delete(path);
+        Assert.IsFalse(service.SupportsWeightSize);
+        Assert.AreEqual(new PhysicsSettings().MaxOffset, service.CreateDefaultPhysics().MaxOffset);
+    }
+
+    [TestMethod]
+    public void WeightSizeMetadataAndLowerUserSettingsSurviveAppInstallation()
+    {
+        AppendWeightSizeFixture();
+        RuntimeEnvironmentService service = new(payload!);
+        PhysicsSettings settings = new() { MaxOffset = 0.02, Radius = 0.19 };
+        service.Install(zzmi!, defaultPhysics: settings, boneWeightEnabled: true);
+        string installedIni = Path.Combine(zzmi!, "Mods", "JiggleForgeShaderFix", "JiggleForge.ini");
+        string installed = File.ReadAllText(installedIni);
+        StringAssert.Contains(installed, "global $defaultMaxOffset = 0.02");
+        StringAssert.Contains(installed, "global $defaultRadius = 0.19");
+        StringAssert.Contains(installed, "global $sizeReferenceLength = 0.03");
+        StringAssert.Contains(installed, "; JIGGLEFORGE_WEIGHT_SIZE_END");
+        Assert.AreEqual(0.02, settings.MaxOffset);
+        Assert.IsTrue(service.Inspect(zzmi!).RuntimeCurrent);
+
+        service.SetBoneWeightEnabled(zzmi!, false);
+        service.Install(zzmi!, defaultPhysics: settings);
+        installed = File.ReadAllText(installedIni);
+        Assert.AreEqual(false, service.Inspect(zzmi!).BoneWeightEnabled);
+        StringAssert.Contains(installed, "global $defaultMaxOffset = 0.02");
+        StringAssert.Contains(installed, "global $sizeAdaptationEnabled = 1");
+        Assert.IsTrue(service.Inspect(zzmi!).RuntimeCurrent);
+    }
+
+    private void AppendWeightSizeFixture()
+    {
+        File.AppendAllText(Path.Combine(payload!, "JiggleForge.ini"), """
+
+            [Constants]
+            ; JIGGLEFORGE_BONE_WEIGHT_BEGIN
+            global $boneWeightEnabled = 1
+            y115 = 0
+            ; JIGGLEFORGE_BONE_WEIGHT_END
+            ; JIGGLEFORGE_WEIGHT_SIZE_BEGIN
+            global $sizeAdaptationEnabled = 1
+            global $sizeReferenceLength = 0.03
+            z115 = 1
+            w115 = 0.03
+            ; JIGGLEFORGE_WEIGHT_SIZE_END
+
+            """);
+    }
+
+    [TestMethod]
     public void InstallReportsCurrentRuntimeAndPreservesExistingShaderFix()
     {
         string firstHash = RuntimeEnvironmentService.RequiredShaderHashes[0];

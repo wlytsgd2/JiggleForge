@@ -1,0 +1,260 @@
+{
+  "revision": "WeightSize-r1",
+  "runtimeFiles": [
+    {
+      "path": "JiggleForge.ini",
+      "sha256": "81b3bfaaf7f11b428860acc2ad6faa13e00a4079e81930aec3fcfa9b81c56b8a",
+      "bytes": 84126
+    },
+    {
+      "path": "JiggleForge/WheelBridge.txt",
+      "sha256": "479b5e4820dc8616d2724b65dd0890263775bb390ec90429541f509755a00e6d",
+      "bytes": 576
+    },
+    {
+      "path": "JiggleForge/modules/accumulate_global_pick.hlsl",
+      "sha256": "1376483a61120a4aa962f318ae37002ae217da04f991f08b204e978b38dfa9f0",
+      "bytes": 3085
+    },
+    {
+      "path": "JiggleForge/modules/capture_composite_uv_ps.hlsl",
+      "sha256": "57537c71f21b3f9347bd3effa45668e1f2b091b5993a57e775ffa8de24e1b907",
+      "bytes": 382
+    },
+    {
+      "path": "JiggleForge/modules/capture_filtered_role_composite_uv_ps.hlsl",
+      "sha256": "b5972f8361d4112b8a3a692cdd7b965229dc8a7b337ce0974d39d59f5f13705a",
+      "bytes": 454
+    },
+    {
+      "path": "JiggleForge/modules/capture_role_composite_raw_vs.hlsl",
+      "sha256": "29cab49b684fb17a46d9c34b0bb2828b0fbe2685c1b24d4959d3ce423d526cf2",
+      "bytes": 1792
+    },
+    {
+      "path": "JiggleForge/modules/capture_role_composite_uv_ps.hlsl",
+      "sha256": "f7dc51da5c78369dac5aa784adb708ab405adbcbad67c673c7937d36b28ffbd0",
+      "bytes": 414
+    },
+    {
+      "path": "JiggleForge/modules/compare_role_composite_cs.hlsl",
+      "sha256": "731514d4cc48a805116fd0155365696b3f2e66ce5b7600277a071a7c7ff50fbf",
+      "bytes": 1621
+    },
+    {
+      "path": "JiggleForge/modules/native_world_pick_split.hlsl",
+      "sha256": "9ec4649f4039c316e8d39542c26f3a2d6225c312d41320dd06968552f2e9eaa7",
+      "bytes": 9564
+    },
+    {
+      "path": "JiggleForge/modules/resolve_inline_cursor_cs.hlsl",
+      "sha256": "9560ea4ff036651154721f23caf5c00ce93a46fc02d6b8b830f75ca20afe2439",
+      "bytes": 1840
+    },
+    {
+      "path": "JiggleForge/runtime/binding_clear_cs.hlsl",
+      "sha256": "50834a64bcf4c191c25fb95bb3783f3349b9a5dfcb68f176b5283c37bd87579c",
+      "bytes": 1618
+    },
+    {
+      "path": "JiggleForge/runtime/binding_consumer.hlsl",
+      "sha256": "68375682dc333ccc324b303497b84085ab6d0ca0d10348fe73edbe22b2b8e726",
+      "bytes": 4643
+    },
+    {
+      "path": "JiggleForge/runtime/binding_diagnostic_context_cs.hlsl",
+      "sha256": "dacbbe8ab3ba8ea1fcb46ba91852e40e8885aea86c41582614249205d119dfa9",
+      "bytes": 982
+    },
+    {
+      "path": "JiggleForge/runtime/binding_diagnostic_labels.hlsl",
+      "sha256": "9af31ab7e3b9260f04d65b17ffce2daab3512170da2a3f8748f0d901272943dd",
+      "bytes": 1396
+    },
+    {
+      "path": "JiggleForge/runtime/binding_diagnostic_text_cs.hlsl",
+      "sha256": "922629510a60d184d3b8ad571e6fc0f9cf053633a6e84a4f86094ddaa7db9029",
+      "bytes": 5517
+    },
+    {
+      "path": "JiggleForge/runtime/binding_distance_cs.hlsl",
+      "sha256": "2d841eb2db503dea73dde8abce8c33dbd8edaa609a521f65c40e28bfa0f79a9a",
+      "bytes": 32
+    },
+    {
+      "path": "JiggleForge/runtime/binding_index_cs.hlsl",
+      "sha256": "bef32ef7b9a899acbd33dcc824d5ca75e48386d2d24da03cecd2cd113b994211",
+      "bytes": 57
+    },
+    {
+      "path": "JiggleForge/runtime/binding_layout.hlsl",
+      "sha256": "26efc30a6bc3c2f7f2bf88665dfba354d79097ef9b26fef46e10ee80846bd4d3",
+      "bytes": 1503
+    },
+    {
+      "path": "JiggleForge/runtime/binding_nearest.hlsl",
+      "sha256": "6c2169369ec0963a524380d9bc6b0034491cfb9552121878cd544f8f18fcdba9",
+      "bytes": 2583
+    },
+    {
+      "path": "JiggleForge/runtime/binding_resolve_cs.hlsl",
+      "sha256": "2f22a3767a16b8c9fcb09aa020bd07297e763099923c99cfc3a75c2aa5344b16",
+      "bytes": 3719
+    },
+    {
+      "path": "JiggleForge/runtime/build_diagnostic_text_cs.hlsl",
+      "sha256": "cf8fdcfd8d69a88fcd9a0e4af0df6d7b7680f980ab1a1fe2eaeffb5edc2a2850",
+      "bytes": 10639
+    },
+    {
+      "path": "JiggleForge/runtime/deformation_field.hlsl",
+      "sha256": "0fc764ed75d0411772f20b578c06d56cf42106995f9554fe98ebe7fb117421ac",
+      "bytes": 5541
+    },
+    {
+      "path": "JiggleForge/runtime/draw_state_consumer.hlsl",
+      "sha256": "f56895a4b66aba3acd3ce196638411d5d72d015217568536a2cd0f8a1562bc18",
+      "bytes": 5508
+    },
+    {
+      "path": "JiggleForge/runtime/input_controller.hlsl",
+      "sha256": "173ca2fc889a6ec1279d92ae9627bf59b14adbc96308a2f2e559d0bb638d8684",
+      "bytes": 9101
+    },
+    {
+      "path": "JiggleForge/runtime/motion_model.hlsl",
+      "sha256": "1bd7878841c4a48de1afdfa8b46824da47d17d3e8277b3e27749e121083c8b0e",
+      "bytes": 19391
+    },
+    {
+      "path": "JiggleForge/runtime/pick_decoder.hlsl",
+      "sha256": "2b645d912036be038663c2992e4e6f757ca8ca75b2b50980987a8493a0f68703",
+      "bytes": 2492
+    },
+    {
+      "path": "JiggleForge/runtime/register_default_parameters_cs.hlsl",
+      "sha256": "40c339a8558d31509db780cec8f6c7d3974ce2d2901bea4f84c5c883462ea462",
+      "bytes": 1450
+    },
+    {
+      "path": "JiggleForge/runtime/register_draw_parameters_cs.hlsl",
+      "sha256": "e8b1e9eebee3446b680b7d2bfa1e62106ffd22bd9a4beddd64e2c87ddea3a61d",
+      "bytes": 1475
+    },
+    {
+      "path": "JiggleForge/runtime/reset_frame_pick_cs.hlsl",
+      "sha256": "29495886fb35a1e5d62a8af7e988cde28034f087ddbd808f958ad13e26df506c",
+      "bytes": 921
+    },
+    {
+      "path": "JiggleForge/runtime/size_estimate.hlsl",
+      "sha256": "214f2e680259f697d925e2ed290d757523726694c5cc5df589a29af6fd7a6090",
+      "bytes": 5817
+    },
+    {
+      "path": "JiggleForge/runtime/update_input_cs.hlsl",
+      "sha256": "a75b9d60cbf9225df1a60981009990c3dcb4683e8595292a1eb60ef97ef1c4fb",
+      "bytes": 4964
+    },
+    {
+      "path": "JiggleForge/runtime/update_motion_cs.hlsl",
+      "sha256": "5d6152cc1e762b0075b5d6eb1b1abbc2aea545518245135b5f6563beb54d1c0f",
+      "bytes": 3880
+    },
+    {
+      "path": "JiggleForge/runtime/update_project_motion_cs.hlsl",
+      "sha256": "852faf17f1ae57b947b5780d65d359fc5351a69da0e508aa6ad7278efa6e0f31",
+      "bytes": 3920
+    },
+    {
+      "path": "JiggleForge/shaders/2621_jiggle.hlsl",
+      "sha256": "8a2254b63aaa55a7e62d6d20ccba4b845c906e3d7f008f3d6ec7c867a0a2ed7f",
+      "bytes": 22661
+    },
+    {
+      "path": "JiggleForge/shaders/c280_jiggle.hlsl",
+      "sha256": "5648de82a5e571871996c3d9260fea4cf6897521ff6cbc85c1f14122d4fe055a",
+      "bytes": 22853
+    },
+    {
+      "path": "ShaderFixes/1f6ab42231416fdb-vs_replace.txt",
+      "sha256": "d4374101c8193ce020497cdaaadd216d673c42c634d31dad30877a32ac050c6b",
+      "bytes": 12917
+    },
+    {
+      "path": "ShaderFixes/26214fb5eedfcbdd-vs_replace.txt",
+      "sha256": "2b9a25cb2fcbb03e4e54fdb53bf8076f488d15377f63ef20e3761b1f51960839",
+      "bytes": 22121
+    },
+    {
+      "path": "ShaderFixes/29837c29e23201fd-vs_replace.txt",
+      "sha256": "a17e24ee781eb2b1560eb2287e3b0cd7a1020aef43131b8b14e9e3316707e46d",
+      "bytes": 23198
+    },
+    {
+      "path": "ShaderFixes/3dc9820c6068ed8b-vs_replace.txt",
+      "sha256": "e8994929c1c3918000f5b99e00640a4579bc37776144a1e3e038864846922328",
+      "bytes": 24811
+    },
+    {
+      "path": "ShaderFixes/402766e2987d7821-vs_replace.txt",
+      "sha256": "d40799cd5cd490a30338fb0c50cec37e86a962c692623513cc2c53063f31f6b1",
+      "bytes": 19086
+    },
+    {
+      "path": "ShaderFixes/59238ab48197031d-vs_replace.txt",
+      "sha256": "3af05b583b3b19c0a10888d77664a7cc8e95c5af3587599d3e172fd93bd44820",
+      "bytes": 22845
+    },
+    {
+      "path": "ShaderFixes/6883e4375b728e90-vs_replace.txt",
+      "sha256": "d7fc4fb32643c60cc27ef94c0458d9014fa7743a381e0e9b248ff956d8c426f1",
+      "bytes": 26991
+    },
+    {
+      "path": "ShaderFixes/699981e2a62dd9b4-vs_replace.txt",
+      "sha256": "cf220e49deaf1f835e88c959dda350408c983d854865999189f9a389969954a3",
+      "bytes": 8073
+    },
+    {
+      "path": "ShaderFixes/JiggleForgeRuntime/binding_consumer.hlsl",
+      "sha256": "68375682dc333ccc324b303497b84085ab6d0ca0d10348fe73edbe22b2b8e726",
+      "bytes": 4643
+    },
+    {
+      "path": "ShaderFixes/JiggleForgeRuntime/binding_layout.hlsl",
+      "sha256": "26efc30a6bc3c2f7f2bf88665dfba354d79097ef9b26fef46e10ee80846bd4d3",
+      "bytes": 1503
+    },
+    {
+      "path": "ShaderFixes/JiggleForgeRuntime/deformation_field.hlsl",
+      "sha256": "0fc764ed75d0411772f20b578c06d56cf42106995f9554fe98ebe7fb117421ac",
+      "bytes": 5541
+    },
+    {
+      "path": "ShaderFixes/JiggleForgeRuntime/draw_state_consumer.hlsl",
+      "sha256": "f56895a4b66aba3acd3ce196638411d5d72d015217568536a2cd0f8a1562bc18",
+      "bytes": 5508
+    },
+    {
+      "path": "ShaderFixes/a0b37a7c7c2a1905-vs_replace.txt",
+      "sha256": "1d17538fa3e703a25d7c014fc939ce9ba8d2a888f4bf3ce4d93061f1481d765e",
+      "bytes": 19358
+    },
+    {
+      "path": "ShaderFixes/ad24b1c214866fd7-vs_replace.txt",
+      "sha256": "56d24ae71b346fbb1ac8953166e83ea4308d24430e6709cf87ad5230cc95ad9e",
+      "bytes": 22652
+    },
+    {
+      "path": "ShaderFixes/c280f6945b23a42a-vs_replace.txt",
+      "sha256": "94868a085e6697d16e9edb8f226297c3242790bc36617b9aea9ed8651c4e4a2f",
+      "bytes": 22308
+    },
+    {
+      "path": "ShaderFixes/d0a1a756bd3bde31-vs_replace.txt",
+      "sha256": "065430843d3dafb3c570cb4029ab0b6b9bc50595c73b74194d1b0d9e62d0d429",
+      "bytes": 27196
+    }
+  ]
+}

@@ -2,7 +2,8 @@ param(
     [string]$Configuration = 'Release',
     [string]$RuntimeIdentifier = 'win-x64',
     [string]$VersionOverride,
-    [string]$RuntimePayloadSource
+    [string]$RuntimePayloadSource,
+    [string]$TestBuildNotesDirectory
 )
 
 $ErrorActionPreference = 'Stop'
@@ -136,9 +137,11 @@ Copy-Item -LiteralPath (Join-Path $repositoryRoot 'CHANGELOG.md') -Destination $
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'LICENSE') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'BRANDING.md') -Destination $publishDirectory
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'THIRD-PARTY-NOTICES.md') -Destination $publishDirectory
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'ACKNOWLEDGEMENTS.md') -Destination $publishDirectory
 if ($VersionOverride -match '-beta\.') {
-    Copy-Item -LiteralPath (Join-Path $repositoryRoot 'experiments\binding-weight\TEST-BUILD.zh-CN.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.zh-CN.md')
-    Copy-Item -LiteralPath (Join-Path $repositoryRoot 'experiments\binding-weight\TEST-BUILD.en.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.en.md')
+    if (-not $TestBuildNotesDirectory) { $TestBuildNotesDirectory = Join-Path $repositoryRoot 'experiments\binding-weight' }
+    Copy-Item -LiteralPath (Join-Path $TestBuildNotesDirectory 'TEST-BUILD.zh-CN.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.zh-CN.md')
+    Copy-Item -LiteralPath (Join-Path $TestBuildNotesDirectory 'TEST-BUILD.en.md') -Destination (Join-Path $publishDirectory 'TEST-BUILD.en.md')
 }
 New-Item -ItemType Directory -Path (Join-Path $publishDirectory 'docs') -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'docs\user-guide') `

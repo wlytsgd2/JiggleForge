@@ -56,6 +56,10 @@ public sealed partial class MainWindow
             }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
             string url = new Uri(file).AbsoluteUri + "#config=" + Uri.EscapeDataString(config);
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            if (runtimeEnvironmentService.SupportsWeightSize)
+            {
+                ShowMessage(DefaultWeightSizeLabWarning.Text, InfoBarSeverity.Warning);
+            }
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or System.ComponentModel.Win32Exception)
         { ShowMessage(AppLanguageService.LocalizeException(exception), InfoBarSeverity.Error); }

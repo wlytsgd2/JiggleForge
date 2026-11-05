@@ -398,4 +398,6 @@
   <data name="OpenPhysicsLabButton.Content" xml:space="preserve"><value>在实验室预览当前参数</value></data>
   <data name="PhysicsLabInvalidParameters" xml:space="preserve"><value>当前物理参数无效，请检查数值和滚轮深度范围。</value></data>
   <data name="PhysicsLabMissing" xml:space="preserve"><value>离线实验室文件缺失，请完整解压测试包。</value></data>
+  <data name="WeightSizeBoneWeightDescription.Text" xml:space="preserve"><value>本测试版开启时按共同骨骼权重限制变形，并在新抓取时估计最强骨骼的影响尺寸；尺寸最多取 0.04，以 0.03 为参考，拖动及回弹期间复用。关闭时不搜索骨骼或估计尺寸，使用原距离场。两种模式都将基础最大位移限制为配置值与 0.05 中较小者，不修改已保存参数。开启时运动位移与影响半径继续随尺寸缩放，默认参考下单状态运动上限最高约 0.0667；这不是最终顶点位移的硬上限。隐藏鼠标时仍停止交互。</value></data>
+  <data name="WeightSizeLabWarning.Text" xml:space="preserve"><value>注意：应用内实验室仍是 v26 基础预览，不模拟本测试版的尺寸估计、0.04 尺寸上界、基础位移 0.05 限制及尺寸缩放，预览不能等同游戏效果。</value></data>
 </root>

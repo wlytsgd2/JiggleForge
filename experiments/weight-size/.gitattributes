@@ -1,0 +1,3 @@
+# Frozen, tested source payload: do not rewrite its mixed historical line endings.
+# Its existing CRLFs/whitespace are intentional; do not reformat the snapshot.
+payload/** -text -whitespace

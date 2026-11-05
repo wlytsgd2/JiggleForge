@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Use the shipped Core DLL, not another build of the source tree. -->
+    <Reference Include="JiggleForge.Core">
+      <HintPath>$(PackagedCorePath)</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="RequirePackagedCore" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(PackagedCorePath)' == '' Or !Exists('$(PackagedCorePath)')" Text="Supply -p:PackagedCorePath with the packaged App/JiggleForge.Core.dll." />
+  </Target>
+</Project>

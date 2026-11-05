@@ -118,9 +118,19 @@ public sealed partial class MainWindow : Window
         RuntimePathTextBox.Text = LoadZzmiRootPreference();
         SelectDragKeys(LoadDragKeyPreference());
         SelectRuntimeToggleKey(LoadRuntimeToggleKeyPreference());
+        if (runtimeEnvironmentService.SupportsWeightSize && !File.Exists(PhysicsDefaultsPath))
+        {
+            defaultPhysics = runtimeEnvironmentService.CreateDefaultPhysics();
+        }
         LoadDefaultPhysicsEditor(defaultPhysics);
         BoneWeightToggle.IsOn = LoadBoneWeightPreference();
         BoneWeightCard.Visibility = runtimeEnvironmentService.SupportsBoneWeights ? Visibility.Visible : Visibility.Collapsed;
+        if (runtimeEnvironmentService.SupportsWeightSize)
+        {
+            Localization.SetKey(BoneWeightDescriptionText, "WeightSizeBoneWeightDescription");
+            DefaultWeightSizeLabWarning.Visibility = Visibility.Visible;
+            ProjectWeightSizeLabWarning.Visibility = Visibility.Visible;
+        }
         InitializeApplicationUpdateView();
     }
 
